@@ -22,8 +22,8 @@ Le chiffrement se décide par le type du volume.
 # [instance]
 source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh
 openstack volume type create --encryption-provider luks --encryption-cipher aes-xts-plain64 \
-  --encryption-key-size 256 --encryption-control-location front-end tp09-luks
-openstack volume type show --encryption-type tp09-luks -f value -c encryption
+  --encryption-key-size 256 --encryption-control-location front-end tp09-voltype-luks
+openstack volume type show --encryption-type tp09-voltype-luks -f value -c encryption
 ```
 
 `front-end` : le chiffrement et le déchiffrement sont faits par l'hôte de calcul (Nova), au
@@ -33,7 +33,7 @@ moment où le volume est branché à la VM.
 
 ```bash
 # [instance]
-openstack volume create --size 1 --type tp09-luks tp09-vol
+openstack volume create --size 1 --type tp09-voltype-luks tp09-vol
 openstack volume show tp09-vol -c status -c encrypted        # attendre "available" ; encrypted = True
 openstack secret list -c Name -c Algorithm -c "Bit length" -c Created
 ```
@@ -83,21 +83,21 @@ faut donc que cet utilisateur ait le droit d'utiliser Barbican (TP 08).
 
 ```bash
 # [instance]
-openstack project create tp09-p
-openstack user create --project tp09-p --password-prompt tp09-user
-openstack role add --project tp09-p --user tp09-user member
+openstack project create tp09-proj
+openstack user create --project tp09-proj --password-prompt tp09-user
+openstack role add --project tp09-proj --user tp09-user member
 cat > ~/tp09-openrc.sh <<EOF
 for v in \$(env | grep -o '^OS_[A-Z_]*'); do unset \$v; done
 export OS_AUTH_URL=$OS_AUTH_URL
 export OS_IDENTITY_API_VERSION=3
 export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_DOMAIN_NAME=Default
-export OS_PROJECT_NAME=tp09-p
+export OS_PROJECT_NAME=tp09-proj
 export OS_USERNAME=tp09-user
 read -rsp "Mot de passe de tp09-user : " OS_PASSWORD; echo; export OS_PASSWORD
 EOF
 source ~/tp09-openrc.sh
-openstack volume create --size 1 --type tp09-luks tp09-vol-user
+openstack volume create --size 1 --type tp09-voltype-luks tp09-vol-user
 ```
 
 Réponse : `Key manager error (HTTP 400)`. Ajoutez le rôle `creator` et recommencez :
@@ -105,9 +105,9 @@ Réponse : `Key manager error (HTTP 400)`. Ajoutez le rôle `creator` et recomme
 ```bash
 # [instance]
 source /etc/kolla/admin-openrc.sh
-openstack role add --project tp09-p --user tp09-user creator
+openstack role add --project tp09-proj --user tp09-user creator
 source ~/tp09-openrc.sh
-openstack volume create --size 1 --type tp09-luks tp09-vol-user
+openstack volume create --size 1 --type tp09-voltype-luks tp09-vol-user
 openstack volume show tp09-vol-user -c status              # "available"
 openstack volume delete tp09-vol-user
 ```
@@ -123,9 +123,9 @@ openstack server delete --wait tp09-vm
 openstack floating ip delete $FIP
 openstack secret list                     # la clé du volume a disparu
 sleep 10                                  # laisser Cinder finir la suppression du volume
-openstack volume type delete tp09-luks    # possible une fois qu'aucun volume ne l'utilise
+openstack volume type delete tp09-voltype-luks    # possible une fois qu'aucun volume ne l'utilise
 openstack user delete tp09-user
-openstack project delete tp09-p
+openstack project delete tp09-proj
 rm ~/tp09-openrc.sh
 ```
 

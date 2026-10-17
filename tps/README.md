@@ -28,6 +28,7 @@ exploite et on étend la plateforme.
 | [09](tp09-volumes-chiffres.md) | Chiffrer les volumes Cinder | Extension | 04 | Prêt |
 | [10](tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | Prêt (sans coût) |
 | [11](tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
+| [12](tp12-architecture.md) | TP final : architecture de déploiement sur OpenStack (présentation) | Synthèse | 04 | En préparation |
 
 Non testés sur le lab, et signalés comme tels dans les énoncés : `sshuttle` et la redirection de port
 (TP 02, contraintes techniques), la partie AWS du scénario 03 et le niveau 3 « cloud » du TP 10 (payants).

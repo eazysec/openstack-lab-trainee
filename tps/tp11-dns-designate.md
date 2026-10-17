@@ -62,9 +62,9 @@ Depuis une VM, avec `nslookup` (CirrOS n'a pas `dig`) :
 ```bash
 # [instance]
 openstack server create --image cirros --flavor m1.tiny --key-name mykey \
-  --network demo-net --wait tp11-client
+  --network demo-net --wait tp11-vm-client
 FIP0=$(openstack floating ip create public1 -f value -c floating_ip_address)
-openstack server add floating ip tp11-client $FIP0
+openstack server add floating ip tp11-vm-client $FIP0
 ssh cirros@$FIP0 "nslookup www.tp11.lab.example. $IPH"        # attendre ~1 min le démarrage
 ```
 
@@ -79,30 +79,30 @@ floating IP est associée à ce port, Neutron demande à Designate de publier `<
 ```bash
 # [instance]
 openstack network create --dns-domain tp11.lab.example. tp11-net
-openstack subnet create --network tp11-net --subnet-range 192.168.110.0/24 tp11-sub
-openstack router create tp11-r
-openstack router set --external-gateway public1 tp11-r
-openstack router add subnet tp11-r tp11-sub
+openstack subnet create --network tp11-net --subnet-range 192.168.110.0/24 tp11-subnet
+openstack router create tp11-rtr
+openstack router set --external-gateway public1 tp11-rtr
+openstack router add subnet tp11-rtr tp11-subnet
 
-openstack server create --image cirros --flavor m1.tiny --key-name mykey --network tp11-net --wait web1
-PORT=$(openstack port list --server web1 -f value -c ID)
-openstack port show $PORT -c dns_name -c dns_assignment       # dns_name = web1
+openstack server create --image cirros --flavor m1.tiny --key-name mykey --network tp11-net --wait tp11-vm-web
+PORT=$(openstack port list --server tp11-vm-web -f value -c ID)
+openstack port show $PORT -c dns_name -c dns_assignment       # dns_name = tp11-vm-web
 
 FIP=$(openstack floating ip create public1 -f value -c floating_ip_address)
-openstack server add floating ip web1 $FIP
+openstack server add floating ip tp11-vm-web $FIP
 sleep 10
 openstack recordset list tp11.lab.example. -c name -c type -c records
-dig +short @$IPH web1.tp11.lab.example.                      # la floating IP de web1
+dig +short @$IPH tp11-vm-web.tp11.lab.example.                      # la floating IP de tp11-vm-web
 ```
 
 Retirez la floating IP : l'enregistrement disparaît.
 
 ```bash
 # [instance]
-openstack server remove floating ip web1 $FIP
+openstack server remove floating ip tp11-vm-web $FIP
 sleep 10
-dig +short @$IPH web1.tp11.lab.example.                      # plus de réponse
-openstack server add floating ip web1 $FIP                    # on la remet pour la suite
+dig +short @$IPH tp11-vm-web.tp11.lab.example.                      # plus de réponse
+openstack server add floating ip tp11-vm-web $FIP                    # on la remet pour la suite
 ```
 
 Autre méthode : nommer la floating IP elle-même, sans dépendre d'une VM.
@@ -127,16 +127,16 @@ openstack zone list --all-projects -c name -c project_id
 
 ```bash
 # [instance]
-openstack project create tp11-autre
-openstack user create --project tp11-autre --password-prompt tp11-user
-openstack role add --project tp11-autre --user tp11-user member
+openstack project create tp11-proj-autre
+openstack user create --project tp11-proj-autre --password-prompt tp11-user
+openstack role add --project tp11-proj-autre --user tp11-user member
 cat > ~/tp11-openrc.sh <<EOF
 for v in \$(env | grep -o '^OS_[A-Z_]*'); do unset \$v; done
 export OS_AUTH_URL=$OS_AUTH_URL
 export OS_IDENTITY_API_VERSION=3
 export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_DOMAIN_NAME=Default
-export OS_PROJECT_NAME=tp11-autre
+export OS_PROJECT_NAME=tp11-proj-autre
 export OS_USERNAME=tp11-user
 read -rsp "Mot de passe de tp11-user : " OS_PASSWORD; echo; export OS_PASSWORD
 EOF
@@ -158,15 +158,15 @@ source ~/tp11-openrc.sh
 openstack zone delete autre.lab.example.
 
 source /etc/kolla/admin-openrc.sh
-openstack server delete --wait web1 tp11-client
+openstack server delete --wait tp11-vm-web tp11-vm-client
 openstack floating ip delete $FIP $FIP2 $FIP0
-openstack router remove subnet tp11-r tp11-sub
-openstack router unset --external-gateway tp11-r
-openstack router delete tp11-r
+openstack router remove subnet tp11-rtr tp11-subnet
+openstack router unset --external-gateway tp11-rtr
+openstack router delete tp11-rtr
 openstack network delete tp11-net
 openstack zone delete tp11.lab.example.
 openstack user delete tp11-user
-openstack project delete tp11-autre
+openstack project delete tp11-proj-autre
 rm ~/tp11-openrc.sh
 ```
 
@@ -174,7 +174,7 @@ rm ~/tp11-openrc.sh
 
 1. À quoi servent les enregistrements NS et SOA créés automatiquement avec la zone ?
 2. Quelle différence entre un enregistrement A et un CNAME ? Dans quel cas choisir un CNAME ?
-3. Décrivez la chaîne qui publie `web1.tp11.lab.example.` : quel service fait quoi, à quel moment ?
+3. Décrivez la chaîne qui publie `tp11-vm-web.tp11.lab.example.` : quel service fait quoi, à quel moment ?
 4. Pourquoi Designate refuse-t-il qu'un autre projet crée `equipe.tp11.lab.example.` ? Quel risque
    cela évite-t-il ?
 5. Les zones de ce lab ne sont pas joignables depuis Internet. Que faudrait-il pour qu'un vrai domaine
@@ -182,8 +182,8 @@ rm ~/tp11-openrc.sh
 
 ## Validation
 
-- [ ] `www`, `intranet` et `web1` résolus par `dig` ; `www` résolu depuis une VM.
-- [ ] Publication et suppression automatiques de `web1` observées ; `api` publié par la floating IP.
+- [ ] `www`, `intranet` et `tp11-vm-web` résolus par `dig` ; `www` résolu depuis une VM.
+- [ ] Publication et suppression automatiques de `tp11-vm-web` observées ; `api` publié par la floating IP.
 - [ ] Les deux refus de l'étape 4 relevés.
 - [ ] Nettoyage fait.
 

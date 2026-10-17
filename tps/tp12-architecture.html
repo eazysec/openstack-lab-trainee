@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Architecture TP 12</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Mise en page : dossier d'architecture cible du TP 12, une colonne (1240 px max). Les schémas gardent leur taille réelle
+   dans un cadre défilant. Codes couleur des réseaux repris partout (schémas, parcours, tableaux). */
+:root{
+  --bg:#F1F3F6; --surface:#FFFFFF; --surface-2:#F6F7F9; --ink:#162033; --muted:#596579; --line:#D7DCE4; --line-strong:#A9B3C2;
+  --pub:#BF630C; --pub-soft:#FCEBD8;
+  --adm:#2C4CC2; --adm-soft:#E2E8FB;
+  --data:#08795F; --data-soft:#D7F0E8;
+  --ext:#5F6B82; --ext-soft:#E9ECF1;
+  --risk:#B3312A; --risk-soft:#FBE3E0;
+  --warn:#8F5A00; --warn-soft:#FBEFD3;
+  --ok:#28724A; --ok-soft:#DCF1E4;
+  --on-badge:#FFFFFF;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131B; --surface:#161D28; --surface-2:#1B2330; --ink:#E4E9F0; --muted:#9AA6B8; --line:#2B3545; --line-strong:#4A5669;
+    --pub:#F2A04A; --pub-soft:#3A2913;
+    --adm:#93A6FF; --adm-soft:#1E2748;
+    --data:#45CDA8; --data-soft:#113A31;
+    --ext:#A3ADBE; --ext-soft:#202835;
+    --risk:#F2786E; --risk-soft:#3E1F1C;
+    --warn:#E9B357; --warn-soft:#3A2D12;
+    --ok:#6FD39B; --ok-soft:#173326;
+    --on-badge:#14100F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131B; --surface:#161D28; --surface-2:#1B2330; --ink:#E4E9F0; --muted:#9AA6B8; --line:#2B3545; --line-strong:#4A5669;
+  --pub:#F2A04A; --pub-soft:#3A2913;
+  --adm:#93A6FF; --adm-soft:#1E2748;
+  --data:#45CDA8; --data-soft:#113A31;
+  --ext:#A3ADBE; --ext-soft:#202835;
+  --risk:#F2786E; --risk-soft:#3E1F1C;
+  --warn:#E9B357; --warn-soft:#3A2D12;
+  --ok:#6FD39B; --ok-soft:#173326;
+  --on-badge:#14100F;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15.5px/1.55 var(--f-body)}
+.page{max-width:1240px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:28px 72px;display:grid;gap:44px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(30px,4.2vw,44px);font-weight:700;letter-spacing:-.005em}
+h2{font-size:clamp(22px,2.6vw,28px);font-weight:600}
+h3{font-size:18px;font-weight:600}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+a{color:var(--adm)}
+:focus-visible{outline:2px solid var(--adm);outline-offset:2px}
+
+.eyebrow{font:600 12px/1.2 var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+header.top{display:grid;gap:14px}
+header.top .lede{max-width:72ch;color:var(--muted);font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13.5px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow:hidden}
+.stat{padding:14px 16px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font:700 28px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+
+section{display:grid;gap:16px;min-width:0}
+.sec-head{display:grid;gap:6px;max-width:80ch}
+.sec-head p{color:var(--muted)}
+
+/* Légende */
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 24px;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.lg{display:flex;align-items:center;gap:10px;font-size:13.5px;min-width:0}
+.lg svg{flex:none}
+.lg span{min-width:0}
+
+/* Schéma */
+.diagram{border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow-x:auto}
+.diagram svg{display:block;width:1180px;max-width:none;height:auto}
+.diagram-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.note{font-size:13.5px;color:var(--muted);max-width:110ch}
+.btn{font:600 13px/1 var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:8px 12px;cursor:pointer}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.diagram.fit svg{width:100%}
+
+/* SVG */
+.svg text{font-family:var(--f-body);fill:var(--ink)}
+.svg .mono{font-family:var(--f-mono)}
+.svg .bg{fill:var(--surface)}
+.svg .zone{fill:var(--ext-soft);stroke:var(--line-strong);stroke-dasharray:4 4}
+.svg .pill{fill:var(--surface);stroke:var(--line-strong)}
+.svg .muted{fill:var(--muted)}
+.svg .band-pub{stroke:var(--pub);stroke-width:6;stroke-linecap:round}
+.svg .band-adm{stroke:var(--adm);stroke-width:6;stroke-linecap:round}
+.svg .band-data{stroke:var(--data);stroke-width:6;stroke-linecap:round}
+.svg .band-ext{stroke:var(--ext);stroke-width:5;stroke-linecap:round}
+.svg .link{stroke:var(--line-strong);stroke-width:1.2;fill:none}
+.svg .c-pub{stroke:var(--pub);stroke-width:1.6;fill:none}
+.svg .c-adm{stroke:var(--adm);stroke-width:1.6;fill:none}
+.svg .c-data{stroke:var(--data);stroke-width:1.6;fill:none}
+.svg .c-ext{stroke:var(--ext);stroke-width:1.6;fill:none}
+.svg .halo{stroke:var(--surface);stroke-width:8;fill:none}
+.svg .lane-pub{stroke:var(--pub);stroke-width:1.4;stroke-dasharray:5 4;fill:none}
+.svg .lane-adm{stroke:var(--adm);stroke-width:1.4;stroke-dasharray:5 4;fill:none}
+.svg .dot-pub{fill:var(--pub)} .svg .dot-adm{fill:var(--adm)} .svg .dot-data{fill:var(--data)}
+.svg .ip-pub{fill:var(--pub)} .svg .ip-adm{fill:var(--adm)} .svg .ip-data{fill:var(--data)}
+.svg .box{fill:var(--surface);stroke:var(--line-strong);stroke-width:1}
+.svg .box-head{fill:var(--surface-2)}
+.svg .sep{stroke:var(--line);stroke-width:1}
+.svg .tag-pub{fill:var(--pub-soft);stroke:var(--pub)} .svg .tag-adm{fill:var(--adm-soft);stroke:var(--adm)} .svg .tag-data{fill:var(--data-soft);stroke:var(--data)}
+.svg .tag-ext{fill:var(--ext-soft);stroke:var(--ext)}
+.svg .router{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+.svg .router-mark{stroke:var(--ink);stroke-width:1.5;fill:none}
+.svg .router-head{fill:var(--ink)}
+.svg .vip-pub{fill:var(--surface);stroke:var(--pub);stroke-width:2}
+.svg .vip-data{fill:var(--surface);stroke:var(--data);stroke-width:2}
+.svg .fip-pub{fill:var(--surface);stroke:var(--pub);stroke-width:2}
+.svg .fip-adm{fill:var(--surface);stroke:var(--adm);stroke-width:2}
+.svg .arr-pub{fill:var(--pub)} .svg .arr-adm{fill:var(--adm)}
+.svg .badge-risk{fill:var(--risk)} .svg .badge-ok{fill:var(--ok)} .svg .badge-warn{fill:var(--warn)}
+.svg .badge-t{fill:var(--on-badge);font-weight:700;font-size:10.5px}
+.svg .rail{stroke:var(--line-strong);stroke-width:1.2;fill:none}
+
+/* Parcours */
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,540px),1fr));gap:16px}
+.path{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:16px;display:grid;gap:12px;min-width:0}
+.path h3{display:flex;gap:10px;align-items:baseline}
+.path h3 .num{font:700 13px/1 var(--f-mono);color:var(--muted)}
+.path p{font-size:14px;color:var(--muted)}
+.chain{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px 0}
+.node{display:grid;gap:2px;align-content:start;padding:7px 10px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);min-width:0;font-size:13.5px;line-height:1.3}
+.node .k{font:600 10.5px/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase}
+.node b{font-weight:600}
+.node code{font-size:11.5px;color:var(--muted)}
+.n-pub{border-color:var(--pub);background:var(--pub-soft)} .n-pub .k{color:var(--pub)}
+.n-adm{border-color:var(--adm);background:var(--adm-soft)} .n-adm .k{color:var(--adm)}
+.n-data{border-color:var(--data);background:var(--data-soft)} .n-data .k{color:var(--data)}
+.n-ext{border-color:var(--ext);background:var(--ext-soft)} .n-ext .k{color:var(--ext)}
+.n-nd{border-style:dashed;background:var(--surface-2)} .n-nd .k{color:var(--muted)}
+.hop{display:grid;align-content:center;justify-items:center;padding:0 6px;min-width:64px;font:600 11px/1.25 var(--f-mono);color:var(--muted);text-align:center}
+.hop i{display:block;width:100%;min-width:44px;height:10px;position:relative;margin-top:2px}
+.hop i::before{content:"";position:absolute;left:0;right:6px;top:4px;border-top:1.6px solid var(--line-strong)}
+.hop i::after{content:"";position:absolute;right:0;top:0;border-left:7px solid var(--line-strong);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.hop.two i::before{left:6px}
+.hop.two i span{position:absolute;left:0;top:0;border-right:7px solid var(--line-strong);border-top:5px solid transparent;border-bottom:5px solid transparent}
+
+/* Tableaux */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 13px/1 var(--f-body);padding:8px 12px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.table-wrap{border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.4}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font:600 12px/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);position:sticky;top:0}
+tbody tr:last-child td{border-bottom:0}
+td code{font-size:12px}
+td.nowrap{white-space:nowrap}
+.cat{font:600 11px/1 var(--f-mono);padding:3px 6px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
+.net{display:inline-block;font:600 11px/1 var(--f-body);letter-spacing:.04em;padding:3px 7px;border-radius:4px;white-space:nowrap}
+.net.nd{color:var(--muted);background:var(--surface-2);border:1px dashed var(--line-strong)}
+.net.pub{color:var(--pub);background:var(--pub-soft)} .net.adm{color:var(--adm);background:var(--adm-soft)} .net.data{color:var(--data);background:var(--data-soft)} .net.ext{color:var(--ext);background:var(--ext-soft)}
+.st{display:inline-block;font:600 11.5px/1.25 var(--f-body);padding:3px 8px;border-radius:4px;border:1px solid transparent}
+.st.entry{color:var(--ext);background:var(--ext-soft)}
+.st.any{color:var(--warn);background:var(--warn-soft)}
+.st.iso{color:var(--data);background:var(--data-soft)}
+.st.none{color:var(--risk);background:var(--risk-soft)}
+.st.bad{color:var(--risk);border-color:var(--risk);background:transparent}
+.st.out{color:var(--muted);background:var(--surface-2);border-color:var(--line)}
+.why{display:block;margin-top:4px;color:var(--muted);font-size:12.5px}
+.ref{color:var(--muted);font-size:12.5px}
+.ports{font-family:var(--f-mono);font-size:12px}
+.card-cell{display:grid;gap:2px}
+.card-cell .ip{font-family:var(--f-mono);font-weight:600;font-size:12.5px}
+.card-cell .sg{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.empty{color:var(--line-strong)}
+
+/* Constats */
+.findings{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:12px}
+.finding{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+.finding .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 12px/1 var(--f-body);color:var(--on-badge);background:var(--risk)}
+.finding.good .n{background:var(--ok)}
+.finding.mid .n{background:var(--warn)}
+.finding h3{font-size:16.5px;margin-bottom:4px}
+.finding p{font-size:14px;color:var(--muted)}
+.finding .refs{margin-top:6px;font-size:12.5px;color:var(--ink)}
+
+/* Glossaire */
+.glossary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow:hidden}
+.glossary div{padding:14px 16px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);min-width:0}
+.glossary dt{font:600 15px/1.3 var(--f-display);margin-bottom:4px}
+.glossary dd{margin:0;font-size:14px;color:var(--muted)}
+/* NDLR */
+.notes{display:grid;gap:16px}
+.notes .note{padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--line-strong);border-radius:8px;background:var(--surface)}
+.notes .note h3{font:600 15px/1.3 var(--f-display);margin-bottom:6px}
+.notes .note p{margin:0;font-size:14.5px;line-height:1.55;color:var(--muted)}
+.notes .note p+p{margin-top:8px}
+.cols-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px}
+.plain{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14.5px}
+.plain li::marker{color:var(--muted)}
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.st.dec{color:var(--ok);background:var(--ok-soft)}
+.st.prop{color:var(--adm);background:var(--adm-soft)}
+.st.test{color:var(--warn);background:var(--warn-soft)}
+.st.cost{color:var(--risk);background:var(--risk-soft)}
+.svg .aws{fill:var(--warn-soft);stroke:var(--warn);stroke-dasharray:4 4}
+.svg .host{fill:var(--surface-2);stroke:var(--line-strong)}
+.svg .c-aws{stroke:var(--warn);stroke-width:1.6;fill:none}
+.svg .dot-ext{fill:var(--ext)} .svg .dot-aws{fill:var(--warn)}
+.svg .arrow{fill:var(--line-strong)}
+.svg .small{font-size:11.5px}
+.svg .b{font-weight:600}
+</style>
+</head>
+<body>
+<main class="page">
+
+<header class="top">
+  <span class="eyebrow">Parcours OpenStack sur AWS · TP final</span>
+  <h1>Architecture de déploiement</h1>
+  <p class="lede">Un serveur applicatif (vm-1, avec HAProxy) et un serveur de base de données (vm-2), répartis sur trois réseaux : publication, administration et data. L'hôte OpenStack sert de bastion SSH et de proxy de sortie. Seule la FIP de HAProxy est publiée sur Internet, par une IP secondaire de l'ENI et une Elastic IP.</p>
+  <p class="lede">Ce document présente le TP final du parcours et l'architecture que vous allez construire.</p>
+  <div class="meta">
+    <span><b>Version</b> 2026-10-18</span>
+    <span><b>État</b> conception, rien n'est encore déployé ni testé</span>
+    <span><b>Plateforme</b> lab All-in-One Kolla-Ansible sur AWS EC2, scénario 04</span>
+    <span><b>Préfixe des ressources</b> <code>tp12-</code></span>
+  </div>
+</header>
+
+<div class="stats" aria-label="Chiffres clés">
+  <div class="stat"><b>2</b><span>machines virtuelles</span></div>
+  <div class="stat"><b>3</b><span>réseaux internes</span></div>
+  <div class="stat"><b>2</b><span>routeurs, sans SNAT</span></div>
+  <div class="stat"><b>5</b><span>cartes réseau</span></div>
+  <div class="stat"><b>4</b><span>security groups</span></div>
+  <div class="stat"><b>1</b><span>FIP publiée sur Internet</span></div>
+</div>
+
+<section id="promesse" aria-labelledby="h-promesse">
+  <div class="sec-head">
+    <span class="eyebrow">Le TP final</span>
+    <h2 id="h-promesse">Ce que vous allez construire</h2>
+    <p>Au terme du parcours, vous déployez de bout en bout une application web et sa base de données. L'application est publiée sur Internet, et l'ensemble est protégé comme en production : une seule porte d'entrée, des réseaux séparés par usage, un pare-feu par carte réseau, aucune sortie directe vers Internet. Vous le faites sur un vrai cloud OpenStack que vous avez vous-même installé, sur une vraie instance AWS.</p>
+  </div>
+  <div class="cols-2">
+    <div class="path">
+      <h3>Ce que vous saurez faire</h3>
+      <ul class="plain">
+        <li>Concevoir une architecture réseau segmentée : publication, administration, données.</li>
+        <li>Écrire des règles de security group au plus juste, en entrée et en sortie, avec des groupes plutôt que des adresses.</li>
+        <li>Publier un service sur Internet à travers deux couches réseau, AWS puis OpenStack, et expliquer chaque traduction d'adresse.</li>
+        <li>Administrer des VM uniquement par un bastion, et contrôler leurs sorties par un proxy filtrant.</li>
+        <li>Diagnostiquer une panne réseau saut par saut avec <code>tcpdump</code>, et prouver qu'un flux interdit l'est vraiment.</li>
+        <li>Nommer, étiqueter et nettoyer des ressources comme dans une équipe d'exploitation.</li>
+      </ul>
+    </div>
+    <div class="path">
+      <h3>Comment vous apprenez</h3>
+      <ul class="plain">
+        <li>Un lab réel, pas une simulation : OpenStack 2025.1 déployé par Kolla-Ansible, sur AWS EC2.</li>
+        <li>Chaque commande des TP est rejouée sur le lab avant publication.</li>
+        <li>On fait constater plutôt qu'affirmer : chaque règle de sécurité est vérifiée par un test qui réussit et un test qui échoue.</li>
+        <li>Des pièges réels, rencontrés en exploitation, à diagnostiquer vous-même.</li>
+        <li>Les coûts sont maîtrisés : tout est gratuit, sauf une étape optionnelle signalée et soumise à l'accord du tuteur.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="securite" aria-labelledby="h-securite">
+  <div class="sec-head">
+    <span class="eyebrow">Sécurité</span>
+    <h2 id="h-securite">Les principes de sécurité mis en œuvre</h2>
+    <p>Chaque principe correspond à un élément concret de l'architecture, et à un test que vous exécutez.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Principe</th><th>Mise en œuvre dans le TP</th><th>Ce que vous vérifiez</th></tr></thead>
+      <tbody>
+        <tr><td>Surface d'exposition minimale</td><td>Une seule adresse publique, celle de HAProxy ; la base n'a aucune carte sur le réseau de publication</td><td>La base est injoignable depuis Internet et depuis le réseau pub</td></tr>
+        <tr><td>Séparation des plans</td><td>Trois réseaux : publication, administration, données ; deux routeurs ; réseau data sans routeur</td><td>Chaque flux emprunte le réseau prévu, et lui seul</td></tr>
+        <tr><td>Moindre privilège</td><td>Security groups par rôle de carte ; sources internes désignées par groupe (<code>remote_group_id</code>)</td><td>Seule l'appli joint la base, et seulement sur le port 5432</td></tr>
+        <tr><td>Filtrage en sortie</td><td>Règles de sortie par défaut supprimées sur toutes les cartes ; routeurs sans SNAT</td><td>Une VM compromise ne peut ni exfiltrer ni télécharger d'outils</td></tr>
+        <tr><td>Point d'administration unique</td><td>Bastion SSH ; aucune clé de VM sur le bastion</td><td>SSH refusé depuis toute autre source</td></tr>
+        <tr><td>Sorties contrôlées et tracées</td><td>Proxy Squid à liste blanche de domaines, par VM</td><td>Un domaine non autorisé est refusé ; chaque requête est journalisée</td></tr>
+        <tr><td>Défense en profondeur</td><td>Security Group AWS, DNAT de l'hôte, security groups OpenStack, écoute locale de l'appli</td><td>Le retrait d'une couche ne suffit pas à ouvrir un flux</td></tr>
+        <tr><td>Secrets et données protégés</td><td>Mot de passe de la base dans Barbican ; volume de la base chiffré</td><td>Aucun mot de passe en clair dans les fichiers ; volume illisible hors de la VM</td></tr>
+        <tr><td>Traçabilité</td><td>Convention de nommage <code>tp12-</code> et tag sur chaque ressource</td><td>Inventaire et nettoyage complets en une commande</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="parcours-tp" aria-labelledby="h-parcours-tp">
+  <div class="sec-head">
+    <span class="eyebrow">Le parcours</span>
+    <h2 id="h-parcours-tp">Douze TP pour y arriver</h2>
+    <p>Aucune connaissance d'OpenStack n'est supposée : il faut savoir se servir d'un terminal Linux et de SSH. Chaque TP apporte une brique que le TP final réutilise.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>TP</th><th>Titre</th><th>Phase</th><th>Repris dans le TP 12</th></tr></thead>
+      <tbody>
+        <tr><td>00</td><td>Préparer et découvrir l'instance AWS</td><td>Avant le déploiement</td><td>Accès à l'hôte, Security Group AWS</td></tr>
+        <tr><td>01</td><td>Déployer OpenStack et vérifier le déploiement</td><td>Déploiement</td><td>La plateforme elle-même</td></tr>
+        <tr><td>02</td><td>Lancer des instances depuis l'hôte et s'y connecter en SSH</td><td>Utilisation</td><td>Rebond SSH, tunnels</td></tr>
+        <tr><td>03</td><td>Comprendre le réseau Neutron</td><td>Utilisation</td><td>Réseaux, routeurs, security groups</td></tr>
+        <tr><td>04</td><td>Stockage persistant : volumes, montage, snapshots</td><td>Utilisation</td><td>Volume de la base</td></tr>
+        <tr><td>05</td><td>Exploiter la plateforme : logs, pannes, reconfiguration</td><td>Exploitation</td><td>Diagnostic</td></tr>
+        <tr><td>06</td><td>Projets, utilisateurs, rôles et quotas</td><td>Exploitation</td><td>Projet du TP</td></tr>
+        <tr><td>07</td><td>Floating IP publiques et réseau AWS</td><td>Extension</td><td>Publication par l'ENI</td></tr>
+        <tr><td>08</td><td>Gérer des secrets avec Barbican</td><td>Extension</td><td>Mot de passe de la base</td></tr>
+        <tr><td>09</td><td>Chiffrer les volumes Cinder</td><td>Extension</td><td>Volume chiffré</td></tr>
+        <tr><td>10</td><td>Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte</td><td>Extension</td><td>Extension possible</td></tr>
+        <tr><td>11</td><td>DNS as a Service avec Designate</td><td>Extension</td><td>Extension possible</td></tr>
+        <tr><td>12</td><td>TP final : architecture de déploiement sur OpenStack</td><td>Synthèse</td><td>En préparation</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="statuts" aria-labelledby="h-statuts">
+  <div class="sec-head">
+    <span class="eyebrow">Dossier de conception</span>
+    <h2 id="h-statuts">L'architecture en détail</h2>
+    <p>Le TP 12 est en préparation. Chaque choix porte un statut ; un élément « à tester » ne sera rédigé dans le TP qu'après exécution réelle sur le lab.</p>
+  </div>
+  <div class="filters">
+    <span class="st dec">Décidé</span><span class="st prop">Proposé, à valider</span><span class="st test">À tester</span><span class="st cost">Payant, sur accord</span>
+  </div>
+</section>
+
+<section id="schema" aria-labelledby="h-schema">
+  <div class="sec-head">
+    <span class="eyebrow">réseau et système</span>
+    <h2 id="h-schema">Topologie</h2>
+    <p>Les réseaux sont des bus verticaux. Chaque VM a une carte sur chaque réseau qu'elle touche, avec son adresse et son security group. Les adresses internes sont proposées ; les adresses AWS sont des marqueurs.</p>
+  </div>
+
+  <div class="legend" aria-label="Légende">
+    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--pub);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau de publication <code>tp12-net-pub</code> (flux des utilisateurs)</span></div>
+    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--adm);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau d'administration <code>tp12-net-admin</code> (SSH, proxy)</span></div>
+    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--data);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau data <code>tp12-net-data</code> (accès à la base)</span></div>
+    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--ext);stroke-width:5;stroke-linecap:round"/></svg><span>Réseau externe Neutron <code>public1</code>, interne à l'hôte</span></div>
+    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--warn);stroke-width:1.6"/></svg><span>Couche AWS (ENI, Elastic IP)</span></div>
+    <div class="lg"><svg width="40" height="24" aria-hidden="true"><circle cx="20" cy="12" r="10" style="fill:var(--surface);stroke:var(--ink);stroke-width:1.6"/><path d="M13 9h12M27 9l-3-2.5v5zM27 15H15M13 15l3-2.5v5z" style="stroke:var(--ink);stroke-width:1.4;fill:var(--ink)"/></svg><span>Routeur Neutron</span></div>
+    <div class="lg"><svg width="40" height="16" aria-hidden="true"><circle cx="8" cy="8" r="5" style="fill:var(--surface);stroke:var(--pub);stroke-width:2"/><line x1="14" y1="8" x2="38" y2="8" style="stroke:var(--pub);stroke-width:1.4;stroke-dasharray:5 4"/></svg><span>FIP et la carte à laquelle elle est associée</span></div>
+  </div>
+
+  <div class="diagram-tools">
+    <p class="note">Le schéma est affiché à sa taille réelle ; faites-le défiler horizontalement sur un petit écran.</p>
+    <button class="btn" id="fit-toggle" type="button" aria-pressed="false">Ajuster à la largeur</button>
+  </div>
+  <div class="diagram" id="diagram" role="img" aria-label="Topologie du TP 12 : Internet et la couche AWS à gauche, l'hôte bastion, le réseau externe public1, deux routeurs, les réseaux pub, admin et data, vm-1 avec trois cartes et vm-2 avec deux cartes.">
+<svg xmlns="http://www.w3.org/2000/svg" class="svg" viewBox="0 0 1180 600" width="1180" height="600" aria-hidden="true">
+  <defs>
+    <marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrow"/></marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1180" height="600"/>
+
+  <rect class="aws" x="16" y="40" width="214" height="520" rx="8"/>
+  <text x="30" y="64" class="b">AWS</text>
+  <text x="30" y="82" class="small muted">VPC, hors du contrôle d'OpenStack</text>
+  <rect class="box" x="30" y="100" width="186" height="46" rx="6"/>
+  <text x="42" y="120" class="b">Internet</text>
+  <text x="42" y="137" class="small muted">client web, sans accès SSH</text>
+  <rect class="box" x="30" y="176" width="186" height="46" rx="6"/>
+  <text x="42" y="196" class="b">Elastic IP</text>
+  <text x="42" y="213" class="small mono">&lt;IP_PUBLIQUE_EIP&gt;</text>
+  <rect class="box" x="30" y="252" width="186" height="46" rx="6"/>
+  <text x="42" y="272" class="b">ENI : IP secondaire</text>
+  <text x="42" y="289" class="small mono">&lt;IP_PRIVEE_SECONDAIRE&gt;</text>
+  <rect class="box" x="30" y="400" width="186" height="46" rx="6"/>
+  <text x="42" y="420" class="b">ENI : IP principale</text>
+  <text x="42" y="437" class="small mono">&lt;IP_PRIVEE_PRINCIPALE&gt;</text>
+  <rect class="box" x="30" y="476" width="186" height="46" rx="6"/>
+  <text x="42" y="496" class="b">IP publique de l'instance</text>
+  <text x="42" y="513" class="small mono">&lt;IP_PUBLIQUE&gt;, administration</text>
+  <line x1="123" y1="146" x2="123" y2="174" class="c-aws" marker-end="url(#fl)"/>
+  <line x1="123" y1="222" x2="123" y2="250" class="c-aws" marker-end="url(#fl)"/>
+  <line x1="123" y1="474" x2="123" y2="448" class="c-aws" marker-end="url(#fl)"/>
+  <text x="130" y="240" class="small muted">NAT AWS</text>
+
+  <rect class="host" x="252" y="40" width="236" height="520" rx="8"/>
+  <text x="266" y="64" class="b">Hôte OpenStack (bastion)</text>
+  <text x="266" y="82" class="small muted">instance EC2 t2.xlarge</text>
+  <rect class="box" x="266" y="252" width="208" height="46" rx="6"/>
+  <text x="278" y="272" class="b">DNAT</text>
+  <text x="278" y="289" class="small">IP secondaire → FIP de vm-1</text>
+  <rect class="box" x="266" y="320" width="208" height="46" rx="6"/>
+  <text x="278" y="340" class="b">Squid :3128</text>
+  <text x="278" y="357" class="small">proxy de sortie, liste blanche</text>
+  <rect class="box" x="266" y="400" width="208" height="46" rx="6"/>
+  <text x="278" y="420" class="b">sshd :22</text>
+  <text x="278" y="437" class="small">rebond SSH vers les cartes admin</text>
+  <rect class="box" x="266" y="476" width="208" height="46" rx="6"/>
+  <text x="278" y="496" class="b">veth, passerelle externe</text>
+  <text x="278" y="513" class="small mono">10.0.2.1 (EXT_GW)</text>
+  <line x1="218" y1="275" x2="264" y2="275" class="c-aws" marker-end="url(#fl)"/>
+  <line x1="218" y1="423" x2="264" y2="423" class="c-aws" marker-end="url(#fl)"/>
+
+  <line x1="530" y1="60" x2="530" y2="560" class="band-ext"/>
+  <text x="530" y="44" text-anchor="middle" class="b">public1</text>
+  <text x="530" y="580" text-anchor="middle" class="small mono">10.0.2.0/24</text>
+  <line x1="474" y1="499" x2="527" y2="499" class="c-ext"/>
+  <line x1="474" y1="275" x2="527" y2="275" class="c-pub" marker-end="url(#fl)"/>
+  <line x1="474" y1="343" x2="527" y2="343" class="c-adm"/>
+  <line x1="474" y1="423" x2="527" y2="423" class="c-adm"/>
+
+  <circle cx="560" cy="116" r="7" class="fip-pub"/>
+  <text x="572" y="104" class="small b">tp12-fip-vm-1-pub</text>
+  <text x="572" y="120" class="small mono">10.0.2.x</text>
+  <line x1="530" y1="116" x2="553" y2="116" class="c-ext"/>
+  <path d="M567 116 H830 V200 H844" class="lane-pub"/>
+
+  <line x1="530" y1="200" x2="584" y2="200" class="c-ext"/>
+  <circle cx="600" cy="200" r="16" class="router"/>
+  <path d="M591 196h14" class="router-mark"/><path d="M609 196l-4.5 -3.5v7z" class="router-head"/>
+  <path d="M609 204h-14" class="router-mark"/><path d="M591 204l4.5 -3.5v7z" class="router-head"/>
+  <text x="600" y="236" text-anchor="middle" class="small b">tp12-rtr-pub</text>
+  <text x="600" y="251" text-anchor="middle" class="small muted">sans SNAT, porte la FIP</text>
+  <line x1="616" y1="200" x2="657" y2="200" class="c-pub"/>
+
+  <line x1="530" y1="400" x2="584" y2="400" class="c-ext"/>
+  <circle cx="600" cy="400" r="16" class="router"/>
+  <path d="M591 396h14" class="router-mark"/><path d="M609 396l-4.5 -3.5v7z" class="router-head"/>
+  <path d="M609 404h-14" class="router-mark"/><path d="M591 404l4.5 -3.5v7z" class="router-head"/>
+  <text x="600" y="436" text-anchor="middle" class="small b">tp12-rtr-admin</text>
+  <text x="600" y="451" text-anchor="middle" class="small muted">sans SNAT : pas d'Internet</text>
+  <line x1="616" y1="400" x2="717" y2="400" class="c-adm"/>
+
+  <line x1="660" y1="140" x2="660" y2="300" class="band-pub"/>
+  <text x="660" y="132" text-anchor="middle" class="small b">pub</text>
+  <text x="660" y="318" text-anchor="middle" class="small mono">192.168.120.0/24</text>
+  <line x1="720" y1="140" x2="720" y2="540" class="band-adm"/>
+  <text x="720" y="132" text-anchor="middle" class="small b">admin</text>
+  <text x="712" y="556" text-anchor="end" class="small mono">192.168.121.0/24</text>
+  <line x1="780" y1="140" x2="780" y2="540" class="band-data"/>
+  <text x="780" y="132" text-anchor="middle" class="small b">data</text>
+  <text x="788" y="556" text-anchor="start" class="small mono">192.168.122.0/24</text>
+  <text x="788" y="572" text-anchor="start" class="small muted">sans routeur</text>
+
+  <rect class="box" x="850" y="150" width="310" height="186" rx="6"/>
+  <rect class="box-head" x="851" y="151" width="308" height="26" rx="5"/>
+  <text x="862" y="169" class="b">tp12-vm-1</text>
+  <text x="1148" y="169" text-anchor="end" class="small muted">role=lb-app</text>
+  <text x="862" y="270" class="small">HAProxy :80</text>
+  <text x="862" y="286" class="small">appli sur 127.0.0.1:8080 uniquement</text>
+  <text x="862" y="302" class="small">client PostgreSQL</text>
+  <text x="862" y="318" class="small muted">flux HAProxy → appli local, hors SG</text>
+  <line x1="660" y1="200" x2="848" y2="200" class="c-pub"/><circle cx="848" cy="200" r="3.5" class="dot-pub"/>
+  <text x="800" y="194" class="small mono ip-pub">.10</text>
+  <text x="862" y="204" class="small mono">pub · tp12-sg-pub</text>
+  <line x1="720" y1="226" x2="848" y2="226" class="c-adm"/><circle cx="848" cy="226" r="3.5" class="dot-adm"/>
+  <text x="800" y="220" class="small mono ip-adm">.11</text>
+  <text x="862" y="230" class="small mono">admin · tp12-sg-admin</text>
+  <line x1="780" y1="252" x2="848" y2="252" class="c-data"/><circle cx="848" cy="252" r="3.5" class="dot-data"/>
+  <text x="800" y="246" class="small mono ip-data">.11</text>
+  <text x="862" y="256" class="small mono">data · tp12-sg-app-data</text>
+
+  <rect class="box" x="850" y="380" width="310" height="150" rx="6"/>
+  <rect class="box-head" x="851" y="381" width="308" height="26" rx="5"/>
+  <text x="862" y="399" class="b">tp12-vm-2</text>
+  <text x="1148" y="399" text-anchor="end" class="small muted">role=db</text>
+  <text x="862" y="486" class="small">PostgreSQL :5432</text>
+  <text x="862" y="502" class="small">volume tp12-vol-vm-2-db</text>
+  <text x="862" y="518" class="small muted">aucune carte pub, jamais exposée</text>
+  <line x1="720" y1="430" x2="848" y2="430" class="c-adm"/><circle cx="848" cy="430" r="3.5" class="dot-adm"/>
+  <text x="800" y="424" class="small mono ip-adm">.12</text>
+  <text x="862" y="434" class="small mono">admin · tp12-sg-admin</text>
+  <line x1="780" y1="456" x2="848" y2="456" class="c-data"/><circle cx="848" cy="456" r="3.5" class="dot-data"/>
+  <text x="800" y="450" class="small mono ip-data">.12</text>
+  <text x="862" y="460" class="small mono">data · tp12-sg-db</text>
+</svg>
+  </div>
+  <p class="note">Les deux routeurs ont leur passerelle sur <code>public1</code> avec <code>--disable-snat</code>. La FIP de vm-1 fonctionne sans SNAT (traduction 1 pour 1) : <span class="st test">à tester</span>. Le MASQUERADE de l'hôte ne traduit que la source <code>10.0.2.0/24</code> : une adresse des réseaux admin ou data ne peut donc pas sortir sur Internet, même par erreur de routage.</p>
+</section>
+
+<section id="eni" aria-labelledby="h-eni">
+  <div class="sec-head">
+    <span class="eyebrow">couche AWS</span>
+    <h2 id="h-eni">Vue de l'ENI : comment une FIP devient joignable depuis Internet</h2>
+    <p>AWS ne connaît pas les VM OpenStack : une Elastic IP ne s'associe qu'à une IP privée de l'ENI de l'instance. L'IP principale reste celle de l'administration ; une IP secondaire, dédiée à la FIP de vm-1, sert de point d'entrée public. L'hôte fait le reste par DNAT.</p>
+  </div>
+  <div class="paths">
+    <article class="path">
+      <h3><span class="num">E1</span>Entrée publique vers HAProxy</h3>
+      <p>Un seul point d'entrée pour toute l'application : une IP secondaire et une Elastic IP suffisent.</p>
+      <div class="chain">
+        <div class="node n-ext"><span class="k">Internet</span><b>client</b></div>
+        <div class="hop">HTTP 80<i></i></div>
+        <div class="node"><span class="k">AWS</span><b>Elastic IP</b><code>&lt;IP_PUBLIQUE_EIP&gt;</code></div>
+        <div class="hop">NAT AWS<i></i></div>
+        <div class="node"><span class="k">ENI</span><b>IP secondaire</b><code>&lt;IP_PRIVEE_SECONDAIRE&gt;</code></div>
+        <div class="hop">DNAT hôte<i></i></div>
+        <div class="node n-ext"><span class="k">public1</span><b>FIP</b><code>10.0.2.x</code></div>
+        <div class="hop">tp12-rtr-pub<i></i></div>
+        <div class="node n-pub"><span class="k">pub</span><b>vm-1 HAProxy :80</b><code>192.168.120.10</code></div>
+      </div>
+    </article>
+    <article class="path">
+      <h3><span class="num">E2</span>Administration de l'hôte, inchangée</h3>
+      <p>L'IP principale et l'IP publique de l'instance ne servent qu'à l'administration ; elles ne sont jamais redirigées vers une VM.</p>
+      <div class="chain">
+        <div class="node n-ext"><span class="k">Poste</span><b>votre ordinateur</b></div>
+        <div class="hop">SSH 22<i></i></div>
+        <div class="node"><span class="k">AWS</span><b>IP publique</b><code>&lt;IP_PUBLIQUE&gt;</code></div>
+        <div class="hop">NAT AWS<i></i></div>
+        <div class="node"><span class="k">ENI</span><b>IP principale</b><code>&lt;IP_PRIVEE_PRINCIPALE&gt;</code></div>
+        <div class="hop">local<i></i></div>
+        <div class="node"><span class="k">Hôte</span><b>sshd :22</b></div>
+      </div>
+    </article>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Adresse de l'ENI</th><th>IP publique associée</th><th>Usage</th><th>Coût</th><th>Statut</th></tr></thead>
+      <tbody>
+        <tr><td>IP principale <code>&lt;IP_PRIVEE_PRINCIPALE&gt;</code></td><td>IP publique de l'instance, change à chaque arrêt</td><td>Administration : SSH vers l'hôte, tunnels vers Horizon</td><td>Facturée par AWS comme toute IPv4 publique</td><td><span class="st dec">Existant</span></td></tr>
+        <tr><td>IP secondaire <code>&lt;IP_PRIVEE_SECONDAIRE&gt;</code></td><td>Elastic IP <code>tp12-eip-vm-1-pub</code></td><td>Entrée publique de l'application, DNAT vers la FIP de vm-1</td><td>IP secondaire gratuite ; Elastic IP environ 0,005 USD/h, jusqu'à sa libération</td><td><span class="st cost">Payant, sur accord</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Outils existants : <code>aws/aws-public-fip.sh</code> (côté AWS, simulation sans <code>--apply</code>, confirmation « oui ») et <code>tools/public-fip.sh</code> (côté hôte, validé au TP 07 sans ressource AWS). La partie AWS n'a jamais été exécutée. Le Security Group AWS de l'instance doit ouvrir le port 80, de préférence à l'IP du testeur seulement. L'entrée n'utilise que HTTP : le HTTPS est reporté au chantier « Horizon en HTTPS ».</p>
+</section>
+
+<section id="parcours" aria-labelledby="h-parcours">
+  <div class="sec-head">
+    <span class="eyebrow">flux applicatifs et d'exploitation</span>
+    <h2 id="h-parcours">Parcours des flux, de bout en bout</h2>
+    <p>La couleur d'une étape indique son réseau ; au-dessus des flèches figurent le protocole et le port.</p>
+  </div>
+  <div class="paths">
+    <article class="path">
+      <h3><span class="num">P1</span>Utilisateur vers l'application</h3>
+      <p>HAProxy reçoit sur la carte pub et relaie en local : ce dernier saut ne traverse aucun port Neutron.</p>
+      <div class="chain">
+        <div class="node n-ext"><span class="k">Internet</span><b>client</b></div>
+        <div class="hop">80<i></i></div>
+        <div class="node n-ext"><span class="k">public1</span><b>FIP</b></div>
+        <div class="hop">80<i></i></div>
+        <div class="node n-pub"><span class="k">pub</span><b>HAProxy</b><code>vm-1 :80</code></div>
+        <div class="hop">8080 local<i></i></div>
+        <div class="node n-nd"><span class="k">vm-1</span><b>appli</b><code>127.0.0.1:8080</code></div>
+      </div>
+    </article>
+    <article class="path">
+      <h3><span class="num">P2</span>Application vers la base</h3>
+      <p>Seul flux du réseau data, filtré à l'entrée et à la sortie par groupe.</p>
+      <div class="chain">
+        <div class="node n-data"><span class="k">data</span><b>vm-1</b><code>192.168.122.11</code></div>
+        <div class="hop">5432<i></i></div>
+        <div class="node n-data"><span class="k">data</span><b>vm-2 PostgreSQL</b><code>192.168.122.12</code></div>
+      </div>
+    </article>
+    <article class="path">
+      <h3><span class="num">P3</span>Administration des VM par le bastion</h3>
+      <p>Rebond SSH depuis le poste ; aucune clé de VM n'est posée sur le bastion.</p>
+      <div class="chain">
+        <div class="node n-ext"><span class="k">Poste</span><b>ssh -J</b></div>
+        <div class="hop">22<i></i></div>
+        <div class="node"><span class="k">Hôte</span><b>bastion</b><code>10.0.2.1</code></div>
+        <div class="hop">22<i></i></div>
+        <div class="node n-adm"><span class="k">admin</span><b>vm-1, vm-2</b><code>.11, .12</code></div>
+      </div>
+    </article>
+    <article class="path">
+      <h3><span class="num">P4</span>Sortie des VM : paquets et HTTPS</h3>
+      <p>Les VM ne sortent jamais elles-mêmes : Squid relaie vers une liste blanche de domaines, propre à chaque VM, et journalise chaque requête.</p>
+      <div class="chain">
+        <div class="node n-adm"><span class="k">admin</span><b>vm-1, vm-2</b></div>
+        <div class="hop">3128<i></i></div>
+        <div class="node"><span class="k">Hôte</span><b>Squid</b><code>10.0.2.1:3128</code></div>
+        <div class="hop">80, 443<i></i></div>
+        <div class="node n-ext"><span class="k">Internet</span><b>dépôts autorisés</b></div>
+      </div>
+    </article>
+    <article class="path">
+      <h3><span class="num">P5</span>Exception SSH sortante (niveau avancé)</h3>
+      <p>Exercice : ouvrir une seule destination pour vm-1, puis lire le journal Squid. Il montre la destination et la durée, pas le contenu.</p>
+      <div class="chain">
+        <div class="node n-adm"><span class="k">admin</span><b>vm-1</b><code>ProxyCommand nc -X connect</code></div>
+        <div class="hop">3128<i></i></div>
+        <div class="node"><span class="k">Hôte</span><b>Squid CONNECT</b></div>
+        <div class="hop">22<i></i></div>
+        <div class="node n-ext"><span class="k">Internet</span><b>github.com</b><code>refus publickey attendu</code></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+
+
+
+<section id="objectifs" aria-labelledby="h-objectifs">
+  <div class="sec-head">
+    <span class="eyebrow">Objectifs</span>
+    <h2 id="h-objectifs">Les objectifs de sécurité à atteindre</h2>
+    <p>À vous de traduire ces objectifs en security groups, en routes et en configuration du proxy. Chaque objectif se valide par deux tests : le flux autorisé fonctionne, le flux interdit échoue.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>N°</th><th>Objectif</th><th>Preuve attendue</th></tr></thead>
+      <tbody>
+        <tr><td>O1</td><td>L'application est joignable depuis Internet, et seulement sur le port de HAProxy.</td><td>Page servie par l'adresse publique ; tout autre port refusé</td></tr>
+        <tr><td>O2</td><td>L'appli n'est joignable que par HAProxy.</td><td>Port de l'appli injoignable depuis tout réseau</td></tr>
+        <tr><td>O3</td><td>Seule l'appli joint la base, sur un seul port.</td><td>Connexion à la base réussie depuis vm-1, refusée ailleurs et sur tout autre port</td></tr>
+        <tr><td>O4</td><td>Les VM ne s'administrent que depuis le bastion.</td><td>SSH par rebond réussi ; SSH depuis une autre source refusé</td></tr>
+        <tr><td>O5</td><td>Aucune VM ne sort directement sur Internet.</td><td>Accès direct à Internet refusé depuis vm-1 et vm-2</td></tr>
+        <tr><td>O6</td><td>Les sorties passent par le proxy, vers des domaines autorisés seulement.</td><td>Installation de paquets réussie ; domaine non autorisé refusé ; requêtes visibles dans le journal</td></tr>
+        <tr><td>O7</td><td>Chaque VM a au plus une route par défaut, et la base aucune vers Internet.</td><td>Tables de routage lues et expliquées ; SSH du bastion vers chaque carte d'administration réussi</td></tr>
+        <tr><td>O8</td><td>Toutes les ressources sont nommées et étiquetées selon la convention.</td><td>Inventaire et nettoyage complets par le seul filtre <code>tp12</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="ressources" aria-labelledby="h-ressources">
+  <div class="sec-head">
+    <span class="eyebrow">ressources et nommage</span>
+    <h2 id="h-ressources">Ressources à déployer</h2>
+    <p>Convention : <code>tp12-&lt;type&gt;-&lt;rôle&gt;[-&lt;précision&gt;]</code>, minuscules et tirets, préfixe défini une fois en tête de script (<code>PREFIX=tp12</code>), tag Neutron <code>tp12</code> sur tout ce qui l'accepte. Un seul filtre retrouve et nettoie tout : <code>--tags tp12</code>.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Nom</th><th>Remarque</th><th>Statut</th></tr></thead>
+      <tbody>
+        <tr><td>Réseaux</td><td><code>tp12-net-pub</code>, <code>tp12-net-admin</code>, <code>tp12-net-data</code></td><td></td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Sous-réseaux</td><td><code>tp12-subnet-pub</code>, <code>tp12-subnet-admin</code>, <code>tp12-subnet-data</code></td><td>plages dans la topologie</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Routeurs</td><td><code>tp12-rtr-pub</code>, <code>tp12-rtr-admin</code></td><td><code>--disable-snat</code> sur les deux</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Security groups</td><td><code>tp12-sg-pub</code>, <code>tp12-sg-admin</code>, <code>tp12-sg-app-data</code>, <code>tp12-sg-db</code></td><td>sorties par défaut supprimées</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Ports</td><td><code>tp12-port-vm-1-pub</code>, <code>-admin</code>, <code>-data</code> ; <code>tp12-port-vm-2-admin</code>, <code>-data</code></td><td>créés avant les VM, adresses fixes</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>VM</td><td><code>tp12-vm-1</code> (<code>role=lb-app</code>), <code>tp12-vm-2</code> (<code>role=db</code>)</td><td>image Ubuntu ou Debian : CirrOS ne suffit pas</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>FIP</td><td>description <code>tp12-fip-vm-1-pub</code>, tag <code>tp12</code></td><td>une FIP n'a pas de nom</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Paire de clés</td><td><code>tp12-key</code></td><td></td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Volume</td><td><code>tp12-vol-vm-2-db</code></td><td>données PostgreSQL ; chiffré (type LUKS du TP 09)</td><td><span class="st prop">Proposé</span></td></tr>
+        <tr><td>Secret Barbican</td><td><code>tp12-secret-db</code></td><td>mot de passe de la base (TP 08)</td><td><span class="st prop">Proposé</span></td></tr>
+        <tr><td>Hôte</td><td><code>/etc/squid/conf.d/tp12.conf</code></td><td>listes blanches par IP source</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>AWS</td><td>Elastic IP, tags <code>Name=tp12-eip-vm-1-pub</code> et <code>openstack-lab=true</code></td><td>libérée en fin de TP, vérifiée par <code>list</code></td><td><span class="st cost">Payant, sur accord</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="progression" aria-labelledby="h-progression">
+  <div class="sec-head">
+    <span class="eyebrow">Déroulé</span>
+    <h2 id="h-progression">Séquence d'exécution</h2>
+    <p>Chaque étape dépend des précédentes indiquées : ne passez à la suivante qu'après un contrôle réussi. L'ordre a ses raisons. Squid doit fonctionner avant le lancement des VM, sinon cloud-init ne peut rien installer. La route de retour sur l'hôte doit exister avant le premier SSH vers le réseau admin. Les ports sont créés avant les VM pour imposer les adresses et les groupes. Tout est gratuit, sauf l'étape 15, optionnelle et payante.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>N°</th><th>Lieu</th><th>Dépend de</th><th>Objectif de l'étape</th><th>Contrôle</th><th>Retour arrière</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td class="nowrap"><code>[instance]</code></td><td>aucune</td><td>Vérifier la plateforme : scénario 04 déployé, <code>verify.sh</code> sans échec, image Ubuntu importée, gabarit d'au moins 2 Go de mémoire disponible.</td><td><code>verify.sh</code> : 0 échec ; image et gabarit visibles</td><td>aucun</td></tr>
+        <tr><td>1</td><td class="nowrap"><code>[instance]</code></td><td>0</td><td>Créer les trois réseaux et leurs sous-réseaux, avec les plages prévues. Seul le sous-réseau pub annonce une passerelle ; le sous-réseau admin pousse une route vers le bastion.</td><td>Passerelles et routes des sous-réseaux conformes à la conception</td><td>Supprimer les sous-réseaux puis les réseaux</td></tr>
+        <tr><td>2</td><td class="nowrap"><code>[instance]</code></td><td>1</td><td>Créer les deux routeurs sans SNAT, chacun avec sa passerelle sur <code>public1</code> et son interface sur son réseau. Le réseau data n'a pas de routeur.</td><td>SNAT désactivé sur les deux routeurs ; un namespace <code>qrouter</code> par routeur</td><td>Retirer les interfaces, puis supprimer les routeurs</td></tr>
+        <tr><td>3</td><td class="nowrap"><code>[instance]</code></td><td>2</td><td>Ajouter sur l'hôte la route de retour vers le réseau admin, par l'adresse de <code>tp12-rtr-admin</code> sur <code>public1</code>.</td><td>L'hôte joint l'interface admin du routeur</td><td>Supprimer la route (elle ne survit pas à un redémarrage)</td></tr>
+        <tr><td>4</td><td class="nowrap"><code>[instance]</code></td><td>3</td><td>Installer Squid sur le bastion : écoute sur l'adresse de l'hôte côté <code>public1</code> uniquement, liste blanche de domaines propre à chaque VM, journal des requêtes.</td><td>Un domaine autorisé passe, un autre est refusé ; les deux apparaissent dans le journal</td><td>Retirer la configuration <code>tp12</code> de Squid</td></tr>
+        <tr><td>5</td><td class="nowrap"><code>[instance]</code></td><td>1</td><td>Créer les quatre security groups, supprimer leurs règles de sortie par défaut et écrire les règles prévues.</td><td>Aucune règle de sortie vers 0.0.0.0/0 ; sources internes désignées par groupe</td><td>Supprimer les groupes (après les ports qui les utilisent)</td></tr>
+        <tr><td>6</td><td class="nowrap"><code>[instance]</code></td><td>1, 5</td><td>Créer les cinq ports à adresse fixe, chacun avec son security group et le tag <code>tp12</code>.</td><td>Les cinq ports listés par le filtre <code>tp12</code>, avec la bonne adresse et le bon groupe</td><td>Supprimer les ports</td></tr>
+        <tr><td>7</td><td class="nowrap"><code>[instance]</code></td><td>4, 6</td><td>Préparer cloud-init (proxy pour les paquets) et lancer vm-2 puis vm-1 sur leurs ports.</td><td>VM actives ; cloud-init terminé sans erreur dans la console</td><td>Supprimer les VM (les ports restent)</td></tr>
+        <tr><td>8</td><td class="nowrap"><code>[poste]</code>, <code>[instance]</code></td><td>3, 7</td><td>Se connecter à chaque VM par rebond via le bastion, sur sa carte admin. Exercice de diagnostic : retirer la route vers le bastion, observer l'échec avec <code>tcpdump</code>, la rétablir.</td><td>Objectif O4 ; échec puis succès expliqués</td><td>Rétablir la route du sous-réseau admin</td></tr>
+        <tr><td>9</td><td class="nowrap"><code>[VM]</code></td><td>8</td><td>vm-2 : créer et attacher le volume chiffré, installer PostgreSQL par le proxy, placer les données sur le volume, n'accepter que vm-1. Le mot de passe vient de Barbican.</td><td>PostgreSQL écoute sur la carte data seulement ; données sur le volume</td><td>Détacher et supprimer le volume ; supprimer le secret</td></tr>
+        <tr><td>10</td><td class="nowrap"><code>[VM]</code></td><td>9</td><td>vm-1 : installer l'appli (écoute locale seulement) et HAProxy (carte pub), relier l'appli à la base.</td><td>Page servie par HAProxy depuis vm-1 ; appli injoignable de l'extérieur (O2)</td><td>Arrêter et désinstaller les services</td></tr>
+        <tr><td>11</td><td class="nowrap"><code>[instance]</code></td><td>2, 10</td><td>Associer une FIP au port pub de vm-1, avec la description et le tag prévus.</td><td>Page servie par la FIP depuis l'hôte</td><td>Supprimer la FIP</td></tr>
+        <tr><td>12</td><td class="nowrap"><code>[instance]</code>, <code>[VM]</code></td><td>11</td><td>Valider les objectifs O1 à O8, chacun par un test autorisé et un test interdit.</td><td>16 tests au moins, résultats consignés</td><td>aucun</td></tr>
+        <tr><td>13</td><td class="nowrap"><code>[poste]</code></td><td>11</td><td>Ouvrir l'application depuis le poste par un tunnel SSH.</td><td>Page affichée dans le navigateur du poste</td><td>Fermer le tunnel</td></tr>
+        <tr><td>14</td><td class="nowrap"><code>[VM]</code>, <code>[instance]</code></td><td>12</td><td>Niveau avancé : ouvrir l'exception SSH vers une seule destination et lire le journal Squid (parcours P5).</td><td>Destination visible, contenu invisible ; autre destination refusée</td><td>Retirer l'exception</td></tr>
+        <tr><td>15</td><td class="nowrap"><code>[poste]</code>, <code>[instance]</code></td><td>12</td><td>Optionnel et payant : IP secondaire et Elastic IP, port 80 ouvert dans le Security Group AWS pour l'IP du testeur seulement, DNAT sur l'hôte ; test depuis un navigateur sans accès SSH.</td><td>Objectif O1 depuis Internet</td><td>Libérer l'Elastic IP et retirer l'IP secondaire, vérifier par <code>list</code></td></tr>
+        <tr><td>16</td><td class="nowrap"><code>[instance]</code>, <code>[poste]</code></td><td>toutes</td><td>Nettoyer dans l'ordre inverse : étape 15 si faite, FIP, VM, volume, secret, ports, security groups, routeurs, réseaux, paire de clés, route de l'hôte, configuration de Squid.</td><td>Le filtre <code>tp12</code> ne renvoie plus rien ; aucune Elastic IP du lab restante</td><td>aucun</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">L'étape 15 se fait uniquement avec l'accord du tuteur. <span class="st cost">Payant</span></p>
+  <p class="note">Compétences des TP précédents réutilisées : réseau et routeurs (TP 03), volumes (TP 04), dépannage (TP 05), secrets (TP 08), volumes chiffrés (TP 09), publication de FIP (TP 07). Sauvegarde de la base (TP 10) et nom DNS de l'appli (TP 11) : extensions possibles, non retenues à ce stade.</p>
+</section>
+
+<section id="constats" aria-labelledby="h-constats">
+  <div class="sec-head">
+    <span class="eyebrow">Choix et limites</span>
+    <h2 id="h-constats">Choix assumés et points de vigilance</h2>
+  </div>
+  <ol class="findings">
+    <li class="finding mid"><span class="n" aria-hidden="true">1</span><div><h3>HAProxy et appli mutualisés sur vm-1</h3><p>Écart assumé aux bonnes pratiques, pour les ressources du lab. Conséquence : le flux HAProxy → appli échappe aux security groups. Compensation : écoute sur 127.0.0.1 seulement, vérifiée. À présenter comme tel aux stagiaires.</p></div></li>
+    <li class="finding good"><span class="n" aria-hidden="true">2</span><div><h3>Une seule entrée publique</h3><p>Une IP secondaire et une Elastic IP pour toute l'application ; vm-2 n'a aucune carte pub.</p></div></li>
+    <li class="finding good"><span class="n" aria-hidden="true">3</span><div><h3>Aucune sortie directe vers Internet</h3><p>Routeurs sans SNAT ; toute sortie passe par Squid, filtrée par domaine et journalisée. Pas de SSH sortant, sauf l'exercice avancé.</p></div></li>
+    <li class="finding mid"><span class="n" aria-hidden="true">4</span><div><h3>Séparation logique, pas physique</h3><p>Les deux routeurs partagent l'hôte, l'agent L3 et <code>public1</code>. Le bastion est aussi l'hôte OpenStack : sa compromission donne tout le cloud. Ne jamais y poser de clé de VM.</p></div></li>
+    <li class="finding"><span class="n" aria-hidden="true">5</span><div><h3>Points non validés</h3><p>FIP avec <code>--disable-snat</code>, route de retour sur l'hôte, ouverture du port 3128 avec les règles de Kolla et de Neutron, métadonnées et DHCP avec un filtrage sortant strict, sous-réseau admin sans passerelle. Rien ne sera rédigé avant exécution.</p></div></li>
+    <li class="finding"><span class="n" aria-hidden="true">6</span><div><h3>Reporté</h3><p>HTTPS sur HAProxy (avec le chantier Horizon en HTTPS), répartition de charge sur deux serveurs applicatifs, Octavia (non déployé, lourd en All-in-One).</p></div></li>
+    <li class="finding"><span class="n" aria-hidden="true">7</span><div><h3>Pile logicielle à arrêter lors des tests</h3><p>Deux candidates : paquets natifs (HAProxy, PostgreSQL, appli en service systemd durci, Squid sur l'hôte) ou conteneurs Podman sans root. Critères : sécurité (privilèges, chaîne d'approvisionnement des images, pare-feu interne), lisibilité des flux, sortie par Squid. Le choix et ses éventuelles dérogations aux bonnes pratiques seront justifiés ici. Statut : à tester.</p></div></li>
+  </ol>
+</section>
+
+<section id="glossaire" aria-labelledby="h-glossaire">
+  <div class="sec-head">
+    <span class="eyebrow">Repères</span>
+    <h2 id="h-glossaire">Glossaire</h2>
+  </div>
+  <dl class="glossary">
+    <div><dt>ENI</dt><dd>Interface réseau d'une instance EC2. Elle porte une IP privée principale et peut recevoir des IP privées secondaires.</dd></div>
+    <div><dt>Elastic IP</dt><dd>IP publique fixe d'AWS, associée à une IP privée de l'ENI. Facturée jusqu'à sa libération.</dd></div>
+    <div><dt>DNAT</dt><dd>Traduction de l'adresse de destination ; ici, l'hôte redirige l'IP secondaire vers la FIP.</dd></div>
+    <div><dt>FIP</dt><dd>Adresse du réseau externe Neutron associée à une carte de VM par le routeur. Elle ne filtre rien.</dd></div>
+    <div><dt>SNAT</dt><dd>Traduction de l'adresse source, qui permet aux VM sans FIP de sortir. Désactivé sur les deux routeurs.</dd></div>
+    <div><dt>Security group</dt><dd>Pare-feu stateful appliqué à une carte réseau, pas à un logiciel.</dd></div>
+    <div><dt>remote_group_id</dt><dd>Source ou destination d'une règle désignée par un groupe : toutes les cartes membres du groupe.</dd></div>
+    <div><dt>remote_ip_prefix</dt><dd>Source ou destination désignée par une plage d'adresses ; utilisée pour ce qui n'est pas un port Neutron.</dd></div>
+    <div><dt>Bastion</dt><dd>Point de passage unique pour l'administration ; ici l'hôte OpenStack.</dd></div>
+    <div><dt>Proxy de sortie</dt><dd>Service qui relaie les requêtes web des VM vers Internet (Squid) ; HTTPS relayé sans déchiffrement (CONNECT).</dd></div>
+  </dl>
+</section>
+
+<footer>TP 12 du parcours OpenStack sur AWS, version du 18 octobre 2026. Il décrit une architecture cible, pas un état déployé. Les adresses AWS sont des marqueurs.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var b=document.getElementById("fit-toggle"), d=document.getElementById("diagram");
+  if(!b||!d) return;
+  b.addEventListener("click",function(){
+    var on=b.getAttribute("aria-pressed")!=="true";
+    b.setAttribute("aria-pressed",String(on));
+    d.classList.toggle("fit",on);
+  });
+})();
+</script>
+</body>
+</html>

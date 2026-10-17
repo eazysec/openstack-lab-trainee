@@ -19,10 +19,10 @@
 # [instance]
 source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh
 
-openstack project create --description "Equipe TP 06" tp06-equipe
-openstack user create --project tp06-equipe --password-prompt tp06-stagiaire   # choisir un mot de passe
-openstack role add --project tp06-equipe --user tp06-stagiaire member
-openstack role assignment list --project tp06-equipe --names
+openstack project create --description "Equipe TP 06" tp06-proj-equipe
+openstack user create --project tp06-proj-equipe --password-prompt tp06-user-stagiaire   # choisir un mot de passe
+openstack role add --project tp06-proj-equipe --user tp06-user-stagiaire member
+openstack role assignment list --project tp06-proj-equipe --names
 ```
 
 ## Étape 2. Se connecter en tant que l'utilisateur
@@ -37,9 +37,9 @@ export OS_AUTH_URL=$OS_AUTH_URL
 export OS_IDENTITY_API_VERSION=3
 export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_DOMAIN_NAME=Default
-export OS_PROJECT_NAME=tp06-equipe
-export OS_USERNAME=tp06-stagiaire
-read -rsp "Mot de passe de tp06-stagiaire : " OS_PASSWORD; echo; export OS_PASSWORD
+export OS_PROJECT_NAME=tp06-proj-equipe
+export OS_USERNAME=tp06-user-stagiaire
+read -rsp "Mot de passe de tp06-user-stagiaire : " OS_PASSWORD; echo; export OS_PASSWORD
 EOF
 source ~/tp06-openrc.sh
 openstack token issue -c project_id -c user_id
@@ -47,7 +47,7 @@ openstack token issue -c project_id -c user_id
 
 ## Étape 3. L'isolation
 
-Toujours en tant que `tp06-stagiaire` :
+Toujours en tant que `tp06-user-stagiaire` :
 
 ```bash
 # [instance]
@@ -63,31 +63,31 @@ les projets sont isolés, les plages d'adresses peuvent se recouvrir.
 # [instance]
 openstack network create tp06-net
 openstack subnet create --network tp06-net --subnet-range 10.0.0.0/24 tp06-subnet
-openstack router create tp06-router
-openstack router set --external-gateway public1 tp06-router
-openstack router add subnet tp06-router tp06-subnet
-openstack server create --image cirros --flavor m1.tiny --network tp06-net --wait tp06-vm1
+openstack router create tp06-rtr
+openstack router set --external-gateway public1 tp06-rtr
+openstack router add subnet tp06-rtr tp06-subnet
+openstack server create --image cirros --flavor m1.tiny --network tp06-net --wait tp06-vm-1
 ```
 
-Connectez-vous à Horizon (tunnel du TP 02) avec `tp06-stagiaire` : vous ne voyez que le projet
-`tp06-equipe`.
+Connectez-vous à Horizon (tunnel du TP 02) avec `tp06-user-stagiaire` : vous ne voyez que le projet
+`tp06-proj-equipe`.
 
 ## Étape 4. Les quotas (en admin)
 
 ```bash
 # [instance]
 source /etc/kolla/admin-openrc.sh
-openstack quota show tp06-equipe | grep -E "instances|cores|ram"
-openstack quota set --instances 2 tp06-equipe
+openstack quota show tp06-proj-equipe | grep -E "instances|cores|ram"
+openstack quota set --instances 2 tp06-proj-equipe
 ```
 
-En tant que `tp06-stagiaire`, essayez de créer deux VM de plus :
+En tant que `tp06-user-stagiaire`, essayez de créer deux VM de plus :
 
 ```bash
 # [instance]
 source ~/tp06-openrc.sh
-openstack server create --image cirros --flavor m1.tiny --network tp06-net --wait tp06-vm2
-openstack server create --image cirros --flavor m1.tiny --network tp06-net --wait tp06-vm3
+openstack server create --image cirros --flavor m1.tiny --network tp06-net --wait tp06-vm-2
+openstack server create --image cirros --flavor m1.tiny --network tp06-net --wait tp06-vm-3
 ```
 
 La troisième est refusée. Relevez le message d'erreur.
@@ -97,15 +97,15 @@ La troisième est refusée. Relevez le message d'erreur.
 ```bash
 # [instance]
 source ~/tp06-openrc.sh
-openstack server delete --wait tp06-vm1 tp06-vm2
-openstack router remove subnet tp06-router tp06-subnet
-openstack router unset --external-gateway tp06-router
-openstack router delete tp06-router
+openstack server delete --wait tp06-vm-1 tp06-vm-2
+openstack router remove subnet tp06-rtr tp06-subnet
+openstack router unset --external-gateway tp06-rtr
+openstack router delete tp06-rtr
 openstack network delete tp06-net
 
 source /etc/kolla/admin-openrc.sh
-openstack user delete tp06-stagiaire
-openstack project delete tp06-equipe
+openstack user delete tp06-user-stagiaire
+openstack project delete tp06-proj-equipe
 rm ~/tp06-openrc.sh
 ```
 
@@ -113,12 +113,12 @@ rm ~/tp06-openrc.sh
 
 1. Quelle est la différence entre un utilisateur, un projet et un rôle ?
 2. Pourquoi deux projets peuvent-ils utiliser tous les deux le réseau 10.0.0.0/24 sans conflit ?
-3. `tp06-stagiaire` voit `public1`, mais pas `demo-net`. Pourquoi ?
+3. `tp06-user-stagiaire` voit `public1`, mais pas `demo-net`. Pourquoi ?
 4. À quoi servent les quotas sur une plateforme partagée ? Citez trois ressources limitables.
 
 ## Validation
 
-- [ ] Connexion en `tp06-stagiaire` (CLI et Horizon) avec une vue limitée à son projet.
+- [ ] Connexion en `tp06-user-stagiaire` (CLI et Horizon) avec une vue limitée à son projet.
 - [ ] Quota atteint et message d'erreur relevé.
 - [ ] Nettoyage fait (projet et utilisateur supprimés).
 

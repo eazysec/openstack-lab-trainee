@@ -36,14 +36,14 @@ Si besoin, ajoutez Cinder au déploiement existant (les VM existantes sont conse
 # [instance]
 source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh
 openstack server create --image cirros --flavor m1.tiny --key-name mykey \
-  --network demo-net --wait tp04-vm1
+  --network demo-net --wait tp04-vm-1
 FIP1=$(openstack floating ip create public1 -f value -c floating_ip_address)
-openstack server add floating ip tp04-vm1 $FIP1
+openstack server add floating ip tp04-vm-1 $FIP1
 
 openstack volume create --size 1 tp04-vol
 openstack volume list                     # attendre le statut "available"
-openstack server add volume tp04-vm1 tp04-vol
-openstack volume list                     # statut "in-use", attaché à tp04-vm1
+openstack server add volume tp04-vm-1 tp04-vol
+openstack volume list                     # statut "in-use", attaché à tp04-vm-1
 ```
 
 ## Étape 2. Formater, monter, écrire
@@ -54,12 +54,12 @@ ssh cirros@$FIP1
 ```
 
 ```bash
-# [VM] (tp04-vm1)
+# [VM] (tp04-vm-1)
 lsblk                                     # vda = disque système (éphémère), vdb = le volume
 sudo mkfs.ext4 /dev/vdb                   # formater : UNE SEULE FOIS, cela efface le volume
 sudo mkdir -p /mnt/data
 sudo mount /dev/vdb /mnt/data
-echo "écrit par tp04-vm1 le $(date)" | sudo tee /mnt/data/preuve.txt
+echo "écrit par tp04-vm-1 le $(date)" | sudo tee /mnt/data/preuve.txt
 df -h /mnt/data
 sudo umount /mnt/data                     # toujours démonter avant de détacher
 exit
@@ -69,20 +69,20 @@ exit
 
 ```bash
 # [instance]
-openstack server remove volume tp04-vm1 tp04-vol
-openstack server delete --wait tp04-vm1
+openstack server remove volume tp04-vm-1 tp04-vol
+openstack server delete --wait tp04-vm-1
 openstack volume list                     # le volume existe toujours, "available"
 
 openstack server create --image cirros --flavor m1.tiny --key-name mykey \
-  --network demo-net --wait tp04-vm2
-openstack server add floating ip tp04-vm2 $FIP1
-openstack server add volume tp04-vm2 tp04-vol
+  --network demo-net --wait tp04-vm-2
+openstack server add floating ip tp04-vm-2 $FIP1
+openstack server add volume tp04-vm-2 tp04-vol
 ssh-keygen -R $FIP1                       # nouvelle VM sur la même floating IP (voir conventions)
 ssh cirros@$FIP1                          # attendre ~1 min le démarrage
 ```
 
 ```bash
-# [VM] (tp04-vm2)
+# [VM] (tp04-vm-2)
 sudo mkdir -p /mnt/data
 sudo mount /dev/vdb /mnt/data             # sans mkfs : il effacerait les données
 sudo cat /mnt/data/preuve.txt             # le fichier appartient à root (créé avec sudo tee)
@@ -110,7 +110,7 @@ openstack volume list
 ```
 
 `tp04-vol-copie` est un nouveau volume contenant les données du snapshot. Pour vérifier, attachez-le
-à `tp04-vm2` à la place de `tp04-vol` et lisez `preuve.txt`.
+à `tp04-vm-2` à la place de `tp04-vol` et lisez `preuve.txt`.
 
 ## Étape 5. Où sont les volumes sur l'hôte ?
 
@@ -125,12 +125,12 @@ ls -lh /var/lib/cinder-volumes.img        # le fichier qui contient tout le grou
 
 ```bash
 # [instance]
-openstack server remove volume tp04-vm2 tp04-vol 2>/dev/null
-openstack server remove volume tp04-vm2 tp04-vol-copie 2>/dev/null
+openstack server remove volume tp04-vm-2 tp04-vol 2>/dev/null
+openstack server remove volume tp04-vm-2 tp04-vol-copie 2>/dev/null
 openstack volume delete tp04-vol-copie
 openstack volume snapshot delete tp04-snap
 openstack volume delete tp04-vol          # un volume avec des snapshots ne peut pas être supprimé
-openstack server delete --wait tp04-vm2
+openstack server delete --wait tp04-vm-2
 openstack floating ip delete $FIP1
 ```
 
@@ -147,7 +147,7 @@ du snapshot se termine, puis relancez.
 
 ## Validation
 
-- [ ] `preuve.txt` lu depuis `tp04-vm2` après suppression de `tp04-vm1`.
+- [ ] `preuve.txt` lu depuis `tp04-vm-2` après suppression de `tp04-vm-1`.
 - [ ] Snapshot créé et volume restauré à partir du snapshot.
 - [ ] Nettoyage fait (aucun volume ni snapshot `tp04-…`).
 

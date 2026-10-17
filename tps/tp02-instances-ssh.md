@@ -36,8 +36,8 @@ aux VM depuis l'instance.
 ```bash
 # [instance]
 openstack server create --image cirros --flavor m1.tiny --key-name mykey \
-  --network demo-net --wait tp02-vm1
-openstack server show tp02-vm1 -c status -c addresses
+  --network demo-net --wait tp02-vm-1
+openstack server show tp02-vm-1 -c status -c addresses
 ```
 
 `--wait` attend que la VM soit `ACTIVE`. Elle a une adresse en `10.0.0.x` sur `demo-net`, un réseau
@@ -48,7 +48,7 @@ son démarrage dans sa console :
 
 ```bash
 # [instance]
-openstack console log show tp02-vm1 | tail -20
+openstack console log show tp02-vm-1 | tail -20
 ```
 
 Attendez la ligne `login:`.
@@ -58,7 +58,7 @@ Attendez la ligne `login:`.
 ```bash
 # [instance]
 FIP=$(openstack floating ip create public1 -f value -c floating_ip_address)
-openstack server add floating ip tp02-vm1 $FIP
+openstack server add floating ip tp02-vm-1 $FIP
 echo $FIP
 ping -c3 $FIP
 ssh cirros@$FIP
@@ -80,13 +80,13 @@ exit
 ```bash
 # [instance]
 openstack server create --image cirros --flavor m1.tiny --key-name mykey \
-  --network demo-net --wait tp02-vm2
-openstack server show tp02-vm2 -f value -c addresses       # notez son IP 10.0.0.y
+  --network demo-net --wait tp02-vm-2
+openstack server show tp02-vm-2 -f value -c addresses       # notez son IP 10.0.0.y
 ssh cirros@$FIP
 ```
 
 ```bash
-# [VM] (tp02-vm1)
+# [VM] (tp02-vm-1)
 ping -c2 <IP_PRIVEE_DE_TP02_VM2>
 exit
 ```
@@ -114,7 +114,7 @@ grep keystone_admin_password /etc/kolla/passwords.yml
 ```
 
 Dans Horizon : *Projet → Compute → Instances*. Retrouvez vos deux VM, ouvrez la console de
-`tp02-vm2`, puis lancez une troisième VM `tp02-vm3` depuis l'interface (image `cirros`, gabarit
+`tp02-vm-2`, puis lancez une troisième VM `tp02-vm-3` depuis l'interface (image `cirros`, gabarit
 `m1.tiny`, réseau `demo-net`, keypair `mykey`).
 
 **Constater ce que protège le tunnel.** Déconnectez-vous d'Horizon, puis lancez deux captures sur
@@ -170,11 +170,11 @@ scp -i ec2_key ~/.ssh/id_ed25519.pub ubuntu@<IP_PUBLIQUE>:ma-cle.pub
 
 ```bash
 # [instance]
-openstack keypair create --public-key ~/ma-cle.pub tp02-cle
-openstack server create --image cirros --flavor m1.tiny --key-name tp02-cle \
-  --network demo-net --wait tp02-poste
+openstack keypair create --public-key ~/ma-cle.pub tp02-key-poste
+openstack server create --image cirros --flavor m1.tiny --key-name tp02-key-poste \
+  --network demo-net --wait tp02-vm-poste
 FIP2=$(openstack floating ip create public1 -f value -c floating_ip_address)
-openstack server add floating ip tp02-poste $FIP2
+openstack server add floating ip tp02-vm-poste $FIP2
 echo $FIP2
 ```
 
@@ -288,9 +288,9 @@ Scénario 03 : voir le TP 07 et [../aws/aws-setup.md §4](../aws/aws-setup.md).
 
 ```bash
 # [instance]
-openstack server delete --wait tp02-vm1 tp02-vm2 tp02-vm3 tp02-poste
+openstack server delete --wait tp02-vm-1 tp02-vm-2 tp02-vm-3 tp02-vm-poste
 openstack floating ip delete $FIP $FIP2
-openstack keypair delete tp02-cle
+openstack keypair delete tp02-key-poste
 rm ~/ma-cle.pub
 openstack server list
 ```
@@ -308,10 +308,10 @@ openstack server list
 
 ## Validation
 
-- [ ] Connexion SSH à `tp02-vm1` réussie, ping vers Internet et vers `tp02-vm2` réussis.
+- [ ] Connexion SSH à `tp02-vm-1` réussie, ping vers Internet et vers `tp02-vm-2` réussis.
 - [ ] VM créée depuis Horizon, par le tunnel SSH.
 - [ ] Captures faites : `password=` absent du trafic SSH, présent à la sortie du tunnel.
-- [ ] Connexion à `tp02-poste` depuis votre poste par au moins trois méthodes parmi B à F.
+- [ ] Connexion à `tp02-vm-poste` depuis votre poste par au moins trois méthodes parmi B à F.
 - [ ] Le risque du transfert d'agent (E) expliqué.
 - [ ] Nettoyage fait (`openstack server list` ne montre plus de `tp02-…`).
 

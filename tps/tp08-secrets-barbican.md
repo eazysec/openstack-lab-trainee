@@ -34,7 +34,7 @@ Si rien ne s'affiche, déployez le scénario 04 (dans tmux, ~20 min, les VM exis
 
 ```bash
 # [instance]
-H=$(openstack secret store --name tp08-motdepasse --payload "valeur-de-demonstration" \
+H=$(openstack secret store --name tp08-secret-motdepasse --payload "valeur-de-demonstration" \
   --payload-content-type text/plain -f value -c "Secret href")
 echo $H                                   # l'adresse du secret : c'est son identifiant
 openstack secret list -c Name -c Status -c "Content types"
@@ -52,7 +52,7 @@ garde, elle n'a jamais existé ailleurs.
 
 ```bash
 # [instance]
-O=$(openstack secret order create --name tp08-cle-aes --algorithm aes --bit-length 256 \
+O=$(openstack secret order create --name tp08-secret-cle-aes --algorithm aes --bit-length 256 \
   --mode cbc --payload-content-type application/octet-stream key -f value -c "Order href")
 openstack secret order get $O -c Status -c "Secret href"     # attendre "ACTIVE"
 S=$(openstack secret order get $O -f value -c "Secret href")
@@ -71,9 +71,9 @@ son projet), `observer` (lire), `audit` (métadonnées seulement).
 ```bash
 # [instance]
 openstack role list | grep -E "creator|observer|audit"
-openstack project create tp08-autre
-openstack user create --project tp08-autre --password-prompt tp08-user
-openstack role add --project tp08-autre --user tp08-user member
+openstack project create tp08-proj-autre
+openstack user create --project tp08-proj-autre --password-prompt tp08-user
+openstack role add --project tp08-proj-autre --user tp08-user member
 ```
 
 Créez un fichier d'identifiants pour `tp08-user`, comme au TP 06 :
@@ -86,7 +86,7 @@ export OS_AUTH_URL=$OS_AUTH_URL
 export OS_IDENTITY_API_VERSION=3
 export OS_USER_DOMAIN_NAME=Default
 export OS_PROJECT_DOMAIN_NAME=Default
-export OS_PROJECT_NAME=tp08-autre
+export OS_PROJECT_NAME=tp08-proj-autre
 export OS_USERNAME=tp08-user
 read -rsp "Mot de passe de tp08-user : " OS_PASSWORD; echo; export OS_PASSWORD
 EOF
@@ -108,9 +108,9 @@ Avec le rôle `creator` :
 ```bash
 # [instance]
 source /etc/kolla/admin-openrc.sh
-openstack role add --project tp08-autre --user tp08-user creator
+openstack role add --project tp08-proj-autre --user tp08-user creator
 source ~/tp08-openrc.sh
-HU=$(openstack secret store --name tp08-du-user --payload "secret-user" -f value -c "Secret href")
+HU=$(openstack secret store --name tp08-secret-user --payload "secret-user" -f value -c "Secret href")
 openstack secret list -c Name
 openstack secret get --payload $HU                     # son propre secret : accepté
 openstack secret get --payload <HREF_DU_SECRET_ADMIN>  # la valeur de $H de l'étape 1 : refusé
@@ -143,7 +143,7 @@ openstack secret delete $H                # une seule adresse par commande
 openstack secret delete $S
 openstack secret order delete $O
 openstack user delete tp08-user
-openstack project delete tp08-autre
+openstack project delete tp08-proj-autre
 rm ~/tp08-openrc.sh
 openstack secret list
 ```

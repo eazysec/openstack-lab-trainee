@@ -49,10 +49,10 @@ openstack server create --image cirros --flavor m1.tiny --key-name mykey \
   --network demo-net --wait tp10-vm
 FIP=$(openstack floating ip create public1 -f value -c floating_ip_address)
 openstack server add floating ip tp10-vm $FIP
-openstack volume create --size 1 tp10-donnees          # les données à protéger
-openstack volume create --size 1 tp10-depot            # le dépôt de sauvegarde du niveau 1
-openstack server add volume tp10-vm tp10-donnees       # attendre "available" avant chaque ajout
-openstack server add volume tp10-vm tp10-depot
+openstack volume create --size 1 tp10-vol-donnees          # les données à protéger
+openstack volume create --size 1 tp10-vol-depot            # le dépôt de sauvegarde du niveau 1
+openstack server add volume tp10-vm tp10-vol-donnees       # attendre "available" avant chaque ajout
+openstack server add volume tp10-vm tp10-vol-depot
 scp -O /usr/local/bin/restic cirros@$FIP:/dev/shm/restic   # attendre ~1 min le démarrage
 ```
 
@@ -67,7 +67,7 @@ standard : il n'apparaît dans aucune commande exécutée sur la VM.
 
 ```bash
 # [instance]
-HPW=$(openstack secret store --name tp10-mdp-restic --payload "$(openssl rand -base64 24)" \
+HPW=$(openstack secret store --name tp10-secret-restic --payload "$(openssl rand -base64 24)" \
   -f value -c "Secret href")
 openstack secret get --payload -f value -c Payload $HPW | ssh cirros@$FIP "umask 077; cat > /dev/shm/restic-pw"
 ssh cirros@$FIP
@@ -115,13 +115,13 @@ source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh
 IPH=$(ip -o -4 route get 1.1.1.1 | grep -o 'src [0-9.]*' | cut -d' ' -f2)
 FIP=<FLOATING_IP_DE_TP10-VM>                                # la valeur de $FIP de la 1re session
 G="sudo docker exec lab-s3 /garage"
-$G key create tp10-cle
-$G bucket create tp10-sauvegardes
-$G bucket allow --read --write --owner tp10-sauvegardes --key tp10-cle
-KI=$($G key info tp10-cle --show-secret | awk '/Key ID/{print $3}')
-KS=$($G key info tp10-cle --show-secret | awk '/Secret key/{print $3}')
+$G key create tp10-s3key
+$G bucket create tp10-bucket-sauvegardes
+$G bucket allow --read --write --owner tp10-bucket-sauvegardes --key tp10-s3key
+KI=$($G key info tp10-s3key --show-secret | awk '/Key ID/{print $3}')
+KS=$($G key info tp10-s3key --show-secret | awk '/Secret key/{print $3}')
 echo $KI                                                    # identifiant de la clé (pas secret)
-HS3=$(openstack secret store --name tp10-s3-secret --payload "$KS" -f value -c "Secret href")
+HS3=$(openstack secret store --name tp10-secret-s3 --payload "$KS" -f value -c "Secret href")
 openstack secret get --payload -f value -c Payload $HS3 | ssh cirros@$FIP "umask 077; cat > /dev/shm/s3-secret"
 ```
 
@@ -131,7 +131,7 @@ Dans la VM, restic parle S3 au serveur de l'hôte (`<IP_PRIVEE_INSTANCE>` est la
 # [VM]
 export AWS_ACCESS_KEY_ID=<KI> AWS_DEFAULT_REGION=garage
 export AWS_SECRET_ACCESS_KEY=$(cat /dev/shm/s3-secret)
-S3=s3:http://<IP_PRIVEE_INSTANCE>:3900/tp10-sauvegardes/vm1
+S3=s3:http://<IP_PRIVEE_INSTANCE>:3900/tp10-bucket-sauvegardes/vm1
 sudo -E /dev/shm/restic -r $S3 init
 sudo -E /dev/shm/restic -r $S3 backup /mnt/donnees
 sudo -E /dev/shm/restic -r $S3 restore latest --target /dev/shm/r2
@@ -148,14 +148,14 @@ sudo -E /dev/shm/restic -r s3:http://<IP_PRIVEE_INSTANCE>:3900/un-autre-bucket i
 
 Réponse : `Access key … is not allowed to create buckets`. La clé ne peut que lire et écrire dans le
 bucket qu'on lui a confié ; c'est l'administrateur qui crée les buckets. D'où le dépôt dans un
-chemin du bucket (`…/tp10-sauvegardes/vm1`).
+chemin du bucket (`…/tp10-bucket-sauvegardes/vm1`).
 
 Ce que voit le stockage, et où il est :
 
 ```bash
 # [instance]
 S3C=(s3cmd --access_key="$KI" --secret_key="$KS" --host="$IPH:3900" --host-bucket="$IPH:3900" --no-ssl --region=garage)
-"${S3C[@]}" ls --recursive s3://tp10-sauvegardes        # config, data/…, index/…, keys/… : des noms opaques
+"${S3C[@]}" ls --recursive s3://tp10-bucket-sauvegardes        # config, data/…, index/…, keys/… : des noms opaques
 sudo grep -rac rapport /srv/lab-s3/data | awk -F: '{s+=$NF} END{print s+0}'   # 0 : tout est chiffré
 sudo du -sh /srv/lab-s3/data                            # les objets sont… sur le disque de l'instance
 ```
@@ -194,7 +194,7 @@ Copier le dépôt à travers un tunnel vers le port S3 de l'instance :
 # [poste]
 ssh -i ec2_key -f -N -L 3900:<IP_PRIVEE_INSTANCE>:3900 ubuntu@<IP_PUBLIQUE>
 export AWS_ACCESS_KEY_ID=<KI> AWS_SECRET_ACCESS_KEY=<KS> AWS_DEFAULT_REGION=garage
-SRC=s3:http://localhost:3900/tp10-sauvegardes/vm1
+SRC=s3:http://localhost:3900/tp10-bucket-sauvegardes/vm1
 ~/bin/restic -r ~/tp10/depot-poste init --password-file ~/tp10/mdp-sequestre \
   --from-repo $SRC --from-password-file ~/tp10/mdp-sequestre --copy-chunker-params
 ~/bin/restic -r ~/tp10/depot-poste copy --password-file ~/tp10/mdp-sequestre \
@@ -249,14 +249,14 @@ rm -rf ~/tp10
 
 ```bash
 # [instance]
-"${S3C[@]}" del --recursive --force s3://tp10-sauvegardes   # un bucket doit être vide pour être supprimé
-$G bucket delete --yes tp10-sauvegardes
-$G key delete --yes tp10-cle
-openstack server remove volume tp10-vm tp10-donnees
-openstack server remove volume tp10-vm tp10-depot
+"${S3C[@]}" del --recursive --force s3://tp10-bucket-sauvegardes   # un bucket doit être vide pour être supprimé
+$G bucket delete --yes tp10-bucket-sauvegardes
+$G key delete --yes tp10-s3key
+openstack server remove volume tp10-vm tp10-vol-donnees
+openstack server remove volume tp10-vm tp10-vol-depot
 sleep 10
-openstack volume delete tp10-donnees
-openstack volume delete tp10-depot
+openstack volume delete tp10-vol-donnees
+openstack volume delete tp10-vol-depot
 openstack server delete --wait tp10-vm
 openstack floating ip delete $FIP
 openstack secret delete $HPW
@@ -270,7 +270,7 @@ openstack secret delete $HS3
    l'instance ? Qu'apporte-t-il alors ?
 3. Le mot de passe du dépôt est dans Barbican. Pourquoi le mettre aussi en séquestre hors de
    l'hôte ? Que se passe-t-il sinon le jour où l'instance est perdue ?
-4. Pourquoi la clé `tp10-cle` ne peut-elle pas créer de bucket ? Quel risque cela limite-t-il ?
+4. Pourquoi la clé `tp10-s3key` ne peut-elle pas créer de bucket ? Quel risque cela limite-t-il ?
 5. Un rançongiciel chiffre la VM et dispose de la clé S3. Que peut-il faire au dépôt du niveau 2 ?
    Quelle fonction d'un stockage objet l'en empêcherait ?
 6. Proposez une organisation 3-2-1 réaliste pour une VM de production sur OpenStack.

@@ -24,9 +24,9 @@ openstack network create tp03-net
 openstack subnet create --network tp03-net --subnet-range 192.168.30.0/24 \
   --dns-nameserver 8.8.8.8 tp03-subnet
 
-openstack router create tp03-router
-openstack router set --external-gateway public1 tp03-router     # sortie vers le réseau externe
-openstack router add subnet tp03-router tp03-subnet             # entrée côté réseau privé
+openstack router create tp03-rtr
+openstack router set --external-gateway public1 tp03-rtr     # sortie vers le réseau externe
+openstack router add subnet tp03-rtr tp03-subnet             # entrée côté réseau privé
 ```
 
 ## Étape 2. Un security group sur mesure
@@ -47,9 +47,9 @@ openstack security group rule list tp03-sg
 ```bash
 # [instance]
 openstack server create --image cirros --flavor m1.tiny --key-name mykey \
-  --network tp03-net --security-group tp03-sg --wait tp03-vm
+  --network tp03-net --security-group tp03-sg --wait tp03-vm-1
 FIP=$(openstack floating ip create public1 -f value -c floating_ip_address)
-openstack server add floating ip tp03-vm $FIP
+openstack server add floating ip tp03-vm-1 $FIP
 echo $FIP
 ```
 
@@ -63,7 +63,7 @@ ssh cirros@$FIP
 ```bash
 # [VM]
 ip addr          # 192.168.30.x : le sous-réseau que vous avez créé
-ip route         # passerelle 192.168.30.1 : le routeur tp03-router
+ip route         # passerelle 192.168.30.1 : le routeur tp03-rtr
 exit
 ```
 
@@ -85,7 +85,7 @@ avec ses propres interfaces, routes et règles de pare-feu.
 
 ```bash
 # [instance]
-ROUTER_ID=$(openstack router show tp03-router -f value -c id)
+ROUTER_ID=$(openstack router show tp03-rtr -f value -c id)
 sudo ip netns | grep $ROUTER_ID
 sudo ip netns exec qrouter-$ROUTER_ID ip addr
 ```
@@ -141,18 +141,18 @@ en écoutant sur `enX0` : `sudo tcpdump -ni enX0 icmp and host 8.8.8.8`. Compare
 
 ```bash
 # [instance]
-openstack server delete --wait tp03-vm
+openstack server delete --wait tp03-vm-1
 openstack floating ip delete $FIP
-openstack router remove subnet tp03-router tp03-subnet
-openstack router unset --external-gateway tp03-router
-openstack router delete tp03-router
+openstack router remove subnet tp03-rtr tp03-subnet
+openstack router unset --external-gateway tp03-rtr
+openstack router delete tp03-rtr
 openstack network delete tp03-net               # supprime aussi tp03-subnet
 openstack security group delete tp03-sg
 ```
 
 ## Questions
 
-1. Dessinez le chemin d'un paquet de `tp03-vm` vers 8.8.8.8 : chaque interface traversée et l'adresse
+1. Dessinez le chemin d'un paquet de `tp03-vm-1` vers 8.8.8.8 : chaque interface traversée et l'adresse
    source à chaque étape. Indiquez pour chaque étape si elle relève d'OpenStack, de l'hôte Linux ou d'AWS.
 2. Quelle adresse source voyez-vous sur `veth-ext` ? Et sur `enX0` ? Qui a fait chaque traduction ?
 3. Quelle différence entre un security group OpenStack et un Security Group AWS ?
