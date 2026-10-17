@@ -15,7 +15,7 @@ Attribution, Partage dans les mêmes conditions 4.0 International (CC BY-SA 4.0)
 Vous pouvez les copier, les distribuer, les modifier et les utiliser, y compris dans un cadre
 commercial (une formation payante par exemple), à deux conditions :
 
-- **Attribution** : citer la source (« openstack-formation, openstack-lab-trainee ») avec un lien vers
+- **Attribution** : citer la source (« Merlin Tchoffo, openstack-lab-trainee ») avec un lien vers
   le dépôt, indiquer la licence et signaler les modifications ;
 - **Partage dans les mêmes conditions** : diffuser vos versions modifiées sous la même licence.
 
