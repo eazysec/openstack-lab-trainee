@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 2 h 30 |
 | Prérequis | TP 04, TP 08 ; scénario 04 (Cinder, Barbican, stockage objet du lab) |
 | Coût | **Aucun** (niveaux 1 à 3). Le niveau 3 « cloud » (bucket AWS S3) est payant : accord du tuteur |
 | À la fin du TP | Vous savez sauvegarder et restaurer, et dire ce qu'une sauvegarde protège réellement |

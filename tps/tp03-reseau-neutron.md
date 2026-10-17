@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 2 h |
 | Prérequis | TP 02 ; avoir lu [../README.md §5](../README.md) |
 | À la fin du TP | Vous savez construire un réseau complet et suivre un paquet de la VM jusqu'à Internet |
 

@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 1 h 30 (+ ~15 min si Cinder n'est pas encore déployé) |
 | Prérequis | TP 02 ; Cinder déployé (scénario 02) |
 | À la fin du TP | Vous savez donner à une VM un disque qui survit à la VM |
 

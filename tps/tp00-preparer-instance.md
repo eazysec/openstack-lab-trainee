@@ -2,8 +2,7 @@
 
 | | |
 |---|---|
-| Durée | 1 h |
-| Prérequis | Accès à la console AWS (ou une instance préparée par le tuteur), la clé `ec2_key` |
+| Prérequis | Une instance (à créer dans la console AWS, ou déjà préparée), la clé `ec2_key` |
 | À la fin du TP | Vous savez sur quelle machine OpenStack va tourner et quelles sont ses limites |
 
 ## Objectifs
@@ -17,7 +16,7 @@
 
 ## Étape 1. Les caractéristiques de l'instance
 
-Si le tuteur vous fait créer l'instance, utilisez ces paramètres (déjà validés) :
+Si vous créez vous-même l'instance, utilisez ces paramètres (déjà validés) :
 
 | Paramètre | Valeur |
 |---|---|

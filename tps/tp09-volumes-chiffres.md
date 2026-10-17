@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 1 h 30 |
 | Prérequis | TP 04 et TP 08 ; scénario 04 (Cinder + Barbican) |
 | À la fin du TP | Vous savez chiffrer un volume et dire contre quoi ce chiffrement protège |
 

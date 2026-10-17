@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 1 h 30 |
 | Prérequis | TP 03 ; avoir lu [../aws/aws-setup.md §2.3 et §4](../aws/aws-setup.md) |
 | Coût | **Aucun** : la partie AWS est simulée. La version réelle (Elastic IP payante) se fait uniquement avec l'accord du tuteur |
 | À la fin du TP | Vous savez pourquoi une floating IP n'est pas joignable depuis Internet sur AWS, et comment la publier |

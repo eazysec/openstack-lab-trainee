@@ -6,10 +6,7 @@ typique : AWS EC2), et fournit un parcours de TP.
 | Vous êtes | Commencez par |
 |---|---|
 | Stagiaire ou alternant | [tps/README.md](tps/README.md) : parcours de TP |
-| Administrateur du lab ou formateur | Ce document : déploiement, architecture, exploitation |
-
-Les formateurs disposent d'un dépôt distinct, non public, qui accompagne ce parcours (corrigé, tests de
-validation des TP).
+| Administrateur du lab | Ce document : déploiement, architecture, exploitation |
 
 Ce document décrit OpenStack et le déploiement. Ce qui est propre à AWS (réseau VPC, types d'instance,
 alternatives) est dans [aws/aws-setup.md](aws/aws-setup.md), les coûts dans [aws/finops.md](aws/finops.md).
@@ -38,7 +35,6 @@ openstack-lab-trainee/
 │   └── test-public-fip.sh     test du scénario 03 côté hôte, sans ressource AWS (TP 07)
 ├── tps/                       parcours de TP : énoncés, conventions, grille de suivi, sources
 ├── VERSION                    version du dépôt
-├── VALIDATION.md              résultats de la validation de cette version
 ├── LICENSE                    licence des scripts (MIT)
 ├── LICENSE-CONTENU.md         licence des contenus pédagogiques (CC BY-SA 4.0)
 ├── NOTICE.md                  logiciels tiers utilisés
@@ -54,17 +50,12 @@ openstack-lab-trainee/
 
 ## 2. Les scénarios
 
-| Scénario | Contenu | Ressources AWS en plus | État de la vérification |
-|---|---|---|---|
-| **01 (base)** | Keystone, Glance, Nova, Neutron, Placement, Horizon. Disques des VM éphémères. | Aucune | Vérifié : déploiement neuf en 13 min, `verify.sh` 15/15 |
-| **02 (Cinder)** | 01 + volumes persistants (Cinder, LVM sur fichier loop) | Aucune (option : volume EBS dédié, payant) | Vérifié : ajout sur un 01 existant en 13 min, `verify.sh` 20/20 ; données d'un volume intactes après reboot |
-| **03 (floating IP publiques)** | 01 + accès à des VM depuis Internet | IP secondaires (gratuites) + Elastic IP (**payantes**) | Partie hôte vérifiée : `tests/test-public-fip.sh` 28/28 (client simulé, reconfiguration réseau, retour arrière) + reboot vérifié manuellement. Partie AWS non exécutée : Elastic IP payante, accord requis |
-| **04 (complet)** | 02 + Barbican (secrets, volumes chiffrés) + Designate (DNS, intégration Neutron) + stockage objet S3 (Garage) | Aucune (16 Go de RAM recommandés) | Vérifié : déploiement neuf en 18 min, et ajout sur un 02 existant en 25 min ; `verify.sh` 35/35 dans les deux cas |
-
-Vérifications du 17/10/2026 : chaîne cumulative 01 → 02 → 04 sur un hôte neuf, et déploiement neuf du
-04 en une passe. Depuis, `verify.sh` a gagné des contrôles (connexion réelle à Horizon, stockage objet) :
-42/42 mesuré en scénario 04 complet (déploiement neuf en 18 min, version finale des scripts) ; les
-totaux 15, 20 et 35 ci-dessus sont ceux des versions précédentes, non remesurés pour 01 et 02.
+| Scénario | Contenu | Ressources AWS en plus |
+|---|---|---|
+| **01 (base)** | Keystone, Glance, Nova, Neutron, Placement, Horizon. Disques des VM éphémères. | Aucune |
+| **02 (Cinder)** | 01 + volumes persistants (Cinder, LVM sur fichier loop) | Aucune (option : volume EBS dédié, payant) |
+| **03 (floating IP publiques)** | 01 + accès à des VM depuis Internet | IP secondaires (gratuites) + Elastic IP (**payantes**, accord requis) |
+| **04 (complet)** | 02 + Barbican (secrets, volumes chiffrés) + Designate (DNS, intégration Neutron) + stockage objet S3 (Garage) | Aucune (16 Go de RAM recommandés) |
 
 Les scénarios sont cumulables : on peut déployer 01, puis relancer `deploy.sh` avec 02 (ou 04) pour
 ajouter des services sans perdre les VM existantes.
@@ -85,14 +76,14 @@ de passe (`ubuntu` sur EC2), accès Internet.
 scp -r -i ec2_key openstack-lab-trainee ubuntu@<IP_PUBLIQUE>:
 ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
 
-# Sur l'instance (tmux conseillé : ~15 min)
+# Sur l'instance (tmux conseillé : le déploiement est long)
 tmux new -s deploy
 ./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/01-aio-base.env
 ./openstack-lab-trainee/verify.sh
 ```
 
 Pour suivre tous les TP ([tps/README.md](tps/README.md)), déployez plutôt le scénario 04 :
-`./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/04-aio-complet.env` (~20 min).
+`./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/04-aio-complet.env`.
 
 `verify.sh` crée une VM de test, vérifie le réseau, et selon les services présents Cinder, Barbican,
 le chiffrement des volumes et Designate, puis nettoie.
@@ -122,8 +113,8 @@ Les paramètres se règlent dans le fichier de scénario, ou en variable d'envir
 ### En cas d'échec
 
 Lire le log indiqué (`~/kolla/deploy-*.log`), corriger, puis relancer `deploy.sh` : il est idempotent.
-Durées mesurées : déploiement neuf 13 min (01) à 18 min (04) ; une relance sur un déploiement existant
-revérifie tous les services et prend plus longtemps (28 min en scénario 04) : ce n'est pas un blocage.
+Une relance sur un déploiement existant revérifie tous les services et prend plus longtemps que le premier
+déploiement : ce n'est pas un blocage (suivre le log avec `tail -f ~/kolla/deploy-*.log`).
 
 Pour tout supprimer :
 ```bash

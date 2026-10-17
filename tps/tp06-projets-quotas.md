@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 1 h 30 |
 | Prérequis | TP 03 |
 | À la fin du TP | Vous savez ouvrir un espace isolé à une équipe et limiter ses ressources |
 

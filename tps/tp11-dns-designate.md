@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 1 h 30 |
 | Prérequis | TP 03 et TP 06 ; Designate déployé (scénario 04) |
 | À la fin du TP | Vous savez publier des noms DNS pour vos VM, à la main ou automatiquement |
 

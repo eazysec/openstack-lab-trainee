@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 1 h 30 |
 | Prérequis | TP 06 ; Barbican déployé (scénario 04) |
 | À la fin du TP | Vous savez stocker et protéger un secret, et vous connaissez les limites du stockage du lab |
 

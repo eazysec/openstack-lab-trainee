@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 1 h 30 (dont ~15 min d'attente du déploiement) |
 | Prérequis | TP 00 ; une instance neuve |
 | À la fin du TP | OpenStack tourne et vous savez vérifier qu'il fonctionne |
 

@@ -2,7 +2,6 @@
 
 | | |
 |---|---|
-| Durée | 1 h 30 |
 | Prérequis | TP 01 (OpenStack déployé, `verify.sh` OK) |
 | À la fin du TP | Vous savez créer une VM, la rendre joignable et vous y connecter |
 
