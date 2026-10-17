@@ -1,0 +1,108 @@
+# Parcours de TP : OpenStack sur AWS
+
+> Public : stagiaires et alternants. Aucune connaissance d'OpenStack n'est supposée ; il faut savoir
+> se servir d'un terminal Linux et de SSH.
+>
+> Chaque TP indique ses objectifs, ses prérequis, les étapes guidées, des questions de compréhension
+> et des critères de validation. Le tuteur dispose des éléments de réponse. Les sources et références
+> sont dans [sources.md](sources.md).
+
+---
+
+## 1. Progression
+
+Les TP suivent l'avancement du projet : on découvre l'infrastructure, on déploie, on utilise, puis on
+exploite et on étend la plateforme.
+
+| TP | Titre | Phase du projet | Scénario | Durée | État |
+|---|---|---|---|---|---|
+| [00](tp00-preparer-instance.md) | Préparer et découvrir l'instance AWS | Avant le déploiement | aucun | 1 h | Prêt |
+| [01](tp01-deployer.md) | Déployer OpenStack et vérifier le déploiement | Déploiement | 01 | 1 h 30 | Prêt |
+| [02](tp02-instances-ssh.md) | Lancer des instances depuis l'hôte et s'y connecter en SSH | Utilisation | 01 | 1 h 30 | Prêt |
+| [03](tp03-reseau-neutron.md) | Comprendre le réseau Neutron | Utilisation | 01 | 2 h | Prêt |
+| [04](tp04-volumes-cinder.md) | Stockage persistant : volumes, montage, snapshots | Utilisation | 02 | 1 h 30 | Prêt |
+| [05](tp05-exploitation.md) | Exploiter la plateforme : logs, pannes, reconfiguration | Exploitation | 01 ou 02 | 2 h | Prêt |
+| [06](tp06-projets-quotas.md) | Projets, utilisateurs, rôles et quotas | Exploitation | 01 ou 02 | 1 h 30 | Prêt |
+| [07](tp07-reseau-aws.md) | Floating IP publiques et réseau AWS | Extension | 03 | 1 h 30 | Prêt (sans coût) |
+| [08](tp08-secrets-barbican.md) | Gérer des secrets avec Barbican | Extension | 04 | 1 h 30 | Prêt |
+| [09](tp09-volumes-chiffres.md) | Chiffrer les volumes Cinder | Extension | 04 | 1 h 30 | Prêt |
+| [10](tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | 2 h 30 | Prêt (sans coût) |
+| [11](tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | 1 h 30 | Prêt |
+
+Chaque version de ce parcours est validée avant publication : les commandes de tous les TP sont
+rejouées sur un lab neuf (scénario 04), avec contrôle de chaque résultat et de chaque message d'erreur
+annoncé. Le résultat de la validation de la version en cours figure dans [../VALIDATION.md](../VALIDATION.md).
+Non testés, et signalés comme tels dans les énoncés : `sshuttle` et la redirection de port (TP 02,
+contraintes techniques), la partie AWS du scénario 03 et le niveau 3 « cloud » du TP 10 (payants).
+
+---
+
+## 2. Conventions
+
+Chaque bloc de commandes indique où l'exécuter :
+
+| Marqueur | Où | Comment y aller |
+|---|---|---|
+| `# [poste]` | Votre ordinateur | vous y êtes |
+| `# [instance]` | L'instance EC2 (l'hôte OpenStack) | `ssh -i ec2_key ubuntu@<IP_PUBLIQUE>` |
+| `# [VM]` | Une VM OpenStack (CirrOS) | `ssh cirros@<FLOATING_IP>` depuis l'instance |
+
+- Les valeurs entre chevrons sont à remplacer : `<IP_PUBLIQUE>` (IP publique de l'instance, visible
+  dans la console AWS), `<FLOATING_IP>`, `<INSTANCE_ID>`…
+- Avant toute commande `openstack`, dans chaque nouvelle session SSH sur l'instance :
+  ```bash
+  # [instance]
+  source ~/kolla/venv/bin/activate
+  source /etc/kolla/admin-openrc.sh
+  ```
+  Sans cela : `Command 'openstack' not found`. N'installez pas le client proposé par Ubuntu
+  (`snap`/`apt`) : sa version est trop ancienne.
+- Les ressources créées dans un TP portent son préfixe (`tp02-…`, `tp03-…`) : on sait ce qu'on peut
+  supprimer sans toucher au reste. Chaque TP se termine par un nettoyage.
+- Les floating IP sont réutilisées : une nouvelle VM peut recevoir l'adresse d'une VM supprimée.
+  SSH refuse alors la connexion (`WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!`), car l'empreinte
+  de la VM a changé. C'est normal dans le lab : oubliez l'ancienne empreinte avec
+  `ssh-keygen -R <FLOATING_IP>`, puis reconnectez-vous.
+- CirrOS, l'image des VM de test, est une distribution minimale : ses commandes sont celles de BusyBox
+  (par exemple `ip addr` fonctionne, `ip -br addr` non).
+
+---
+
+## 3. Règles du lab
+
+1. **Aucune ressource AWS payante sans l'accord du tuteur** (Elastic IP, volume EBS, instance
+   supplémentaire…). Voir [../aws/finops.md](../aws/finops.md).
+2. **Ne jamais modifier le réseau de l'interface `enX0`** de l'instance (adresses, netplan, networkd) :
+   c'est par elle qu'on administre l'instance, et une erreur la rend injoignable
+   (voir [../aws/aws-setup.md §6](../aws/aws-setup.md)).
+3. **Arrêter l'instance en fin de journée** (console AWS, *Arrêter*, jamais *Résilier*). OpenStack redémarre
+   tout seul ; l'IP publique change.
+4. Pas de secret (clé SSH, mot de passe, clé AWS) dans un chat, un mail ou un dépôt Git.
+
+---
+
+## 4. Grille de suivi
+
+À cocher par le stagiaire, à valider par le tuteur.
+
+| TP | Je sais… | Stagiaire | Tuteur |
+|---|---|---|---|
+| 00 | expliquer pourquoi les VM OpenStack tournent en émulation sur cette instance |  |  |
+| 00 | distinguer IP publique, IP privée et Security Group AWS |  |  |
+| 01 | déployer OpenStack, lire le log et interpréter `verify.sh` |  |  |
+| 01 | citer le rôle de Keystone, Nova, Neutron, Glance, Placement, Horizon |  |  |
+| 02 | lancer une VM, lui donner une floating IP et m'y connecter en SSH |  |  |
+| 02 | expliquer ce qu'est une keypair et où se trouve la clé privée |  |  |
+| 03 | créer réseau, sous-réseau, routeur et security group |  |  |
+| 03 | suivre le chemin d'un paquet de la VM jusqu'à Internet |  |  |
+| 04 | créer, attacher, formater, monter et détacher un volume |  |  |
+| 04 | expliquer la différence entre disque éphémère et volume |  |  |
+| 05 | trouver le log d'un service et diagnostiquer une panne simple |  |  |
+| 05 | modifier une option de configuration de façon durable |  |  |
+| 06 | créer un projet et un utilisateur, lui donner un rôle et des quotas |  |  |
+| 07 | expliquer pourquoi une floating IP n'est pas joignable depuis Internet sur AWS |  |  |
+| 02 | accéder à une VM depuis mon poste par plusieurs méthodes, et choisir la plus sûre |  |  |
+| 08 | stocker, générer et protéger un secret ; expliquer les rôles Barbican |  |  |
+| 09 | chiffrer un volume et dire contre quoi ce chiffrement protège |  |  |
+| 11 | publier des noms DNS, à la main et automatiquement par Neutron |  |  |
+| 10 | sauvegarder et restaurer une VM, et expliquer la règle 3-2-1 et le séquestre du mot de passe |  |  |

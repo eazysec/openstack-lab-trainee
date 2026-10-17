@@ -1,0 +1,22 @@
+# Clés SSH (paire de clés de l'instance EC2 et toute autre clé)
+ec2_key
+ec2_key.pub
+*.pem
+*.key
+id_rsa*
+id_ecdsa*
+id_ed25519*
+
+# Secrets OpenStack / AWS
+passwords.yml
+admin-openrc.sh
+clouds.yaml
+.aws/
+*.env.local
+
+# Logs de déploiement
+*.log
+deploy.out
+
+# Sauvegardes de user-data créées par aws/recover-network.sh (contiennent l'identifiant de l'instance)
+userdata-*.b64
