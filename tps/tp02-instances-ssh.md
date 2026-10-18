@@ -118,8 +118,12 @@ grep keystone_admin_password /etc/kolla/passwords.yml
 ```
 
 Dans Horizon : *Projet → Compute → Instances*. Retrouvez vos deux VM, ouvrez la console de
-`tp02-vm-2`, puis lancez une troisième VM `tp02-vm-3` depuis l'interface (image `cirros`, gabarit
-`m1.tiny`, réseau `demo-net`, keypair `mykey`).
+`tp02-vm-2` et connectez-vous avec le compte affiché par CirrOS au-dessus de l'invite `login:` :
+utilisateur `cirros`, mot de passe `gocubsgo`. Lancez ensuite une troisième VM `tp02-vm-3` depuis
+l'interface (image `cirros`, gabarit `m1.tiny`, réseau `demo-net`, keypair `mykey`).
+
+Ce mot de passe connu de tous n'est acceptable que pour CirrOS, image de test. Les images cloud de
+production n'ont pas de mot de passe et n'acceptent que des clés SSH (TP 12).
 
 **Constater ce que protège le tunnel.** Déconnectez-vous d'Horizon, puis lancez deux captures sur
 l'instance (2 minutes) : le trafic SSH qui arrive par Internet, et le trafic HTTP à la sortie du tunnel.
