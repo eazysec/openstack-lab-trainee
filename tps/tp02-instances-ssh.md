@@ -102,10 +102,14 @@ Ouvrez le tunnel depuis votre poste :
 
 ```bash
 # [poste]
-ssh -i ec2_key -L 8080:<IP_PRIVEE_INSTANCE>:80 ubuntu@<IP_PUBLIQUE>
+ssh -i ec2_key -L 8080:<IP_PRIVEE_INSTANCE>:80 -L 6080:<IP_PRIVEE_INSTANCE>:6080 ubuntu@<IP_PUBLIQUE>
 ```
 
 `<IP_PRIVEE_INSTANCE>` est l'adresse de `enX0` notée au TP 00. Ouvrez ensuite <http://localhost:8080>.
+La deuxième redirection sert à la console des VM : Horizon l'affiche depuis le proxy VNC de Nova
+(port 6080), que le lab annonce à l'adresse `http://localhost:6080`. Sans elle, la console reste
+vide puis affiche « délai d'attente dépassé ». Comme pour Horizon, aucun port n'est ouvert sur
+Internet : la console voyage dans le tunnel.
 Le formulaire demande seulement l'utilisateur (`admin`) et le mot de passe, qui s'obtient avec :
 
 ```bash
@@ -300,16 +304,19 @@ openstack server list
 1. Quelles sont les quatre ressources indispensables pour lancer une VM ici ?
 2. Pourquoi `ssh cirros@<FLOATING_IP>` fonctionne-t-il depuis l'instance mais pas depuis votre poste ?
    (deux raisons : l'une liée à la clé, l'autre au réseau) Comment l'étape 6 répond-elle à chacune ?
+3. La VM ne connaît que son IP privée. Qui fait la traduction entre floating IP et IP privée ?
+4. Que se passe-t-il pour le disque de la VM quand on la supprime ?
 5. `ProxyJump` et transfert d'agent permettent tous deux de joindre la VM. Lequel préférer, et pourquoi ?
 6. Horizon reste en HTTP. Pourquoi le tunnel protège-t-il quand même le mot de passe ? Qu'est-ce qu'il ne
    protège pas ?
-3. La VM ne connaît que son IP privée. Qui fait la traduction entre floating IP et IP privée ?
-4. Que se passe-t-il pour le disque de la VM quand on la supprime ?
+7. La console des VM passe par une deuxième redirection du tunnel (port 6080). Pourquoi ne pas
+   simplement ouvrir le port 6080 dans le Security Group ?
 
 ## Validation
 
 - [ ] Connexion SSH à `tp02-vm-1` réussie, ping vers Internet et vers `tp02-vm-2` réussis.
 - [ ] VM créée depuis Horizon, par le tunnel SSH.
+- [ ] Console d'une VM affichée dans Horizon, par le tunnel.
 - [ ] Captures faites : `password=` absent du trafic SSH, présent à la sortie du tunnel.
 - [ ] Connexion à `tp02-vm-poste` depuis votre poste par au moins trois méthodes parmi B à F.
 - [ ] Le risque du transfert d'agent (E) expliqué.

@@ -249,6 +249,9 @@ neutron_plugin_agent: "openvswitch"
 # Services
 enable_openstack_core: "yes"
 enable_horizon: "yes"
+# Console des VM : Nova annonce par défaut l'IP privée de l'hôte, injoignable depuis un poste.
+# Le navigateur la joint par le tunnel SSH d'Horizon (-L 6080:<IP_PRIVEE>:6080), sans port ouvert.
+nova_novncproxy_fqdn: "localhost"
 enable_heat: "$ENABLE_HEAT"
 enable_barbican: "$ENABLE_BARBICAN"
 enable_designate: "$ENABLE_DESIGNATE"

@@ -254,7 +254,7 @@ Attention : `deploy.sh` réécrit `globals.yml` ; une modification durable se fa
 | Accès | Comment |
 |---|---|
 | SSH hôte | `ssh -i ec2_key ubuntu@<IP_PUBLIQUE>` |
-| Horizon | `http://<IP_PUBLIQUE>/` si le Security Group ouvre le port 80 à votre IP, sinon par tunnel SSH (§9). Formulaire : utilisateur `admin` et son mot de passe (ni domaine ni région à choisir) |
+| Horizon | `http://<IP_PUBLIQUE>/` si le Security Group ouvre le port 80 à votre IP, sinon par tunnel SSH (§9). La console des VM passe toujours par le tunnel (port 6080, §9). Formulaire : utilisateur `admin` et son mot de passe (ni domaine ni région à choisir) |
 | Mot de passe admin | `grep keystone_admin_password /etc/kolla/passwords.yml` |
 | CLI | `source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh`, puis `openstack ...` (à refaire dans chaque nouvelle session SSH) |
 | VM depuis l'instance | Clé `mykey` (= `~/.ssh/id_ecdsa` de l'instance) : `ssh cirros@<FLOATING_IP>` |
@@ -320,9 +320,10 @@ scénario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
    - **limiter le port 80 du Security Group à votre IP** (source `<VOTRE_IP>/32`) ;
    - **ou fermer le port 80 et passer par un tunnel SSH** :
      ```bash
-     ssh -i ec2_key -L 8080:<IP_PRIVEE>:80 ubuntu@<IP_PUBLIQUE>
+     ssh -i ec2_key -L 8080:<IP_PRIVEE>:80 -L 6080:<IP_PRIVEE>:6080 ubuntu@<IP_PUBLIQUE>
      ```
-     puis ouvrir `http://localhost:8080`.
+     puis ouvrir `http://localhost:8080`. La redirection du port 6080 sert à la console des VM dans
+     Horizon : elle n'est jamais ouverte dans le Security Group, même quand le port 80 l'est.
    → À terme, activer TLS : `kolla_enable_tls_external: "yes"` + certificat (`kolla-ansible certificates` pour un lab).
 2. Les API (5000, 8774, 9696…) ne doivent pas être ouvertes dans le pare-feu du cloud.
 3. `passwords.yml` contient tous les secrets : sauvegarder hors de l'instance, ne pas committer.

@@ -120,7 +120,7 @@ Le nombre d'IP par ENI est limité selon le type d'instance (15 pour une `t2.xla
 | Option | Principe | Coût |
 |---|---|---|
 | Security Group limité à votre IP | Source `<VOTRE_IP>/32` sur le port 80 | Aucun |
-| Tunnel SSH | `ssh -i ec2_key -L 8080:<IP_PRIVEE>:80 ubuntu@<IP_PUBLIQUE>` puis `http://localhost:8080` ; le port 80 peut rester fermé | Aucun |
+| Tunnel SSH | `ssh -i ec2_key -L 8080:<IP_PRIVEE>:80 -L 6080:<IP_PRIVEE>:6080 ubuntu@<IP_PUBLIQUE>` puis `http://localhost:8080` ; les ports 80 et 6080 restent fermés (6080 : console des VM) | Aucun |
 | AWS Systems Manager (Session Manager) | Redirection de port sans ouvrir le port 22 ; nécessite l'agent SSM et un rôle IAM | Aucun pour l'usage de base |
 | Load balancer AWS (ALB) + certificat ACM | HTTPS public propre | Payant (~16 USD/mois minimum) |
 
