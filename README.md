@@ -176,9 +176,14 @@ On crée donc un réseau externe interne à l'hôte, et l'hôte fait le pont par
               │      ║ paire veth (câble virtuel)
               │  veth-neutron ── br-ex (OVS) ── routeur Neutron ── br-int ── VM
               └────────────────────┘
-   public1  : 10.0.2.0/24 (flat), floating IP .100-.200
+   public1  : 10.0.2.0/24 (flat), floating IP de 10.0.2.100 à 10.0.2.200
    demo-net : 10.0.0.0/24 (VXLAN), routeur demo-router
 ```
+
+| Réseau | Plage | Usage des adresses |
+|---|---|---|
+| `public1` (externe) | 10.0.2.0/24 | 10.0.2.1 : `veth-ext`, la passerelle sur l'hôte ; 10.0.2.100 à 10.0.2.200 : la réserve où Neutron puise les floating IP (101 adresses, `EXT_POOL_START` et `EXT_POOL_END`, §3) et les passerelles des routeurs ; le reste est inutilisé |
+| `demo-net` (projet) | 10.0.0.0/24 | Adresses privées des VM, attribuées par DHCP |
 
 Le chemin d'un paquet sortant d'une VM :
 
