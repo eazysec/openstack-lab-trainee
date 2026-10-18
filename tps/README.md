@@ -28,7 +28,8 @@ exploite et on étend la plateforme.
 | [09](tp09-volumes-chiffres.md) | Chiffrer les volumes Cinder | Extension | 04 | Prêt |
 | [10](tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | Prêt (sans coût) |
 | [11](tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
-| [12](tp12-architecture.md) | TP final : architecture de déploiement sur OpenStack (présentation) | Synthèse | 04 | En préparation |
+| [12](tp12-cloud-init.md) | Configurer les VM au démarrage avec cloud-init | Extension | 02 ou 04 | Prêt |
+| [13](tp13-architecture.md) | TP final : architecture de déploiement sur OpenStack (présentation) | Synthèse | 04 | En préparation |
 
 Non testés sur le lab, et signalés comme tels dans les énoncés : `sshuttle` et la redirection de port
 (TP 02, contraintes techniques), la partie AWS du scénario 03 et le niveau 3 « cloud » du TP 10 (payants).
@@ -43,7 +44,25 @@ Chaque bloc de commandes indique où l'exécuter :
 |---|---|---|
 | `# [poste]` | Votre ordinateur | vous y êtes |
 | `# [instance]` | L'instance EC2 (l'hôte OpenStack) | `ssh -i ec2_key ubuntu@<IP_PUBLIQUE>` |
-| `# [VM]` | Une VM OpenStack (CirrOS) | `ssh cirros@<FLOATING_IP>` depuis l'instance |
+| `# [VM]` | Une VM OpenStack (CirrOS ; Debian aux TP 12 et 13) | `ssh cirros@<FLOATING_IP>` depuis l'instance (au TP 12 : `ssh -i ~/.ssh/tp12-key stack@<FLOATING_IP>`) |
+
+```
+Votre poste
+   │  ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
+   ▼
+┌─────────────────────────────────────────────────────────┐
+│ L'« instance » : une machine virtuelle louée chez AWS   │
+│ (t2.xlarge). OpenStack est installé dessus.             │
+│                                                         │
+│   ┌──────────────┐  ┌──────────────┐                    │
+│   │ VM tp02-vm-1 │  │ VM tp02-vm-2 │  ← les « VM » :    │
+│   │ (CirrOS)     │  │ (CirrOS)     │    créées PAR      │
+│   └──────────────┘  └──────────────┘    OpenStack       │
+└─────────────────────────────────────────────────────────┘
+```
+
+AWS comme OpenStack appellent « instance » leurs machines virtuelles. Dans ce parcours, *instance*
+désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 
 - Les valeurs entre chevrons sont à remplacer : `<IP_PUBLIQUE>` (IP publique de l'instance, visible
   dans la console AWS), `<FLOATING_IP>`, `<INSTANCE_ID>`…
@@ -91,6 +110,7 @@ Chaque bloc de commandes indique où l'exécuter :
 | 01 | citer le rôle de Keystone, Nova, Neutron, Glance, Placement, Horizon |  |  |
 | 02 | lancer une VM, lui donner une floating IP et m'y connecter en SSH |  |  |
 | 02 | expliquer ce qu'est une keypair et où se trouve la clé privée |  |  |
+| 02 | accéder à une VM depuis mon poste par plusieurs méthodes, et choisir la plus sûre |  |  |
 | 03 | créer réseau, sous-réseau, routeur et security group |  |  |
 | 03 | suivre le chemin d'un paquet de la VM jusqu'à Internet |  |  |
 | 04 | créer, attacher, formater, monter et détacher un volume |  |  |
@@ -99,8 +119,9 @@ Chaque bloc de commandes indique où l'exécuter :
 | 05 | modifier une option de configuration de façon durable |  |  |
 | 06 | créer un projet et un utilisateur, lui donner un rôle et des quotas |  |  |
 | 07 | expliquer pourquoi une floating IP n'est pas joignable depuis Internet sur AWS |  |  |
-| 02 | accéder à une VM depuis mon poste par plusieurs méthodes, et choisir la plus sûre |  |  |
 | 08 | stocker, générer et protéger un secret ; expliquer les rôles Barbican |  |  |
 | 09 | chiffrer un volume et dire contre quoi ce chiffrement protège |  |  |
-| 11 | publier des noms DNS, à la main et automatiquement par Neutron |  |  |
 | 10 | sauvegarder et restaurer une VM, et expliquer la règle 3-2-1 et le séquestre du mot de passe |  |  |
+| 11 | publier des noms DNS, à la main et automatiquement par Neutron |  |  |
+| 12 | décrire la configuration d'une VM dans un user-data cloud-init, la valider et la vérifier |  |  |
+| 12 | dire pourquoi un secret ne va jamais dans un user-data, et appliquer l'immutabilité |  |  |

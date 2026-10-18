@@ -111,3 +111,19 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | AWS S3 : tarifs | <https://aws.amazon.com/s3/pricing/> |
 | OVHcloud Public Cloud | <https://www.ovhcloud.com/fr/public-cloud/> |
 | Documentation OVHcloud | <https://help.ovhcloud.com/csm/fr-documentation> |
+
+## Configuration des VM au démarrage (TP 12)
+
+| Sujet | Référence |
+|---|---|
+| cloud-init | <https://cloudinit.readthedocs.io/en/latest/> |
+| cloud-init : modules (users, mounts, fs_setup, bootcmd, runcmd…) | <https://cloudinit.readthedocs.io/en/latest/reference/modules.html> |
+| cloud-init : phases du démarrage | <https://cloudinit.readthedocs.io/en/latest/explanation/boot.html> |
+| cloud-init : données d'instance et gabarits Jinja | <https://cloudinit.readthedocs.io/en/latest/explanation/instancedata.html> |
+| cloud-init : commandes (`status`, `query`, `schema`) | <https://cloudinit.readthedocs.io/en/latest/reference/cli.html> |
+| Nova : service de métadonnées | <https://docs.openstack.org/nova/2025.1/user/metadata.html> |
+| Images cloud de Debian | <https://cloud.debian.org/images/cloud/> |
+| GTFOBins : `systemctl` et les échappements par `sudo` | <https://gtfobins.github.io/gtfobins/systemctl/> |
+| NFS : `exports(5)` | <https://man7.org/linux/man-pages/man5/exports.5.html> |
+| NFS : `nfs.conf(5)` | <https://man7.org/linux/man-pages/man5/nfs.conf.5.html> |
+| systemd : automontage | <https://man7.org/linux/man-pages/man5/systemd.automount.5.html> |

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Architecture TP 12</title>
+<title>Architecture TP 13</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Mise en page : dossier d'architecture cible du TP 12, une colonne (1240 px max). Les schémas gardent leur taille réelle
+/* Mise en page : dossier d'architecture cible du TP 13, une colonne (1240 px max). Les schémas gardent leur taille réelle
    dans un cadre défilant. Codes couleur des réseaux repris partout (schémas, parcours, tableaux). */
 :root{
   --bg:#F1F3F6; --surface:#FFFFFF; --surface-2:#F6F7F9; --ink:#162033; --muted:#596579; --line:#D7DCE4; --line-strong:#A9B3C2;
@@ -238,7 +238,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
     <span><b>Version</b> 2026-10-18</span>
     <span><b>État</b> conception, rien n'est encore déployé ni testé</span>
     <span><b>Plateforme</b> lab All-in-One Kolla-Ansible sur AWS EC2, scénario 04</span>
-    <span><b>Préfixe des ressources</b> <code>tp12-</code></span>
+    <span><b>Préfixe des ressources</b> <code>tp13-</code></span>
   </div>
 </header>
 
@@ -300,7 +300,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
         <tr><td>Sorties contrôlées et tracées</td><td>Proxy Squid à liste blanche de domaines, par VM</td><td>Un domaine non autorisé est refusé ; chaque requête est journalisée</td></tr>
         <tr><td>Défense en profondeur</td><td>Security Group AWS, DNAT de l'hôte, security groups OpenStack, écoute locale de l'appli</td><td>Le retrait d'une couche ne suffit pas à ouvrir un flux</td></tr>
         <tr><td>Secrets et données protégés</td><td>Mot de passe de la base dans Barbican ; volume de la base chiffré</td><td>Aucun mot de passe en clair dans les fichiers ; volume illisible hors de la VM</td></tr>
-        <tr><td>Traçabilité</td><td>Convention de nommage <code>tp12-</code> et tag sur chaque ressource</td><td>Inventaire et nettoyage complets en une commande</td></tr>
+        <tr><td>Traçabilité</td><td>Convention de nommage <code>tp13-</code> et tag sur chaque ressource</td><td>Inventaire et nettoyage complets en une commande</td></tr>
       </tbody>
     </table>
   </div>
@@ -309,12 +309,12 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 <section id="parcours-tp" aria-labelledby="h-parcours-tp">
   <div class="sec-head">
     <span class="eyebrow">Le parcours</span>
-    <h2 id="h-parcours-tp">Douze TP pour y arriver</h2>
+    <h2 id="h-parcours-tp">Treize TP pour y arriver</h2>
     <p>Aucune connaissance d'OpenStack n'est supposée : il faut savoir se servir d'un terminal Linux et de SSH. Chaque TP apporte une brique que le TP final réutilise.</p>
   </div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>TP</th><th>Titre</th><th>Phase</th><th>Repris dans le TP 12</th></tr></thead>
+      <thead><tr><th>TP</th><th>Titre</th><th>Phase</th><th>Repris dans le TP 13</th></tr></thead>
       <tbody>
         <tr><td>00</td><td>Préparer et découvrir l'instance AWS</td><td>Avant le déploiement</td><td>Accès à l'hôte, Security Group AWS</td></tr>
         <tr><td>01</td><td>Déployer OpenStack et vérifier le déploiement</td><td>Déploiement</td><td>La plateforme elle-même</td></tr>
@@ -328,7 +328,8 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
         <tr><td>09</td><td>Chiffrer les volumes Cinder</td><td>Extension</td><td>Volume chiffré</td></tr>
         <tr><td>10</td><td>Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte</td><td>Extension</td><td>Extension possible</td></tr>
         <tr><td>11</td><td>DNS as a Service avec Designate</td><td>Extension</td><td>Extension possible</td></tr>
-        <tr><td>12</td><td>TP final : architecture de déploiement sur OpenStack</td><td>Synthèse</td><td>En préparation</td></tr>
+        <tr><td>12</td><td>Configurer les VM au démarrage avec cloud-init</td><td>Extension</td><td>Image, utilisateurs, proxy, métadonnées</td></tr>
+        <tr><td>13</td><td>TP final : architecture de déploiement sur OpenStack</td><td>Synthèse</td><td>En préparation</td></tr>
       </tbody>
     </table>
   </div>
@@ -338,7 +339,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   <div class="sec-head">
     <span class="eyebrow">Dossier de conception</span>
     <h2 id="h-statuts">L'architecture en détail</h2>
-    <p>Le TP 12 est en préparation. Chaque choix porte un statut ; un élément « à tester » ne sera rédigé dans le TP qu'après exécution réelle sur le lab.</p>
+    <p>Le TP 13 est en préparation. Chaque choix porte un statut ; un élément « à tester » ne sera rédigé dans le TP qu'après exécution réelle sur le lab.</p>
   </div>
   <div class="filters">
     <span class="st dec">Décidé</span><span class="st prop">Proposé, à valider</span><span class="st test">À tester</span><span class="st cost">Payant, sur accord</span>
@@ -353,9 +354,9 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   </div>
 
   <div class="legend" aria-label="Légende">
-    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--pub);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau de publication <code>tp12-net-pub</code> (flux des utilisateurs)</span></div>
-    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--adm);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau d'administration <code>tp12-net-admin</code> (SSH, proxy)</span></div>
-    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--data);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau data <code>tp12-net-data</code> (accès à la base)</span></div>
+    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--pub);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau de publication <code>tp13-net-pub</code> (flux des utilisateurs)</span></div>
+    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--adm);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau d'administration <code>tp13-net-admin</code> (SSH, proxy)</span></div>
+    <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--data);stroke-width:6;stroke-linecap:round"/></svg><span>Réseau data <code>tp13-net-data</code> (accès à la base)</span></div>
     <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--ext);stroke-width:5;stroke-linecap:round"/></svg><span>Réseau externe Neutron <code>public1</code>, interne à l'hôte</span></div>
     <div class="lg"><svg width="40" height="12" aria-hidden="true"><line x1="2" y1="6" x2="38" y2="6" style="stroke:var(--warn);stroke-width:1.6"/></svg><span>Couche AWS (ENI, Elastic IP)</span></div>
     <div class="lg"><svg width="40" height="24" aria-hidden="true"><circle cx="20" cy="12" r="10" style="fill:var(--surface);stroke:var(--ink);stroke-width:1.6"/><path d="M13 9h12M27 9l-3-2.5v5zM27 15H15M13 15l3-2.5v5z" style="stroke:var(--ink);stroke-width:1.4;fill:var(--ink)"/></svg><span>Routeur Neutron</span></div>
@@ -366,7 +367,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
     <p class="note">Le schéma est affiché à sa taille réelle ; faites-le défiler horizontalement sur un petit écran.</p>
     <button class="btn" id="fit-toggle" type="button" aria-pressed="false">Ajuster à la largeur</button>
   </div>
-  <div class="diagram" id="diagram" role="img" aria-label="Topologie du TP 12 : Internet et la couche AWS à gauche, l'hôte bastion, le réseau externe public1, deux routeurs, les réseaux pub, admin et data, vm-1 avec trois cartes et vm-2 avec deux cartes.">
+  <div class="diagram" id="diagram" role="img" aria-label="Topologie du TP 13 : Internet et la couche AWS à gauche, l'hôte bastion, le réseau externe public1, deux routeurs, les réseaux pub, admin et data, vm-1 avec trois cartes et vm-2 avec deux cartes.">
 <svg xmlns="http://www.w3.org/2000/svg" class="svg" viewBox="0 0 1180 600" width="1180" height="600" aria-hidden="true">
   <defs>
     <marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrow"/></marker>
@@ -423,7 +424,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   <line x1="474" y1="423" x2="527" y2="423" class="c-adm"/>
 
   <circle cx="560" cy="116" r="7" class="fip-pub"/>
-  <text x="572" y="104" class="small b">tp12-fip-vm-1-pub</text>
+  <text x="572" y="104" class="small b">tp13-fip-vm-1-pub</text>
   <text x="572" y="120" class="small mono">10.0.2.x</text>
   <line x1="530" y1="116" x2="553" y2="116" class="c-ext"/>
   <path d="M567 116 H830 V200 H844" class="lane-pub"/>
@@ -432,7 +433,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   <circle cx="600" cy="200" r="16" class="router"/>
   <path d="M591 196h14" class="router-mark"/><path d="M609 196l-4.5 -3.5v7z" class="router-head"/>
   <path d="M609 204h-14" class="router-mark"/><path d="M591 204l4.5 -3.5v7z" class="router-head"/>
-  <text x="600" y="236" text-anchor="middle" class="small b">tp12-rtr-pub</text>
+  <text x="600" y="236" text-anchor="middle" class="small b">tp13-rtr-pub</text>
   <text x="600" y="251" text-anchor="middle" class="small muted">sans SNAT, porte la FIP</text>
   <line x1="616" y1="200" x2="657" y2="200" class="c-pub"/>
 
@@ -440,7 +441,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   <circle cx="600" cy="400" r="16" class="router"/>
   <path d="M591 396h14" class="router-mark"/><path d="M609 396l-4.5 -3.5v7z" class="router-head"/>
   <path d="M609 404h-14" class="router-mark"/><path d="M591 404l4.5 -3.5v7z" class="router-head"/>
-  <text x="600" y="436" text-anchor="middle" class="small b">tp12-rtr-admin</text>
+  <text x="600" y="436" text-anchor="middle" class="small b">tp13-rtr-admin</text>
   <text x="600" y="451" text-anchor="middle" class="small muted">sans SNAT : pas d'Internet</text>
   <line x1="616" y1="400" x2="717" y2="400" class="c-adm"/>
 
@@ -457,7 +458,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
 
   <rect class="box" x="850" y="150" width="310" height="186" rx="6"/>
   <rect class="box-head" x="851" y="151" width="308" height="26" rx="5"/>
-  <text x="862" y="169" class="b">tp12-vm-1</text>
+  <text x="862" y="169" class="b">tp13-vm-1</text>
   <text x="1148" y="169" text-anchor="end" class="small muted">role=lb-app</text>
   <text x="862" y="270" class="small">HAProxy :80</text>
   <text x="862" y="286" class="small">appli sur 127.0.0.1:8080 uniquement</text>
@@ -465,27 +466,27 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   <text x="862" y="318" class="small muted">flux HAProxy → appli local, hors SG</text>
   <line x1="660" y1="200" x2="848" y2="200" class="c-pub"/><circle cx="848" cy="200" r="3.5" class="dot-pub"/>
   <text x="800" y="194" class="small mono ip-pub">.10</text>
-  <text x="862" y="204" class="small mono">pub · tp12-sg-pub</text>
+  <text x="862" y="204" class="small mono">pub · tp13-sg-pub</text>
   <line x1="720" y1="226" x2="848" y2="226" class="c-adm"/><circle cx="848" cy="226" r="3.5" class="dot-adm"/>
   <text x="800" y="220" class="small mono ip-adm">.11</text>
-  <text x="862" y="230" class="small mono">admin · tp12-sg-admin</text>
+  <text x="862" y="230" class="small mono">admin · tp13-sg-admin</text>
   <line x1="780" y1="252" x2="848" y2="252" class="c-data"/><circle cx="848" cy="252" r="3.5" class="dot-data"/>
   <text x="800" y="246" class="small mono ip-data">.11</text>
-  <text x="862" y="256" class="small mono">data · tp12-sg-app-data</text>
+  <text x="862" y="256" class="small mono">data · tp13-sg-app-data</text>
 
   <rect class="box" x="850" y="380" width="310" height="150" rx="6"/>
   <rect class="box-head" x="851" y="381" width="308" height="26" rx="5"/>
-  <text x="862" y="399" class="b">tp12-vm-2</text>
+  <text x="862" y="399" class="b">tp13-vm-2</text>
   <text x="1148" y="399" text-anchor="end" class="small muted">role=db</text>
   <text x="862" y="486" class="small">PostgreSQL :5432</text>
-  <text x="862" y="502" class="small">volume tp12-vol-vm-2-db</text>
+  <text x="862" y="502" class="small">volume tp13-vol-vm-2-db</text>
   <text x="862" y="518" class="small muted">aucune carte pub, jamais exposée</text>
   <line x1="720" y1="430" x2="848" y2="430" class="c-adm"/><circle cx="848" cy="430" r="3.5" class="dot-adm"/>
   <text x="800" y="424" class="small mono ip-adm">.12</text>
-  <text x="862" y="434" class="small mono">admin · tp12-sg-admin</text>
+  <text x="862" y="434" class="small mono">admin · tp13-sg-admin</text>
   <line x1="780" y1="456" x2="848" y2="456" class="c-data"/><circle cx="848" cy="456" r="3.5" class="dot-data"/>
   <text x="800" y="450" class="small mono ip-data">.12</text>
-  <text x="862" y="460" class="small mono">data · tp12-sg-db</text>
+  <text x="862" y="460" class="small mono">data · tp13-sg-db</text>
 </svg>
   </div>
   <p class="note">Les deux routeurs ont leur passerelle sur <code>public1</code> avec <code>--disable-snat</code>. La FIP de vm-1 fonctionne sans SNAT (traduction 1 pour 1) : <span class="st test">à tester</span>. Le MASQUERADE de l'hôte ne traduit que la source <code>10.0.2.0/24</code> : une adresse des réseaux admin ou data ne peut donc pas sortir sur Internet, même par erreur de routage.</p>
@@ -509,7 +510,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
         <div class="node"><span class="k">ENI</span><b>IP secondaire</b><code>&lt;IP_PRIVEE_SECONDAIRE&gt;</code></div>
         <div class="hop">DNAT hôte<i></i></div>
         <div class="node n-ext"><span class="k">public1</span><b>FIP</b><code>10.0.2.x</code></div>
-        <div class="hop">tp12-rtr-pub<i></i></div>
+        <div class="hop">tp13-rtr-pub<i></i></div>
         <div class="node n-pub"><span class="k">pub</span><b>vm-1 HAProxy :80</b><code>192.168.120.10</code></div>
       </div>
     </article>
@@ -532,7 +533,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
       <thead><tr><th>Adresse de l'ENI</th><th>IP publique associée</th><th>Usage</th><th>Coût</th><th>Statut</th></tr></thead>
       <tbody>
         <tr><td>IP principale <code>&lt;IP_PRIVEE_PRINCIPALE&gt;</code></td><td>IP publique de l'instance, change à chaque arrêt</td><td>Administration : SSH vers l'hôte, tunnels vers Horizon</td><td>Facturée par AWS comme toute IPv4 publique</td><td><span class="st dec">Existant</span></td></tr>
-        <tr><td>IP secondaire <code>&lt;IP_PRIVEE_SECONDAIRE&gt;</code></td><td>Elastic IP <code>tp12-eip-vm-1-pub</code></td><td>Entrée publique de l'application, DNAT vers la FIP de vm-1</td><td>IP secondaire gratuite ; Elastic IP environ 0,005 USD/h, jusqu'à sa libération</td><td><span class="st cost">Payant, sur accord</span></td></tr>
+        <tr><td>IP secondaire <code>&lt;IP_PRIVEE_SECONDAIRE&gt;</code></td><td>Elastic IP <code>tp13-eip-vm-1-pub</code></td><td>Entrée publique de l'application, DNAT vers la FIP de vm-1</td><td>IP secondaire gratuite ; Elastic IP environ 0,005 USD/h, jusqu'à sa libération</td><td><span class="st cost">Payant, sur accord</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -624,7 +625,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
         <tr><td>O5</td><td>Aucune VM ne sort directement sur Internet.</td><td>Accès direct à Internet refusé depuis vm-1 et vm-2</td></tr>
         <tr><td>O6</td><td>Les sorties passent par le proxy, vers des domaines autorisés seulement.</td><td>Installation de paquets réussie ; domaine non autorisé refusé ; requêtes visibles dans le journal</td></tr>
         <tr><td>O7</td><td>Chaque VM a au plus une route par défaut, et la base aucune vers Internet.</td><td>Tables de routage lues et expliquées ; SSH du bastion vers chaque carte d'administration réussi</td></tr>
-        <tr><td>O8</td><td>Toutes les ressources sont nommées et étiquetées selon la convention.</td><td>Inventaire et nettoyage complets par le seul filtre <code>tp12</code></td></tr>
+        <tr><td>O8</td><td>Toutes les ressources sont nommées et étiquetées selon la convention.</td><td>Inventaire et nettoyage complets par le seul filtre <code>tp13</code></td></tr>
       </tbody>
     </table>
   </div>
@@ -634,24 +635,24 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   <div class="sec-head">
     <span class="eyebrow">ressources et nommage</span>
     <h2 id="h-ressources">Ressources à déployer</h2>
-    <p>Convention : <code>tp12-&lt;type&gt;-&lt;rôle&gt;[-&lt;précision&gt;]</code>, minuscules et tirets, préfixe défini une fois en tête de script (<code>PREFIX=tp12</code>), tag Neutron <code>tp12</code> sur tout ce qui l'accepte. Un seul filtre retrouve et nettoie tout : <code>--tags tp12</code>.</p>
+    <p>Convention : <code>tp13-&lt;type&gt;-&lt;rôle&gt;[-&lt;précision&gt;]</code>, minuscules et tirets, préfixe défini une fois en tête de script (<code>PREFIX=tp13</code>), tag Neutron <code>tp13</code> sur tout ce qui l'accepte. Un seul filtre retrouve et nettoie tout : <code>--tags tp13</code>.</p>
   </div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Type</th><th>Nom</th><th>Remarque</th><th>Statut</th></tr></thead>
       <tbody>
-        <tr><td>Réseaux</td><td><code>tp12-net-pub</code>, <code>tp12-net-admin</code>, <code>tp12-net-data</code></td><td></td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>Sous-réseaux</td><td><code>tp12-subnet-pub</code>, <code>tp12-subnet-admin</code>, <code>tp12-subnet-data</code></td><td>plages dans la topologie</td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>Routeurs</td><td><code>tp12-rtr-pub</code>, <code>tp12-rtr-admin</code></td><td><code>--disable-snat</code> sur les deux</td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>Security groups</td><td><code>tp12-sg-pub</code>, <code>tp12-sg-admin</code>, <code>tp12-sg-app-data</code>, <code>tp12-sg-db</code></td><td>sorties par défaut supprimées</td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>Ports</td><td><code>tp12-port-vm-1-pub</code>, <code>-admin</code>, <code>-data</code> ; <code>tp12-port-vm-2-admin</code>, <code>-data</code></td><td>créés avant les VM, adresses fixes</td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>VM</td><td><code>tp12-vm-1</code> (<code>role=lb-app</code>), <code>tp12-vm-2</code> (<code>role=db</code>)</td><td>image Ubuntu ou Debian : CirrOS ne suffit pas</td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>FIP</td><td>description <code>tp12-fip-vm-1-pub</code>, tag <code>tp12</code></td><td>une FIP n'a pas de nom</td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>Paire de clés</td><td><code>tp12-key</code></td><td></td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>Volume</td><td><code>tp12-vol-vm-2-db</code></td><td>données PostgreSQL ; chiffré (type LUKS du TP 09)</td><td><span class="st prop">Proposé</span></td></tr>
-        <tr><td>Secret Barbican</td><td><code>tp12-secret-db</code></td><td>mot de passe de la base (TP 08)</td><td><span class="st prop">Proposé</span></td></tr>
-        <tr><td>Hôte</td><td><code>/etc/squid/conf.d/tp12.conf</code></td><td>listes blanches par IP source</td><td><span class="st dec">Décidé</span></td></tr>
-        <tr><td>AWS</td><td>Elastic IP, tags <code>Name=tp12-eip-vm-1-pub</code> et <code>openstack-lab=true</code></td><td>libérée en fin de TP, vérifiée par <code>list</code></td><td><span class="st cost">Payant, sur accord</span></td></tr>
+        <tr><td>Réseaux</td><td><code>tp13-net-pub</code>, <code>tp13-net-admin</code>, <code>tp13-net-data</code></td><td></td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Sous-réseaux</td><td><code>tp13-subnet-pub</code>, <code>tp13-subnet-admin</code>, <code>tp13-subnet-data</code></td><td>plages dans la topologie</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Routeurs</td><td><code>tp13-rtr-pub</code>, <code>tp13-rtr-admin</code></td><td><code>--disable-snat</code> sur les deux</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Security groups</td><td><code>tp13-sg-pub</code>, <code>tp13-sg-admin</code>, <code>tp13-sg-app-data</code>, <code>tp13-sg-db</code></td><td>sorties par défaut supprimées</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Ports</td><td><code>tp13-port-vm-1-pub</code>, <code>-admin</code>, <code>-data</code> ; <code>tp13-port-vm-2-admin</code>, <code>-data</code></td><td>créés avant les VM, adresses fixes</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>VM</td><td><code>tp13-vm-1</code> (<code>role=lb-app</code>), <code>tp13-vm-2</code> (<code>role=db</code>)</td><td>image <code>tp12-img-debian13</code> et gabarit <code>tp12-flv-1g</code> (1 Go), préparés au TP 12</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>FIP</td><td>description <code>tp13-fip-vm-1-pub</code>, tag <code>tp13</code></td><td>une FIP n'a pas de nom</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Paire de clés</td><td><code>tp13-key</code></td><td></td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>Volume</td><td><code>tp13-vol-vm-2-db</code></td><td>données PostgreSQL ; chiffré (type LUKS du TP 09)</td><td><span class="st prop">Proposé</span></td></tr>
+        <tr><td>Secret Barbican</td><td><code>tp13-secret-db</code></td><td>mot de passe de la base (TP 08)</td><td><span class="st prop">Proposé</span></td></tr>
+        <tr><td>Hôte</td><td><code>/etc/squid/conf.d/tp13.conf</code></td><td>listes blanches par IP source</td><td><span class="st dec">Décidé</span></td></tr>
+        <tr><td>AWS</td><td>Elastic IP, tags <code>Name=tp13-eip-vm-1-pub</code> et <code>openstack-lab=true</code></td><td>libérée en fin de TP, vérifiée par <code>list</code></td><td><span class="st cost">Payant, sur accord</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -667,13 +668,13 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
     <table>
       <thead><tr><th>N°</th><th>Lieu</th><th>Dépend de</th><th>Objectif de l'étape</th><th>Contrôle</th><th>Retour arrière</th></tr></thead>
       <tbody>
-        <tr><td>0</td><td class="nowrap"><code>[instance]</code></td><td>aucune</td><td>Vérifier la plateforme : scénario 04 déployé, <code>verify.sh</code> sans échec, image Ubuntu importée, gabarit d'au moins 2 Go de mémoire disponible.</td><td><code>verify.sh</code> : 0 échec ; image et gabarit visibles</td><td>aucun</td></tr>
+        <tr><td>0</td><td class="nowrap"><code>[instance]</code></td><td>aucune</td><td>Vérifier la plateforme : scénario 04 déployé, <code>verify.sh</code> sans échec, image <code>tp12-img-debian13</code> et gabarit <code>tp12-flv-1g</code> présents (TP 12).</td><td><code>verify.sh</code> : 0 échec ; image et gabarit visibles</td><td>aucun</td></tr>
         <tr><td>1</td><td class="nowrap"><code>[instance]</code></td><td>0</td><td>Créer les trois réseaux et leurs sous-réseaux, avec les plages prévues. Seul le sous-réseau pub annonce une passerelle ; le sous-réseau admin pousse une route vers le bastion.</td><td>Passerelles et routes des sous-réseaux conformes à la conception</td><td>Supprimer les sous-réseaux puis les réseaux</td></tr>
         <tr><td>2</td><td class="nowrap"><code>[instance]</code></td><td>1</td><td>Créer les deux routeurs sans SNAT, chacun avec sa passerelle sur <code>public1</code> et son interface sur son réseau. Le réseau data n'a pas de routeur.</td><td>SNAT désactivé sur les deux routeurs ; un namespace <code>qrouter</code> par routeur</td><td>Retirer les interfaces, puis supprimer les routeurs</td></tr>
-        <tr><td>3</td><td class="nowrap"><code>[instance]</code></td><td>2</td><td>Ajouter sur l'hôte la route de retour vers le réseau admin, par l'adresse de <code>tp12-rtr-admin</code> sur <code>public1</code>.</td><td>L'hôte joint l'interface admin du routeur</td><td>Supprimer la route (elle ne survit pas à un redémarrage)</td></tr>
-        <tr><td>4</td><td class="nowrap"><code>[instance]</code></td><td>3</td><td>Installer Squid sur le bastion : écoute sur l'adresse de l'hôte côté <code>public1</code> uniquement, liste blanche de domaines propre à chaque VM, journal des requêtes.</td><td>Un domaine autorisé passe, un autre est refusé ; les deux apparaissent dans le journal</td><td>Retirer la configuration <code>tp12</code> de Squid</td></tr>
+        <tr><td>3</td><td class="nowrap"><code>[instance]</code></td><td>2</td><td>Ajouter sur l'hôte la route de retour vers le réseau admin, par l'adresse de <code>tp13-rtr-admin</code> sur <code>public1</code>.</td><td>L'hôte joint l'interface admin du routeur</td><td>Supprimer la route (elle ne survit pas à un redémarrage)</td></tr>
+        <tr><td>4</td><td class="nowrap"><code>[instance]</code></td><td>3</td><td>Installer Squid sur le bastion : écoute sur l'adresse de l'hôte côté <code>public1</code> uniquement, liste blanche de domaines propre à chaque VM, journal des requêtes.</td><td>Un domaine autorisé passe, un autre est refusé ; les deux apparaissent dans le journal</td><td>Retirer la configuration <code>tp13</code> de Squid</td></tr>
         <tr><td>5</td><td class="nowrap"><code>[instance]</code></td><td>1</td><td>Créer les quatre security groups, supprimer leurs règles de sortie par défaut et écrire les règles prévues.</td><td>Aucune règle de sortie vers 0.0.0.0/0 ; sources internes désignées par groupe</td><td>Supprimer les groupes (après les ports qui les utilisent)</td></tr>
-        <tr><td>6</td><td class="nowrap"><code>[instance]</code></td><td>1, 5</td><td>Créer les cinq ports à adresse fixe, chacun avec son security group et le tag <code>tp12</code>.</td><td>Les cinq ports listés par le filtre <code>tp12</code>, avec la bonne adresse et le bon groupe</td><td>Supprimer les ports</td></tr>
+        <tr><td>6</td><td class="nowrap"><code>[instance]</code></td><td>1, 5</td><td>Créer les cinq ports à adresse fixe, chacun avec son security group et le tag <code>tp13</code>.</td><td>Les cinq ports listés par le filtre <code>tp13</code>, avec la bonne adresse et le bon groupe</td><td>Supprimer les ports</td></tr>
         <tr><td>7</td><td class="nowrap"><code>[instance]</code></td><td>4, 6</td><td>Préparer cloud-init (proxy pour les paquets) et lancer vm-2 puis vm-1 sur leurs ports.</td><td>VM actives ; cloud-init terminé sans erreur dans la console</td><td>Supprimer les VM (les ports restent)</td></tr>
         <tr><td>8</td><td class="nowrap"><code>[poste]</code>, <code>[instance]</code></td><td>3, 7</td><td>Se connecter à chaque VM par rebond via le bastion, sur sa carte admin. Exercice de diagnostic : retirer la route vers le bastion, observer l'échec avec <code>tcpdump</code>, la rétablir.</td><td>Objectif O4 ; échec puis succès expliqués</td><td>Rétablir la route du sous-réseau admin</td></tr>
         <tr><td>9</td><td class="nowrap"><code>[VM]</code></td><td>8</td><td>vm-2 : créer et attacher le volume chiffré, installer PostgreSQL par le proxy, placer les données sur le volume, n'accepter que vm-1. Le mot de passe vient de Barbican.</td><td>PostgreSQL écoute sur la carte data seulement ; données sur le volume</td><td>Détacher et supprimer le volume ; supprimer le secret</td></tr>
@@ -683,12 +684,12 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
         <tr><td>13</td><td class="nowrap"><code>[poste]</code></td><td>11</td><td>Ouvrir l'application depuis le poste par un tunnel SSH.</td><td>Page affichée dans le navigateur du poste</td><td>Fermer le tunnel</td></tr>
         <tr><td>14</td><td class="nowrap"><code>[VM]</code>, <code>[instance]</code></td><td>12</td><td>Niveau avancé : ouvrir l'exception SSH vers une seule destination et lire le journal Squid (parcours P5).</td><td>Destination visible, contenu invisible ; autre destination refusée</td><td>Retirer l'exception</td></tr>
         <tr><td>15</td><td class="nowrap"><code>[poste]</code>, <code>[instance]</code></td><td>12</td><td>Optionnel et payant : IP secondaire et Elastic IP, port 80 ouvert dans le Security Group AWS pour l'IP du testeur seulement, DNAT sur l'hôte ; test depuis un navigateur sans accès SSH.</td><td>Objectif O1 depuis Internet</td><td>Libérer l'Elastic IP et retirer l'IP secondaire, vérifier par <code>list</code></td></tr>
-        <tr><td>16</td><td class="nowrap"><code>[instance]</code>, <code>[poste]</code></td><td>toutes</td><td>Nettoyer dans l'ordre inverse : étape 15 si faite, FIP, VM, volume, secret, ports, security groups, routeurs, réseaux, paire de clés, route de l'hôte, configuration de Squid.</td><td>Le filtre <code>tp12</code> ne renvoie plus rien ; aucune Elastic IP du lab restante</td><td>aucun</td></tr>
+        <tr><td>16</td><td class="nowrap"><code>[instance]</code>, <code>[poste]</code></td><td>toutes</td><td>Nettoyer dans l'ordre inverse : étape 15 si faite, FIP, VM, volume, secret, ports, security groups, routeurs, réseaux, paire de clés, route de l'hôte, configuration de Squid.</td><td>Le filtre <code>tp13</code> ne renvoie plus rien ; aucune Elastic IP du lab restante</td><td>aucun</td></tr>
       </tbody>
     </table>
   </div>
   <p class="note">L'étape 15 se fait uniquement avec l'accord du tuteur. <span class="st cost">Payant</span></p>
-  <p class="note">Compétences des TP précédents réutilisées : réseau et routeurs (TP 03), volumes (TP 04), dépannage (TP 05), secrets (TP 08), volumes chiffrés (TP 09), publication de FIP (TP 07). Sauvegarde de la base (TP 10) et nom DNS de l'appli (TP 11) : extensions possibles, non retenues à ce stade.</p>
+  <p class="note">Compétences des TP précédents réutilisées : réseau et routeurs (TP 03), volumes (TP 04), dépannage (TP 05), secrets (TP 08), volumes chiffrés (TP 09), configuration des VM par cloud-init (TP 12), publication de FIP (TP 07). Sauvegarde de la base (TP 10) et nom DNS de l'appli (TP 11) : extensions possibles, non retenues à ce stade.</p>
 </section>
 
 <section id="constats" aria-labelledby="h-constats">
@@ -726,7 +727,7 @@ footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);paddin
   </dl>
 </section>
 
-<footer>TP 12 du parcours OpenStack sur AWS, version du 18 octobre 2026. Il décrit une architecture cible, pas un état déployé. Les adresses AWS sont des marqueurs.</footer>
+<footer>TP 13 du parcours OpenStack sur AWS, version du 18 octobre 2026. Il décrit une architecture cible, pas un état déployé. Les adresses AWS sont des marqueurs.</footer>
 </main>
 
 <script>

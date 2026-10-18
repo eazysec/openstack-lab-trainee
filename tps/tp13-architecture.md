@@ -1,4 +1,4 @@
-# TP 12. Architecture de déploiement sur OpenStack
+# TP 13. Architecture de déploiement sur OpenStack
 
 > Un serveur applicatif (vm-1, avec HAProxy) et un serveur de base de données (vm-2), répartis sur
 > trois réseaux : publication, administration et data. L'hôte OpenStack sert de bastion SSH et de
@@ -9,7 +9,7 @@
 
 | Version | État | Plateforme | Préfixe des ressources |
 |---|---|---|---|
-| 2026-10-18 | Conception : rien n'est encore déployé ni testé | Lab All-in-One Kolla-Ansible sur AWS EC2, scénario 04 | `tp12-` |
+| 2026-10-18 | Conception : rien n'est encore déployé ni testé | Lab All-in-One Kolla-Ansible sur AWS EC2, scénario 04 | `tp13-` |
 
 | VM | Réseaux internes | Routeurs | Cartes réseau | Security groups | FIP publiée sur Internet |
 |:-:|:-:|:-:|:-:|:-:|:-:|
@@ -63,16 +63,16 @@ Chaque principe correspond à un élément concret de l'architecture, et à un t
 | Sorties contrôlées et tracées | Proxy Squid à liste blanche de domaines, par VM | Un domaine non autorisé est refusé ; chaque requête est journalisée |
 | Défense en profondeur | Security Group AWS, DNAT de l'hôte, security groups OpenStack, écoute locale de l'appli | Le retrait d'une couche ne suffit pas à ouvrir un flux |
 | Secrets et données protégés | Mot de passe de la base dans Barbican ; volume de la base chiffré | Aucun mot de passe en clair dans les fichiers ; volume illisible hors de la VM |
-| Traçabilité | Convention de nommage `tp12-` et tag sur chaque ressource | Inventaire et nettoyage complets en une commande |
+| Traçabilité | Convention de nommage `tp13-` et tag sur chaque ressource | Inventaire et nettoyage complets en une commande |
 
 ---
 
-## 3. Douze TP pour y arriver
+## 3. Treize TP pour y arriver
 
 Aucune connaissance d'OpenStack n'est supposée : il faut savoir se servir d'un terminal Linux et de
 SSH. Chaque TP apporte une brique que le TP final réutilise.
 
-| TP | Titre | Phase | Repris dans le TP 12 |
+| TP | Titre | Phase | Repris dans le TP 13 |
 |---|---|---|---|
 | 00 | Préparer et découvrir l'instance AWS | Avant le déploiement | Accès à l'hôte, Security Group AWS |
 | 01 | Déployer OpenStack et vérifier le déploiement | Déploiement | La plateforme elle-même |
@@ -86,13 +86,14 @@ SSH. Chaque TP apporte une brique que le TP final réutilise.
 | 09 | Chiffrer les volumes Cinder | Extension | Volume chiffré |
 | 10 | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | Extension possible |
 | 11 | DNS as a Service avec Designate | Extension | Extension possible |
-| 12 | TP final : architecture de déploiement sur OpenStack | Synthèse | En préparation |
+| 12 | Configurer les VM au démarrage avec cloud-init | Extension | Image, utilisateurs, proxy, métadonnées |
+| 13 | TP final : architecture de déploiement sur OpenStack | Synthèse | En préparation |
 
 ---
 
 ## 4. L'architecture en détail
 
-Le TP 12 est en préparation. Chaque choix porte un statut ; un élément « à tester » ne sera rédigé
+Le TP 13 est en préparation. Chaque choix porte un statut ; un élément « à tester » ne sera rédigé
 dans le TP qu'après exécution réelle sur le lab.
 
 | Statut | Sens |
@@ -127,18 +128,18 @@ flowchart LR
   subgraph OS["OpenStack"]
     EXT{{"public1<br>10.0.2.0/24"}}
     FIP(("FIP<br>10.0.2.x"))
-    RPUB(["tp12-rtr-pub<br>sans SNAT"])
-    RADM(["tp12-rtr-admin<br>sans SNAT"])
-    NPUB{{"tp12-net-pub<br>192.168.120.0/24"}}
-    NADM{{"tp12-net-admin<br>192.168.121.0/24"}}
-    NDATA{{"tp12-net-data<br>192.168.122.0/24<br>sans routeur"}}
-    subgraph VM1["tp12-vm-1 (role=lb-app)"]
+    RPUB(["tp13-rtr-pub<br>sans SNAT"])
+    RADM(["tp13-rtr-admin<br>sans SNAT"])
+    NPUB{{"tp13-net-pub<br>192.168.120.0/24"}}
+    NADM{{"tp13-net-admin<br>192.168.121.0/24"}}
+    NDATA{{"tp13-net-data<br>192.168.122.0/24<br>sans routeur"}}
+    subgraph VM1["tp13-vm-1 (role=lb-app)"]
       V1P["pub .10<br>HAProxy :80"]
       V1A["admin .11"]
       V1D["data .11"]
       APP["appli<br>127.0.0.1:8080"]
     end
-    subgraph VM2["tp12-vm-2 (role=db)"]
+    subgraph VM2["tp13-vm-2 (role=db)"]
       V2A["admin .12"]
       V2D["data .12<br>PostgreSQL :5432"]
     end
@@ -188,7 +189,7 @@ vm-1, sert de point d'entrée public. L'hôte fait le reste par DNAT.
 flowchart LR
   subgraph E1["E1. Entrée publique vers HAProxy"]
     direction LR
-    A1(["Client Internet"]) -->|"HTTP 80"| A2["Elastic IP"] -->|"NAT AWS"| A3["ENI : IP secondaire"] -->|"DNAT hôte"| A4(("FIP 10.0.2.x")) -->|"tp12-rtr-pub"| A5["vm-1 HAProxy :80<br>192.168.120.10"]
+    A1(["Client Internet"]) -->|"HTTP 80"| A2["Elastic IP"] -->|"NAT AWS"| A3["ENI : IP secondaire"] -->|"DNAT hôte"| A4(("FIP 10.0.2.x")) -->|"tp13-rtr-pub"| A5["vm-1 HAProxy :80<br>192.168.120.10"]
   end
   subgraph E2["E2. Administration de l'hôte, inchangée"]
     direction LR
@@ -203,7 +204,7 @@ flowchart LR
 | Adresse de l'ENI | IP publique associée | Usage | Coût | Statut |
 |---|---|---|---|---|
 | IP principale `<IP_PRIVEE_PRINCIPALE>` | IP publique de l'instance, change à chaque arrêt | Administration : SSH vers l'hôte, tunnels vers Horizon | Facturée par AWS comme toute IPv4 publique | Existant |
-| IP secondaire `<IP_PRIVEE_SECONDAIRE>` | Elastic IP `tp12-eip-vm-1-pub` | Entrée publique de l'application, DNAT vers la FIP de vm-1 | IP secondaire gratuite ; Elastic IP environ 0,005 USD/h, jusqu'à sa libération | Payant |
+| IP secondaire `<IP_PRIVEE_SECONDAIRE>` | Elastic IP `tp13-eip-vm-1-pub` | Entrée publique de l'application, DNAT vers la FIP de vm-1 | IP secondaire gratuite ; Elastic IP environ 0,005 USD/h, jusqu'à sa libération | Payant |
 
 - Outils existants : `aws/aws-public-fip.sh` côté AWS (simulation sans `--apply`, puis confirmation
   « oui ») et `tools/public-fip.sh` côté hôte, validé au TP 07 sans ressource AWS. La partie AWS n'a
@@ -221,7 +222,7 @@ sequenceDiagram
   participant C as Client Internet
   participant A as AWS (Elastic IP, ENI)
   participant H as Hôte (DNAT)
-  participant R as tp12-rtr-pub
+  participant R as tp13-rtr-pub
   participant P as vm-1 HAProxy :80
   participant L as vm-1 appli 127.0.0.1:8080
   participant D as vm-2 PostgreSQL :5432
@@ -277,28 +278,28 @@ objectif se valide par deux tests : le flux autorisé fonctionne, le flux interd
 | O5 | Aucune VM ne sort directement sur Internet. | Accès direct à Internet refusé depuis vm-1 et vm-2 |
 | O6 | Les sorties passent par le proxy, vers des domaines autorisés seulement. | Installation de paquets réussie ; domaine non autorisé refusé ; requêtes visibles dans le journal |
 | O7 | Chaque VM a au plus une route par défaut, et la base aucune vers Internet. | Tables de routage lues et expliquées ; SSH du bastion vers chaque carte d'administration réussi |
-| O8 | Toutes les ressources sont nommées et étiquetées selon la convention. | Inventaire et nettoyage complets par le seul filtre `tp12` |
+| O8 | Toutes les ressources sont nommées et étiquetées selon la convention. | Inventaire et nettoyage complets par le seul filtre `tp13` |
 
 ### 4.5 Ressources et nommage
 
-Convention : `tp12-<type>-<rôle>[-<précision>]`, en minuscules avec des tirets. Le préfixe est
-défini une fois en tête de script (`PREFIX=tp12`), et le tag Neutron `tp12` est posé sur tout ce qui
-l'accepte. Un seul filtre retrouve et nettoie tout : `--tags tp12`.
+Convention : `tp13-<type>-<rôle>[-<précision>]`, en minuscules avec des tirets. Le préfixe est
+défini une fois en tête de script (`PREFIX=tp13`), et le tag Neutron `tp13` est posé sur tout ce qui
+l'accepte. Un seul filtre retrouve et nettoie tout : `--tags tp13`.
 
 | Type | Nom | Remarque | Statut |
 |---|---|---|---|
-| Réseaux | `tp12-net-pub`, `tp12-net-admin`, `tp12-net-data` | | Décidé |
-| Sous-réseaux | `tp12-subnet-pub`, `tp12-subnet-admin`, `tp12-subnet-data` | plages dans la topologie | Décidé |
-| Routeurs | `tp12-rtr-pub`, `tp12-rtr-admin` | `--disable-snat` sur les deux | Décidé |
-| Security groups | `tp12-sg-pub`, `tp12-sg-admin`, `tp12-sg-app-data`, `tp12-sg-db` | règles de sortie par défaut supprimées | Décidé |
-| Ports | `tp12-port-vm-1-pub`, `-admin`, `-data` ; `tp12-port-vm-2-admin`, `-data` | créés avant les VM, adresses fixes | Décidé |
-| VM | `tp12-vm-1` (`role=lb-app`), `tp12-vm-2` (`role=db`) | image Ubuntu ou Debian : CirrOS ne suffit pas | Décidé |
-| FIP | description `tp12-fip-vm-1-pub`, tag `tp12` | une FIP n'a pas de nom | Décidé |
-| Paire de clés | `tp12-key` | | Décidé |
-| Volume | `tp12-vol-vm-2-db` | données PostgreSQL ; chiffré (type LUKS du TP 09) | Proposé |
-| Secret Barbican | `tp12-secret-db` | mot de passe de la base (TP 08) | Proposé |
-| Hôte | `/etc/squid/conf.d/tp12.conf` | listes blanches par IP source | Décidé |
-| AWS | Elastic IP, tags `Name=tp12-eip-vm-1-pub` et `openstack-lab=true` | libérée en fin de TP, vérifiée par `list` | Payant |
+| Réseaux | `tp13-net-pub`, `tp13-net-admin`, `tp13-net-data` | | Décidé |
+| Sous-réseaux | `tp13-subnet-pub`, `tp13-subnet-admin`, `tp13-subnet-data` | plages dans la topologie | Décidé |
+| Routeurs | `tp13-rtr-pub`, `tp13-rtr-admin` | `--disable-snat` sur les deux | Décidé |
+| Security groups | `tp13-sg-pub`, `tp13-sg-admin`, `tp13-sg-app-data`, `tp13-sg-db` | règles de sortie par défaut supprimées | Décidé |
+| Ports | `tp13-port-vm-1-pub`, `-admin`, `-data` ; `tp13-port-vm-2-admin`, `-data` | créés avant les VM, adresses fixes | Décidé |
+| VM | `tp13-vm-1` (`role=lb-app`), `tp13-vm-2` (`role=db`) | image `tp12-img-debian13` et gabarit `tp12-flv-1g` (1 Go), préparés au TP 12 | Décidé |
+| FIP | description `tp13-fip-vm-1-pub`, tag `tp13` | une FIP n'a pas de nom | Décidé |
+| Paire de clés | `tp13-key` | | Décidé |
+| Volume | `tp13-vol-vm-2-db` | données PostgreSQL ; chiffré (type LUKS du TP 09) | Proposé |
+| Secret Barbican | `tp13-secret-db` | mot de passe de la base (TP 08) | Proposé |
+| Hôte | `/etc/squid/conf.d/tp13.conf` | listes blanches par IP source | Décidé |
+| AWS | Elastic IP, tags `Name=tp13-eip-vm-1-pub` et `openstack-lab=true` | libérée en fin de TP, vérifiée par `list` | Payant |
 
 ---
 
@@ -312,13 +313,13 @@ l'étape 15, optionnelle et payante.
 
 | N° | Lieu | Dépend de | Objectif de l'étape | Contrôle | Retour arrière |
 |---|---|---|---|---|---|
-| 0 | `[instance]` | aucune | Vérifier la plateforme : scénario 04 déployé, `verify.sh` sans échec, image Ubuntu importée, gabarit d'au moins 2 Go de mémoire disponible. | `verify.sh` : 0 échec ; image et gabarit visibles | aucun |
+| 0 | `[instance]` | aucune | Vérifier la plateforme : scénario 04 déployé, `verify.sh` sans échec, image `tp12-img-debian13` et gabarit `tp12-flv-1g` présents (TP 12). | `verify.sh` : 0 échec ; image et gabarit visibles | aucun |
 | 1 | `[instance]` | 0 | Créer les trois réseaux et leurs sous-réseaux, avec les plages prévues. Seul le sous-réseau pub annonce une passerelle ; le sous-réseau admin pousse une route vers le bastion. | Passerelles et routes des sous-réseaux conformes à la conception | Supprimer les sous-réseaux puis les réseaux |
 | 2 | `[instance]` | 1 | Créer les deux routeurs sans SNAT, chacun avec sa passerelle sur `public1` et son interface sur son réseau. Le réseau data n'a pas de routeur. | SNAT désactivé sur les deux routeurs ; un namespace `qrouter` par routeur | Retirer les interfaces, puis supprimer les routeurs |
-| 3 | `[instance]` | 2 | Ajouter sur l'hôte la route de retour vers le réseau admin, par l'adresse de `tp12-rtr-admin` sur `public1`. | L'hôte joint l'interface admin du routeur | Supprimer la route (elle ne survit pas à un redémarrage) |
-| 4 | `[instance]` | 3 | Installer Squid sur le bastion : écoute sur l'adresse de l'hôte côté `public1` uniquement, liste blanche de domaines propre à chaque VM, journal des requêtes. | Un domaine autorisé passe, un autre est refusé ; les deux apparaissent dans le journal | Retirer la configuration `tp12` de Squid |
+| 3 | `[instance]` | 2 | Ajouter sur l'hôte la route de retour vers le réseau admin, par l'adresse de `tp13-rtr-admin` sur `public1`. | L'hôte joint l'interface admin du routeur | Supprimer la route (elle ne survit pas à un redémarrage) |
+| 4 | `[instance]` | 3 | Installer Squid sur le bastion : écoute sur l'adresse de l'hôte côté `public1` uniquement, liste blanche de domaines propre à chaque VM, journal des requêtes. | Un domaine autorisé passe, un autre est refusé ; les deux apparaissent dans le journal | Retirer la configuration `tp13` de Squid |
 | 5 | `[instance]` | 1 | Créer les quatre security groups, supprimer leurs règles de sortie par défaut et écrire les règles prévues. | Aucune règle de sortie vers 0.0.0.0/0 ; sources internes désignées par groupe | Supprimer les groupes (après les ports qui les utilisent) |
-| 6 | `[instance]` | 1, 5 | Créer les cinq ports à adresse fixe, chacun avec son security group et le tag `tp12`. | Les cinq ports listés par le filtre `tp12`, avec la bonne adresse et le bon groupe | Supprimer les ports |
+| 6 | `[instance]` | 1, 5 | Créer les cinq ports à adresse fixe, chacun avec son security group et le tag `tp13`. | Les cinq ports listés par le filtre `tp13`, avec la bonne adresse et le bon groupe | Supprimer les ports |
 | 7 | `[instance]` | 4, 6 | Préparer cloud-init (proxy pour les paquets) et lancer vm-2 puis vm-1 sur leurs ports. | VM actives ; cloud-init terminé sans erreur dans la console | Supprimer les VM (les ports restent) |
 | 8 | `[poste]`, `[instance]` | 3, 7 | Se connecter à chaque VM par rebond via le bastion, sur sa carte admin. Exercice de diagnostic : retirer la route vers le bastion, observer l'échec avec `tcpdump`, la rétablir. | Objectif O4 ; échec puis succès expliqués | Rétablir la route du sous-réseau admin |
 | 9 | `[VM]` | 8 | vm-2 : créer et attacher le volume chiffré, installer PostgreSQL par le proxy, placer les données sur le volume, n'accepter que vm-1. Le mot de passe vient de Barbican. | PostgreSQL écoute sur la carte data seulement ; données sur le volume | Détacher et supprimer le volume ; supprimer le secret |
@@ -328,13 +329,14 @@ l'étape 15, optionnelle et payante.
 | 13 | `[poste]` | 11 | Ouvrir l'application depuis le poste par un tunnel SSH. | Page affichée dans le navigateur du poste | Fermer le tunnel |
 | 14 | `[VM]`, `[instance]` | 12 | Niveau avancé : ouvrir l'exception SSH vers une seule destination et lire le journal Squid (parcours P5). | Destination visible, contenu invisible ; autre destination refusée | Retirer l'exception |
 | 15 | `[poste]`, `[instance]` | 12 | Optionnel et payant : IP secondaire et Elastic IP, port 80 ouvert dans le Security Group AWS pour l'IP du testeur seulement, DNAT sur l'hôte ; test depuis un navigateur sans accès SSH. | Objectif O1 depuis Internet | Libérer l'Elastic IP et retirer l'IP secondaire, vérifier par `list` |
-| 16 | `[instance]`, `[poste]` | toutes | Nettoyer dans l'ordre inverse : étape 15 si faite, FIP, VM, volume, secret, ports, security groups, routeurs, réseaux, paire de clés, route de l'hôte, configuration de Squid. | Le filtre `tp12` ne renvoie plus rien ; aucune Elastic IP du lab restante | aucun |
+| 16 | `[instance]`, `[poste]` | toutes | Nettoyer dans l'ordre inverse : étape 15 si faite, FIP, VM, volume, secret, ports, security groups, routeurs, réseaux, paire de clés, route de l'hôte, configuration de Squid. | Le filtre `tp13` ne renvoie plus rien ; aucune Elastic IP du lab restante | aucun |
 
 L'étape 15 se fait uniquement avec l'accord du tuteur.
 
-Compétences des TP précédents réutilisées : réseau et routeurs (TP 03), volumes (TP 04), dépannage
-(TP 05), publication de FIP (TP 07), secrets (TP 08), volumes chiffrés (TP 09). La sauvegarde de la
-base (TP 10) et le nom DNS de l'appli (TP 11) sont des extensions possibles, non retenues à ce stade.
+Compétences des TP précédents réutilisées : réseau et routeurs (TP 03), volumes (TP 04), dépannage (TP
+05), publication de FIP (TP 07), secrets (TP 08), volumes chiffrés (TP 09), configuration des VM par
+cloud-init (TP 12). La sauvegarde de la base (TP 10) et le nom DNS de l'appli (TP 11) sont des
+extensions possibles, non retenues à ce stade.
 
 ---
 

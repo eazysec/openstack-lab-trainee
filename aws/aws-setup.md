@@ -30,7 +30,9 @@ Une instance EC2 classique est elle-même une VM. Le processeur n'expose pas les
 Intel VT-x / AMD-V à l'intérieur : il n'y a pas de `/dev/kvm`.
 
 - **Conséquence** : Nova ne peut pas utiliser KVM. Les VM OpenStack tournent en émulation QEMU (TCG),
-  10 à 50 fois plus lente. Une CirrOS démarre en ~1 min ; une Ubuntu complète peut prendre 5 à 10 min.
+  10 à 50 fois plus lente. Une CirrOS démarre en ~1 min ; une Debian 13
+  cloud (TP 12) termine cloud-init en ~2 min, une Ubuntu 24.04 minimale en ~3 min 40 (mesures sur
+  `t2.xlarge`, 1 Go de mémoire).
 - **Ce que fait `deploy.sh`** : il détecte l'absence de `/dev/kvm` et configure `virt_type = qemu`.
 
 ### 2.2 Instance *burstable* (familles t2, t3, t4g)
