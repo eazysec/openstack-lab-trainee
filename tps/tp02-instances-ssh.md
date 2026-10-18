@@ -98,22 +98,42 @@ Si le port 80 de l'instance était ouvert sur Internet, n'importe quel équipeme
 le lire. On le laisse donc fermé, et on passe par un tunnel SSH : le trafic d'Horizon voyage à
 l'intérieur de la connexion SSH, chiffrée, et ne sort en clair qu'à l'intérieur de l'instance.
 
-Ouvrez le tunnel depuis votre poste :
+Travaillez avec **deux terminaux** sur votre poste : l'un ne fait que transporter le trafic, l'autre
+sert à taper des commandes.
+
+| Terminal | Rôle | Quand le fermer |
+|---|---|---|
+| 1 : tunnel | Transporte Horizon et la console des VM ; rien à y taper | Seulement à la fin, avec `Ctrl+C` : Horizon et la console sont alors coupés |
+| 2 : shell | Commandes sur l'instance AWS (`openstack`, `grep`…) | Quand vous voulez, avec `exit` : Horizon continue de fonctionner |
+
+Terminal 1, à laisser ouvert :
 
 ```bash
-# [poste]
-ssh -i ec2_key -L 8080:<IP_PRIVEE_INSTANCE>:80 -L 6080:<IP_PRIVEE_INSTANCE>:6080 ubuntu@<IP_PUBLIQUE>
+# [poste] : terminal 1 (tunnel)
+ssh -i ec2_key -N -L 8080:<IP_PRIVEE_INSTANCE>:80 -L 6080:<IP_PRIVEE_INSTANCE>:6080 ubuntu@<IP_PUBLIQUE>
 ```
 
-`<IP_PRIVEE_INSTANCE>` est l'adresse de `enX0` notée au TP 00. Ouvrez ensuite <http://localhost:8080>.
-La deuxième redirection sert à la console des VM : Horizon l'affiche depuis le proxy VNC de Nova
-(port 6080), que le lab annonce à l'adresse `http://localhost:6080`. Sans elle, la console reste
-vide puis affiche « délai d'attente dépassé ». Comme pour Horizon, aucun port n'est ouvert sur
-Internet : la console voyage dans le tunnel.
-Le formulaire demande seulement l'utilisateur (`admin`) et le mot de passe, qui s'obtient avec :
+`<IP_PRIVEE_INSTANCE>` est l'adresse de `enX0` notée au TP 00. Avec `-N`, SSH n'ouvre pas de shell :
+le terminal semble figé, c'est normal. Chaque `-L` relie un port de votre poste à un port de
+l'instance :
+
+- `-L 8080:…:80` : Horizon, ouvert dans le navigateur à <http://localhost:8080> ;
+- `-L 6080:…:6080` : la console des VM. Horizon l'affiche depuis le proxy VNC de Nova (port 6080),
+  que le lab annonce à l'adresse `http://localhost:6080`. Sans cette redirection, la console reste
+  vide puis affiche « délai d'attente dépassé ».
+
+Aucun port n'est ouvert sur Internet : Horizon et la console voyagent dans le tunnel.
+
+Pourquoi deux terminaux ? Si le tunnel est ouvert dans le même terminal que votre shell, un `exit`
+ferme le shell mais SSH attend que le navigateur libère ses connexions (la console en garde une
+ouverte en permanence) : le terminal ne rend pas la main et ce que vous tapez ne va nulle part.
+Fermez alors l'onglet d'Horizon, ou tapez `Entrée` puis `~.` pour couper la connexion.
+
+Le formulaire demande seulement l'utilisateur (`admin`) et le mot de passe, qui s'obtient dans le
+terminal 2, connecté à l'instance :
 
 ```bash
-# [instance]
+# [instance] : terminal 2 (shell)
 grep keystone_admin_password /etc/kolla/passwords.yml
 ```
 
@@ -124,6 +144,9 @@ l'interface (image `cirros`, gabarit `m1.tiny`, réseau `demo-net`, keypair `myk
 
 Ce mot de passe connu de tous n'est acceptable que pour CirrOS, image de test. Les images cloud de
 production n'ont pas de mot de passe et n'acceptent que des clés SSH (TP 12).
+
+Contre-épreuve : faites `Ctrl+C` dans le terminal 1, puis rechargez la page : ni Horizon ni la console
+ne répondent. Relancez la commande du terminal 1 pour continuer.
 
 **Constater ce que protège le tunnel.** Déconnectez-vous d'Horizon, puis lancez deux captures sur
 l'instance (2 minutes) : le trafic SSH qui arrive par Internet, et le trafic HTTP à la sortie du tunnel.
@@ -320,7 +343,8 @@ openstack server list
 
 - [ ] Connexion SSH à `tp02-vm-1` réussie, ping vers Internet et vers `tp02-vm-2` réussis.
 - [ ] VM créée depuis Horizon, par le tunnel SSH.
-- [ ] Console d'une VM affichée dans Horizon, par le tunnel.
+- [ ] Console d'une VM affichée dans Horizon, par le tunnel ; console coupée après `Ctrl+C` sur le
+  tunnel.
 - [ ] Captures faites : `password=` absent du trafic SSH, présent à la sortie du tunnel.
 - [ ] Connexion à `tp02-vm-poste` depuis votre poste par au moins trois méthodes parmi B à F.
 - [ ] Le risque du transfert d'agent (E) expliqué.

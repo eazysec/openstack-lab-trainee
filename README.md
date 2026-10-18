@@ -320,9 +320,10 @@ scénario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
    - **limiter le port 80 du Security Group à votre IP** (source `<VOTRE_IP>/32`) ;
    - **ou fermer le port 80 et passer par un tunnel SSH** :
      ```bash
-     ssh -i ec2_key -L 8080:<IP_PRIVEE>:80 -L 6080:<IP_PRIVEE>:6080 ubuntu@<IP_PUBLIQUE>
+     ssh -i ec2_key -N -L 8080:<IP_PRIVEE>:80 -L 6080:<IP_PRIVEE>:6080 ubuntu@<IP_PUBLIQUE>
      ```
-     puis ouvrir `http://localhost:8080`. La redirection du port 6080 sert à la console des VM dans
+     dans un terminal dédié (`-N` : pas de shell ; `Ctrl+C` ferme le tunnel), puis ouvrir
+     `http://localhost:8080`. La redirection du port 6080 sert à la console des VM dans
      Horizon : elle n'est jamais ouverte dans le Security Group, même quand le port 80 l'est.
    → À terme, activer TLS : `kolla_enable_tls_external: "yes"` + certificat (`kolla-ansible certificates` pour un lab).
 2. Les API (5000, 8774, 9696…) ne doivent pas être ouvertes dans le pare-feu du cloud.
