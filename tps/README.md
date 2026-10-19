@@ -58,6 +58,11 @@ pour les distinguer au premier coup d'œil de celles créées à la main.
 
 ## 2. Conventions
 
+**Conditions d'entrée.** Un TP part de l'état laissé par le précédent. Quand un TP fournit le script
+`tps/tpNN/verifier-entree.sh` (TP 13 et 14 pour l'instant), son étape 0 le lance : il vérifie, sans
+rien modifier, que le lab est prêt, et indique pour chaque écart ce qu'il faut faire. Ne commencez
+pas tant que sa dernière ligne n'est pas `Lab prêt pour le TP NN.`
+
 Chaque bloc de commandes indique où l'exécuter :
 
 | Marqueur | Où | Comment y aller |

@@ -329,7 +329,7 @@ l'étape 15, optionnelle et payante.
 
 | N° | Lieu | Dépend de | Objectif de l'étape | Contrôle | Retour arrière |
 |---|---|---|---|---|---|
-| 0 | `[instance]` | aucune | Vérifier la plateforme : `verify.sh` sans échec, image `debian13` et gabarit `m1.1g` présents (TP 12). | `verify.sh` : 0 échec | aucun |
+| 0 | `[instance]` | aucune | Vérifier les conditions d'entrée : `verify.sh` sans échec, puis `tps/tp13/verifier-entree.sh` (services, image `debian13` et gabarit `m1.1g` du TP 12, aucun reste d'un essai précédent). | `verifier-entree.sh` : « Lab prêt pour le TP 13. » | aucun |
 | 1 | `[instance]` | 0 | Créer les trois réseaux et leurs sous-réseaux. Seul le sous-réseau pub annonce une passerelle ; le sous-réseau adm pousse une route vers le bastion. | Passerelles et routes conformes | Supprimer les sous-réseaux puis les réseaux |
 | 2 | `[instance]` | 1 | Créer les deux routeurs sans SNAT. Le réseau data n'a pas de routeur. | SNAT désactivé, dans l'API et dans le noyau | Retirer les interfaces, puis supprimer les routeurs |
 | 3 | `[instance]` | 2 | Sur l'hôte : route de retour vers le réseau adm, et règle de pare-feu qui refuse vers AWS tout paquet non traduit des réseaux du TP. | L'hôte joint le routeur adm ; règle présente | Supprimer la route et la règle |

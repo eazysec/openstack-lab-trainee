@@ -76,17 +76,26 @@ source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh
 
 ---
 
-## Étape 0. Vérifier la plateforme
+## Étape 0. Vérifier les conditions d'entrée
 
 ```bash
 # [instance]
 cd ~/openstack-lab-trainee && ./verify.sh | tail -1        # "Résultat : 42 réussis, 0 échoués"
-openstack image show debian13 -f value -c status           # active
-openstack flavor show m1.1g -f value -c ram -c vcpus       # 1024, 1
-openstack network list --tags tp13 -f value | wc -l        # 0 : aucun reste d'un essai précédent
+./tps/tp13/verifier-entree.sh                              # dernière ligne : "Lab prêt pour le TP 13."
 ```
 
-Si l'image ou le gabarit manquent, refaites l'étape 0 du TP 12.
+`verifier-entree.sh` ne modifie rien. Il contrôle :
+
+| Condition | Pourquoi | Si elle n'est pas remplie |
+|---|---|---|
+| OpenStack répond ; Cinder et Barbican présents | volume chiffré et secret de la base (étape 9) | déployer le scénario 04 (TP 08, étape 0) |
+| Image `debian13` et gabarit `m1.1g` présents | les deux VM les utilisent | étape 0 du TP 12 |
+| `jq` et `nc` présents sur l'hôte | commandes des étapes 3, 11 et 12 | les installer (`apt-get`) |
+| Aucune ressource `tp13` ni `ht-tp13`, FIP `10.0.2.150` libre | les noms, les adresses et la FIP sont fixes | étape 16 de l'essai précédent (ou étape 10 du TP 14) |
+| Hôte sans route `192.168.121.0/24`, règle FORWARD `tp13`, configuration chrony du TP ni Squid | les étapes 3 et 4 les mettent en place | étape 16 de l'essai précédent |
+
+Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
+pas `Lab prêt pour le TP 13.`
 
 ## Étape 1. Trois réseaux et leurs sous-réseaux
 
