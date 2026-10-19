@@ -29,7 +29,7 @@ exploite et on étend la plateforme.
 | [10](tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | Prêt (sans coût) |
 | [11](tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
 | [12](tp12-cloud-init.md) | Configurer les VM au démarrage avec cloud-init | Extension | 02 ou 04 | Prêt |
-| [13](tp13-architecture.md) | TP final : architecture de déploiement sur OpenStack (présentation) | Synthèse | 04 | En préparation |
+| [13](tp13-deploiement.md) | TP final : déployer une architecture sécurisée sur OpenStack ([architecture](tp13-architecture.md)) | Synthèse | 04 | Prêt (étape 15 optionnelle et payante) |
 
 Non testés sur le lab, et signalés comme tels dans les énoncés : `sshuttle` et la redirection de port
 (TP 02, contraintes techniques), la partie AWS du scénario 03 et le niveau 3 « cloud » du TP 10 (payants).
@@ -44,7 +44,7 @@ Chaque bloc de commandes indique où l'exécuter :
 |---|---|---|
 | `# [poste]` | Votre ordinateur | vous y êtes |
 | `# [instance]` | L'instance EC2 (l'hôte OpenStack) | `ssh -i ec2_key ubuntu@<IP_PUBLIQUE>` |
-| `# [VM]` | Une VM OpenStack (CirrOS ; Debian aux TP 12 et 13) | `ssh cirros@<FLOATING_IP>` depuis l'instance (au TP 12 : `ssh -i ~/.ssh/tp12-key stack@<FLOATING_IP>`) |
+| `# [VM]` | Une VM OpenStack (CirrOS ; Debian aux TP 12 et 13) | `ssh cirros@<FLOATING_IP>` depuis l'instance (au TP 12 : `ssh -i ~/.ssh/tp12-key stack@<FLOATING_IP>` ; au TP 13 : `ssh -F ~/.ssh/tp13_config <VM>` depuis le poste, par le bastion) |
 
 ```
 Votre poste
@@ -125,3 +125,6 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 11 | publier des noms DNS, à la main et automatiquement par Neutron |  |  |
 | 12 | décrire la configuration d'une VM dans un user-data cloud-init, la valider et la vérifier |  |  |
 | 12 | dire pourquoi un secret ne va jamais dans un user-data, et appliquer l'immutabilité |  |  |
+| 13 | segmenter un réseau et écrire des security groups au plus juste, en entrée et en sortie |  |  |
+| 13 | administrer des VM par un bastion, et contrôler leurs sorties par un proxy |  |  |
+| 13 | diagnostiquer un routage asymétrique avec `tcpdump`, et prouver chaque refus par un test |  |  |

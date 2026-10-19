@@ -1,0 +1,122 @@
+/* TP 13 : thème de l'application de démonstration.
+   Couleurs définies ici seulement ; une couleur = un sens, toujours doublée d'un mot :
+   bleu agir · jaune vérifier · rouge bloquant · vert réussi · violet réservé au bandeau du lab.
+   Thème sombre selon la préférence du système (aucun script). */
+
+@font-face { font-family: "Atkinson Hyperlegible"; src: url("polices/AtkinsonHyperlegible-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible"; src: url("polices/AtkinsonHyperlegible-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
+/* ---------- Variables ---------- */
+:root {
+  --police-texte: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --police-donnees: ui-monospace, "DejaVu Sans Mono", "Cascadia Mono", monospace;
+
+  --t-petit: 13px; --t-normal: 15px; --t-titre: 19px; --t-page: 24px;
+  --e1: 4px; --e2: 8px; --e3: 12px; --e4: 16px; --e5: 24px; --e6: 32px;
+  --rayon: 4px;
+  --largeur: 680px;
+
+  --fond: #FFFFFF;
+  --fond-2: #F3F5F6;
+  --encre: #15181B;
+  --doux: #5C646A;
+  --filet: #DADFE2;
+  --champ: #FFFFFF;
+  --champ-bordure: #858E95;
+  --bande: #1E2328;
+  --bande-encre: #FFFFFF;
+  --action: #1F4FD1;          /* bleu = agir */
+  --action-encre: #FFFFFF;
+  --attention-filet: #A87D00; /* jaune = vérifier (ocre : 3,75:1 sur blanc) */
+  --attention-fond: #FFF4CC;
+  --attention-encre: #5E4300;
+  --danger: #B9382A;          /* rouge = bloquant */
+  --danger-fond: #FCEAE7;
+  --reussite: #1E7A45;        /* vert = réussi, seulement */
+  --environnement: #5B4A8A;   /* violet = bandeau du lab, seulement */
+  --environnement-encre: #FFFFFF;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fond: #16191C;
+    --fond-2: #1B1F23;
+    --encre: #E7EAEC;
+    --doux: #9BA4AA;
+    --filet: #30373D;
+    --champ: #1D2226;
+    --champ-bordure: #646D75;
+    --bande: #E7EAEC;
+    --bande-encre: #16191C;
+    --action: #8FB0FF;
+    --action-encre: #16191C;
+    --attention-filet: #F2C230;
+    --attention-fond: #2A2512;
+    --attention-encre: #F5DC8A;
+    --danger: #F0806B;
+    --danger-fond: #2D1C1A;
+    --reussite: #5CCB8A;
+    --environnement: #C9B8F5;
+    --environnement-encre: #16191C;
+    color-scheme: dark;
+  }
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: var(--fond); color: var(--encre); font-family: var(--police-texte); font-size: var(--t-normal); line-height: 1.5; }
+h1, h2, p, dl, dd, ol { margin: 0; }
+:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+.donnees { font-family: var(--police-donnees); font-size: 14px; overflow-wrap: anywhere; }
+.doux { color: var(--doux); }
+.petit { font-size: var(--t-petit); }
+
+/* ---------- Bande et bandeau du lab ---------- */
+.bande { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--e2) var(--e4); padding: var(--e3) var(--e5); background: var(--bande); color: var(--bande-encre); }
+.bande__titre { font-size: var(--t-titre); font-weight: 700; }
+.bande__valeur { font-weight: 700; }
+.bandeau-lab { padding: 6px var(--e5); background: var(--environnement); color: var(--environnement-encre); font-size: 13.5px; font-weight: 700; }
+
+/* ---------- Colonne unique ---------- */
+.page { display: grid; gap: var(--e6); max-width: var(--largeur); margin-inline: auto; padding: var(--e5) var(--e4) 48px; }
+.bloc { display: grid; gap: var(--e3); }
+.bloc__titre { font-size: var(--t-titre); padding-bottom: var(--e2); border-bottom: 1px solid var(--filet); }
+
+/* Parcours de la requête : libellé | valeur */
+.parcours { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--e2) var(--e4); }
+.parcours dt { color: var(--doux); }
+@media (max-width: 520px) {
+  .parcours { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .parcours dd { margin-bottom: var(--e3); }
+}
+
+/* ---------- Messages d'état : chacun commence par un mot ---------- */
+.etat { padding: var(--e2) var(--e3); border-left: 3px solid var(--encre); border-radius: 0 var(--rayon) var(--rayon) 0; background: var(--fond-2); }
+.etat__mot { font-weight: 700; }
+.etat--reussite { border-color: var(--reussite); }
+.etat--reussite .etat__mot { color: var(--reussite); }
+.etat--attention { background: var(--attention-fond); border-color: var(--attention-filet); color: var(--attention-encre); }
+.etat--danger { background: var(--danger-fond); border-color: var(--danger); color: var(--danger); }
+
+/* ---------- Formulaire ---------- */
+.champ { display: grid; gap: 6px; }
+.champ__libelle { font-weight: 700; }
+.champ__aide { font-size: var(--t-petit); color: var(--doux); }
+.champ__erreur { font-size: 13.5px; color: var(--danger); }
+.saisie-groupe { display: flex; flex-wrap: wrap; gap: var(--e2); }
+.saisie { flex: 1 1 240px; min-width: 0; padding: 10px 12px; border: 1px solid var(--champ-bordure); border-radius: var(--rayon); background: var(--champ); color: var(--encre); font: inherit; font-size: 16px; }
+.saisie:focus { outline: 2px solid var(--action); outline-offset: 1px; border-color: var(--action); }
+.saisie[aria-invalid="true"] { border-color: var(--danger); }
+.bouton { min-height: 44px; padding: 10px 18px; border: 1px solid transparent; border-radius: var(--rayon); background: var(--action); color: var(--action-encre); font: inherit; font-weight: 700; cursor: pointer; }
+.bouton:focus-visible { outline-offset: 3px; }
+
+/* ---------- Liste des messages ---------- */
+.messages { list-style: none; padding: 0; display: grid; gap: var(--e2); }
+.messages li { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--e3); padding: var(--e2) 0; border-bottom: 1px solid var(--filet); }
+.messages time { color: var(--doux); font-family: var(--police-donnees); font-size: 14px; }
+.messages__texte { overflow-wrap: anywhere; }
+
+/* ---------- Page d'échantillons seulement ---------- */
+.echantillon { display: grid; gap: var(--e2); padding: var(--e3); border: 1px dashed var(--filet); border-radius: var(--rayon); }
+.echantillon__nom { font-size: var(--t-petit); color: var(--doux); }

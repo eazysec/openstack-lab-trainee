@@ -1,0 +1,57 @@
+[Unit]
+Description=TP 13 : application de démonstration (gunicorn, 127.0.0.1:8080)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/gunicorn --bind 127.0.0.1:8080 --workers 2 --chdir /opt/tp13-appli app:app
+Environment=TP13_DB_HOST=192.168.122.12
+# Mot de passe de la base : copié par systemd dans $CREDENTIALS_DIRECTORY, lisible du seul service
+LoadCredential=db-password:/etc/tp13/db-password
+Restart=on-failure
+
+# Identité : utilisateur créé au démarrage, sans aucun fichier sur le disque
+DynamicUser=yes
+UMask=0077
+
+# Système de fichiers : tout en lecture seule, rien d'autre que le nécessaire de visible
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+DevicePolicy=closed
+ProtectProc=invisible
+ProcSubset=pid
+
+# Noyau et système
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+# Appel interdit : refusé (EPERM) plutôt que processus tué. gunicorn appelle toujours setgroups([])
+# (dans @privileged) au démarrage d'un worker et tolère EPERM ; avec SIGSYS, chaque worker mourait.
+SystemCallErrorNumber=EPERM
+
+# Réseau : IPv4 et sockets locales seulement ; joindre uniquement la boucle locale (HAProxy) et la base
+RestrictAddressFamilies=AF_INET AF_UNIX
+IPAddressDeny=any
+IPAddressAllow=localhost 192.168.122.12/32
+
+# Ressources
+MemoryMax=256M
+TasksMax=32
+
+[Install]
+WantedBy=multi-user.target

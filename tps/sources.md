@@ -47,6 +47,7 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | Horizon (interface web) | <https://docs.openstack.org/horizon/2025.1/> |
 | Designate (DNS) | <https://docs.openstack.org/designate/2025.1/> |
 | Barbican (secrets) | <https://docs.openstack.org/barbican/2025.1/> |
+| Barbican : guide de l'API (secrets, conteneurs, ACL) | <https://docs.openstack.org/api-guide/key-manager/> |
 | CirrOS (image de test) | <https://github.com/cirros-dev/cirros> |
 | Open vSwitch | <https://docs.openvswitch.org/en/latest/> |
 
@@ -127,3 +128,19 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | NFS : `exports(5)` | <https://man7.org/linux/man-pages/man5/exports.5.html> |
 | NFS : `nfs.conf(5)` | <https://man7.org/linux/man-pages/man5/nfs.conf.5.html> |
 | systemd : automontage | <https://man7.org/linux/man-pages/man5/systemd.automount.5.html> |
+
+## Architecture de déploiement (TP 13)
+
+| Sujet | Référence |
+|---|---|
+| Neutron : routeurs, SNAT, security groups | <https://docs.openstack.org/neutron/2025.1/admin/intro-os-networking.html> |
+| Client `openstack` : règles de security group | <https://docs.openstack.org/python-openstackclient/latest/cli/command-objects/security-group-rule.html> |
+| Barbican : client en ligne de commande | <https://docs.openstack.org/python-barbicanclient/latest/cli/usage.html> |
+| Netplan : routes et routage par source (`routing-policy`) | <https://netplan.readthedocs.io/en/stable/netplan-yaml/> |
+| Squid : contrôle d'accès | <https://wiki.squid-cache.org/SquidFaq/SquidAcl> |
+| chrony : `allow` et `bindaddress` | <https://chrony-project.org/doc/4.5/chrony.conf.html> |
+| PostgreSQL 17 : `pg_hba.conf` | <https://www.postgresql.org/docs/17/auth-pg-hba-conf.html> |
+| systemd : durcissement d'un service | <https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html> |
+| HAProxy 3.0 : configuration (`option forwardfor`) | <https://docs.haproxy.org/3.0/configuration.html> |
+| GitHub : empreintes des clés d'hôte SSH | <https://docs.github.com/fr/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints> |
+| AWS : adresses IP Elastic | <https://docs.aws.amazon.com/fr_fr/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html> |

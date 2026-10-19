@@ -1,0 +1,26 @@
+# TP 13 : accès aux VM par rebond à travers le bastion (l'instance AWS).
+# Copier ce fichier en ~/.ssh/tp13_config, remplacer <IP_PUBLIQUE> et <CHEMIN_EC2_KEY>, puis :
+#   ssh -F ~/.ssh/tp13_config tp13-vm-web-haproxy-demo
+# Les clés restent sur le poste : le bastion relaie la connexion TCP (ProxyJump), il ne voit aucune clé.
+Host tp13-bastion
+  HostName <IP_PUBLIQUE>
+  User ubuntu
+  IdentityFile <CHEMIN_EC2_KEY>
+
+Host tp13-vm-web-haproxy-demo tp13-vm-bdd-demo
+  User debian
+  IdentityFile ~/.ssh/tp13-keypair-adm-demo
+  ProxyJump tp13-bastion
+  # Clés d'hôte des VM, écrites après comparaison avec les empreintes de la console (étape 8)
+  UserKnownHostsFile ~/.ssh/tp13_known_hosts
+  StrictHostKeyChecking yes
+  ForwardAgent no
+
+Host tp13-vm-web-haproxy-demo
+  HostName 192.168.121.11
+
+Host tp13-vm-bdd-demo
+  HostName 192.168.121.12
+
+Host *
+  IdentitiesOnly yes

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TP 13 · Application de démonstration</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='tp13.css') }}">
+</head>
+<body>
+<header class="bande">
+  <h1 class="bande__titre">TP 13 · Application de démonstration</h1>
+  <p>Servie par <span class="bande__valeur" data-test="serveur">{{ serveur }}</span></p>
+</header>
+<p class="bandeau-lab">Lab de formation OpenStack · données de TP</p>
+
+<main class="page">
+
+  <section class="bloc" aria-labelledby="t-requete">
+    <h2 class="bloc__titre" id="t-requete">Votre requête</h2>
+    <dl class="parcours">
+      <dt>Navigateur</dt>
+      <dd><span class="donnees" data-test="client">{{ client }}</span>
+        <span class="doux">{% if relais %}(adresse vue par HAProxy){% else %}(adresse du dernier relais){% endif %}</span></dd>
+      <dt>HAProxy</dt>
+      <dd>{% if haproxy %}<span class="donnees" data-test="haproxy">{{ serveur }} · {{ haproxy }}</span>{% else %}<span class="doux">non traversé</span>{% endif %}</dd>
+      <dt>Application</dt>
+      <dd><span class="donnees">{{ serveur }} · </span><span class="donnees" data-test="application">{{ application }}</span></dd>
+      <dt>Base</dt>
+      <dd>{% if base.ok %}<span class="donnees" data-test="base">{{ base.adresse }}</span>{% else %}<span class="donnees">{{ base.cible }}</span> <span class="doux">(adresse configurée)</span>{% endif %}</dd>
+      <dt>Heure du serveur</dt>
+      <dd><span class="donnees" data-test="heure">{{ heure }}</span>{% if ntp %} · <span data-test="ntp">synchronisée (NTP)</span>{% endif %}</dd>
+    </dl>
+    {% if not ntp %}
+    <p class="etat etat--attention" data-test="ntp"><span class="etat__mot">À vérifier :</span> heure non synchronisée (NTP). Les horodatages des messages peuvent être faux.</p>
+    {% endif %}
+    {% if not relais %}
+    <p class="etat etat--attention" data-test="avertissement-relais"><span class="etat__mot">À vérifier :</span> requête reçue sans passer par HAProxy (pas d'en-tête X-Forwarded-For). L'adresse affichée est celle du dernier relais.</p>
+    {% endif %}
+  </section>
+
+  <section class="bloc" aria-labelledby="t-base">
+    <h2 class="bloc__titre" id="t-base">Base de données</h2>
+    {% if base.ok %}
+    <p class="etat etat--reussite" data-test="etat-base"><span class="etat__mot">Réussi :</span> connectée à PostgreSQL {{ base.version }}.</p>
+    {% else %}
+    <p class="etat etat--danger" data-test="etat-base"><span class="etat__mot">Bloquant :</span> {{ base.titre }}, {{ base.cause }}. Les messages ne peuvent être ni lus ni enregistrés.</p>
+    {% endif %}
+  </section>
+
+  <section class="bloc" aria-labelledby="t-messages">
+    <h2 class="bloc__titre" id="t-messages">Messages enregistrés dans la base</h2>
+    {% if enregistre %}
+    <p class="etat etat--reussite" data-test="etat-envoi"><span class="etat__mot">Réussi :</span> message enregistré.</p>
+    {% endif %}
+    <form class="champ" method="post" action="{{ url_for('enregistrer') }}">
+      <label class="champ__libelle" for="message">Message</label>
+      <p class="champ__aide" id="message-aide">1 à {{ longueur_max }} caractères. Il est enregistré dans la base de la VM bdd et visible par tous les visiteurs.</p>
+      <div class="saisie-groupe">
+        <input class="saisie" id="message" name="message" type="text" maxlength="{{ longueur_max }}" required
+               value="{{ saisie }}"{% if erreur %} aria-invalid="true" aria-describedby="message-aide message-erreur"{% else %} aria-describedby="message-aide"{% endif %}>
+        <button class="bouton" type="submit">Enregistrer</button>
+      </div>
+      {% if erreur %}
+      <p class="champ__erreur" id="message-erreur" data-test="erreur-message">{{ erreur }}</p>
+      {% endif %}
+    </form>
+    {% if base.ok %}
+      {% if base.messages %}
+    <ol class="messages">
+        {% for cree_le, texte in base.messages %}
+      <li><time datetime="{{ cree_le.isoformat() }}">{{ cree_le.strftime('%H:%M') }}</time> <span class="messages__texte" data-test="message">{{ texte }}</span></li>
+        {% endfor %}
+    </ol>
+      {% else %}
+    <p class="doux">Aucun message pour l'instant. Écrivez le premier ci-dessus.</p>
+      {% endif %}
+    {% endif %}
+  </section>
+
+</main>
+</body>
+</html>

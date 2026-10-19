@@ -145,7 +145,7 @@ l'interface (image `cirros`, gabarit `m1.tiny`, réseau `demo-net`, keypair `myk
 Ce mot de passe connu de tous n'est acceptable que pour CirrOS, image de test. Les images cloud de
 production n'ont pas de mot de passe et n'acceptent que des clés SSH (TP 12).
 
-Contre-épreuve : faites `Ctrl+C` dans le terminal 1, puis rechargez la page : ni Horizon ni la console
+Test négatif : faites `Ctrl+C` dans le terminal 1, puis rechargez la page : ni Horizon ni la console
 ne répondent. Relancez la commande du terminal 1 pour continuer.
 
 **Constater ce que protège le tunnel.** Déconnectez-vous d'Horizon, puis lancez deux captures sur

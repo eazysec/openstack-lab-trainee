@@ -28,7 +28,7 @@ retry() {  # retry <essais> <pause> commande...
   local n=$1 s=$2; shift 2
   for _ in $(seq "$n"); do "$@" && return 0; sleep "$s"; done; return 1
 }
-vm_ssh() { ssh "${SSH_OPTS[@]}" "cirros@$FIP" "$@"; }
+vm_ssh() { ssh -n "${SSH_OPTS[@]}" "cirros@$FIP" "$@"; }   # -n : ne lit pas l'entrée standard
 # Connexion réelle à Horizon (formulaire + jeton CSRF) : succès si le tableau de bord s'affiche
 horizon_login() {
   local url="http://$1" jar page csrf region post pw

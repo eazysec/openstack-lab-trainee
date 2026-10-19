@@ -68,14 +68,17 @@ U=https://cloud.debian.org/images/cloud/trixie/latest
 curl -fLO $U/debian-13-genericcloud-amd64.qcow2                           # ~330 Mo
 curl -fsSL $U/SHA512SUMS | grep " debian-13-genericcloud-amd64.qcow2$" | sha512sum -c   # "OK"
 openstack image create --disk-format qcow2 --container-format bare \
-  --file debian-13-genericcloud-amd64.qcow2 tp12-img-debian13
-openstack flavor create --vcpus 1 --ram 1024 --disk 8 tp12-flv-1g        # 1 Go suffit
+  --file debian-13-genericcloud-amd64.qcow2 debian13
+openstack flavor create --vcpus 1 --ram 1024 --disk 8 m1.1g        # 1 Go suffit
 ssh-keygen -q -t ed25519 -N "" -C tp12-key -f ~/.ssh/tp12-key
 openstack keypair create --public-key ~/.ssh/tp12-key.pub tp12-key
 ```
 
 Vérifier l'empreinte avant d'importer une image est une règle de base : une image modifiée serait
 recopiée dans chaque VM.
+
+L'image `debian13` et le gabarit `m1.1g` ne portent pas de préfixe de TP : ils sont communs, et le
+TP 13 les réutilise.
 
 ## Étape 1. Un compte d'exploitation décrit dans un user-data
 
@@ -120,7 +123,7 @@ Le security group n'autorise SSH que depuis l'instance (le bastion), dont l'adre
 openstack security group create --description "TP 12 : SSH depuis le bastion" tp12-sg-ssh
 openstack security group rule create --ingress --protocol tcp --dst-port 22 \
   --remote-ip 10.0.2.1/32 tp12-sg-ssh
-openstack server create --image tp12-img-debian13 --flavor tp12-flv-1g --key-name tp12-key \
+openstack server create --image debian13 --flavor m1.1g --key-name tp12-key \
   --network demo-net --security-group tp12-sg-ssh --user-data user-data-stack.yaml --wait tp12-vm-1
 FIP=$(openstack floating ip create public1 --description tp12-fip-vm-1 -f value -c floating_ip_address)
 openstack server add floating ip tp12-vm-1 $FIP
@@ -211,7 +214,7 @@ user-data. cloud-init voit un disque vierge et rejoue tout.
 sed '/^ssh_pwauth/i bootcmd:\n  - echo "bootcmd   $(date +%T)" >> /var/log/tp12-frequences.log\nruncmd:\n  - echo "runcmd    $(date +%T)" >> /var/log/tp12-frequences.log\n  - chmod 644 /var/log/tp12-frequences.log' \
   user-data-stack.yaml > user-data-v2.yaml
 cloud-init schema -c user-data-v2.yaml
-openstack server rebuild --image tp12-img-debian13 --user-data user-data-v2.yaml --wait tp12-vm-1
+openstack server rebuild --image debian13 --user-data user-data-v2.yaml --wait tp12-vm-1
 ssh-keygen -R $FIP                               # disque neuf : nouvelle clé d'hôte SSH
 ssh -i ~/.ssh/tp12-key stack@$FIP 'cloud-init status --wait; cat /var/log/tp12-frequences.log'
 openstack server reboot --wait tp12-vm-1
@@ -244,8 +247,8 @@ la VM. La première ligne doit être `## template: jinja`.
   sed '/^ssh_pwauth/i write_files:\n  - path: /etc/motd\n    content: |\n      VM {{ v1.local_hostname }}, identifiant {{ v1.instance_id }}, zone {{ v1.availability_zone }}' \
     user-data-stack.yaml; } > user-data-jinja.yaml
 cloud-init schema -c user-data-jinja.yaml
-openstack server rebuild --image tp12-img-debian13 --user-data user-data-jinja.yaml --wait tp12-vm-1
-openstack server create --image tp12-img-debian13 --flavor tp12-flv-1g --key-name tp12-key \
+openstack server rebuild --image debian13 --user-data user-data-jinja.yaml --wait tp12-vm-1
+openstack server create --image debian13 --flavor m1.1g --key-name tp12-key \
   --network demo-net --security-group tp12-sg-ssh --user-data user-data-jinja.yaml --wait tp12-vm-2
 FIP2=$(openstack floating ip create public1 --description tp12-fip-vm-2 -f value -c floating_ip_address)
 openstack server add floating ip tp12-vm-2 $FIP2; echo "FIP2=$FIP2" >> ~/tp12/env
@@ -344,7 +347,7 @@ runcmd:
 EOF
 } > user-data-nfs-srv.yaml
 cloud-init schema -c user-data-nfs-srv.yaml
-openstack server create --image tp12-img-debian13 --flavor tp12-flv-1g --key-name tp12-key \
+openstack server create --image debian13 --flavor m1.1g --key-name tp12-key \
   --port tp12-port-vm-nfs --user-data user-data-nfs-srv.yaml \
   --block-device uuid=$VOL,source_type=volume,destination_type=volume,boot_index=-1,delete_on_termination=false \
   --wait tp12-vm-nfs
@@ -371,7 +374,7 @@ runcmd:
 EOF
 } > user-data-nfs-cli.yaml
 cloud-init schema -c user-data-nfs-cli.yaml
-openstack server create --image tp12-img-debian13 --flavor tp12-flv-1g --key-name tp12-key \
+openstack server create --image debian13 --flavor m1.1g --key-name tp12-key \
   --port tp12-port-vm-client --user-data user-data-nfs-cli.yaml --wait tp12-vm-client
 FIPC=$(openstack floating ip create public1 --description tp12-fip-vm-client -f value -c floating_ip_address)
 openstack server add floating ip tp12-vm-client $FIPC; echo "FIPC=$FIPC" >> ~/tp12/env

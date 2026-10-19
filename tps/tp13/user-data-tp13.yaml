@@ -1,0 +1,48 @@
+## template: jinja
+#cloud-config
+# TP 13 : paquets par le proxy Squid du bastion, heure par le bastion, aucune autre sortie
+apt:
+  proxy: http://10.0.2.1:3128
+  https_proxy: http://10.0.2.1:3128
+package_update: true
+ntp:
+  enabled: true
+  ntp_client: systemd-timesyncd
+  servers: [10.0.2.1]
+ssh_pwauth: false
+write_files:
+  # Chaque carte reçoit une route vers 169.254.169.254 (métrique 100) : sans cela, la carte utilisée
+  # change d'un démarrage à l'autre. La carte admin (ens3, la première) passe en métrique 50.
+  - path: /etc/netplan/90-tp13-admin.yaml
+    permissions: '0600'
+    content: |
+      network:
+        version: 2
+        ethernets:
+          ens3:
+            dhcp4-overrides:
+              route-metric: 50
+{% if ds.meta_data.meta.role == 'lb-app' %}
+  # VM web seulement (propriété role=lb-app) : ce qui part de l'adresse pub ressort par la carte pub.
+  # Sans cela, la réponse à une requête du bastion (10.0.2.1) arrivée par la FIP partirait par la
+  # carte admin (route 10.0.2.1/32) et serait rejetée par Neutron (routage asymétrique).
+  - path: /etc/netplan/91-tp13-pub.yaml
+    permissions: '0600'
+    content: |
+      network:
+        version: 2
+        ethernets:
+          ens4:
+            routes:
+              - to: 192.168.120.0/24
+                scope: link
+                table: 120
+              - to: default
+                via: 192.168.120.1
+                table: 120
+            routing-policy:
+              - from: 192.168.120.10
+                table: 120
+{% endif %}
+runcmd:
+  - [netplan, apply]
