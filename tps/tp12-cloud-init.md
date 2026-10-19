@@ -54,11 +54,28 @@ l'étape 9, un montage échouerait parce qu'il a lieu avant l'installation des p
 
 ---
 
-## Étape 0. Préparer l'image, le gabarit et la clé
+## Étape 0. Vérifier les conditions d'entrée, préparer l'image et la clé
+
+```bash
+# [instance]
+cd ~/openstack-lab-trainee && ./verify.sh | tail -1        # "… 0 échoués"
+./tps/tp12/verifier-entree.sh                              # dernière ligne : "Lab prêt pour le TP 12."
+```
+
+`verifier-entree.sh` ne modifie rien. Il contrôle :
+
+| Condition | Pourquoi | Si elle n'est pas remplie |
+|---|---|---|
+| OpenStack répond ; Cinder présent | l'étape 8 crée un volume | déployer le scénario 02 ou 04 (TP 04, étape 0) |
+| L'instance joint `cloud.debian.org` | l'image y est téléchargée | vérifier l'accès Internet de l'instance |
+| Pas de fichier `~/.ssh/tp12-key` | sinon `ssh-keygen` demande s'il faut l'écraser, et le bloc ci-dessous s'arrête sur cette question | supprimer la clé d'un essai précédent |
+| Une seule image `debian13` au plus ; aucune ressource `tp12-` | noms en double | nettoyage d'un essai précédent (étape 12) |
+
+Il indique aussi si l'image et le gabarit existent déjà (lab préparé par le tuteur, ou TP rejoué) :
+dans ce cas, ne créez que la clé.
 
 L'image CirrOS des TP précédents n'embarque pas cloud-init. On utilise l'image cloud officielle de
-Debian 13, légère et rapide à démarrer en émulation. Si l'image et le gabarit existent déjà (lab
-préparé par le formateur), passez directement à la création de la clé.
+Debian 13, légère et rapide à démarrer en émulation.
 
 ```bash
 # [instance]
