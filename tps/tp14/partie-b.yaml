@@ -1,0 +1,293 @@
+heat_template_version: 2021-04-16
+
+description: >
+  TP 14, partie B : l'architecture du TP 13 décrite en code, security groups compris (les règles
+  écrites aux étapes 5 et 7 du TP 13). Réseaux pub, adm et data, deux routeurs
+  sans SNAT, security groups au plus juste, ports à adresse fixe, VM web et VM bdd, volume chiffré,
+  FIP 10.0.2.150. Restent hors de Heat : la route, le pare-feu, Squid et chrony de l'hôte (étapes 3
+  et 4 du TP 13), et le secret de la base (un mot de passe n'a pas sa place dans un modèle).
+
+parameters:
+  prefixe:
+    type: string
+    default: ht-tp13
+    description: début du nom de chaque ressource (ht = déployé par Heat)
+  etiquette:
+    type: string
+    default: tp13
+    description: étiquette posée sur les ressources qui l'acceptent
+  cle_publique:
+    type: string
+    description: contenu de la clé publique d'administration des VM (fichier .pub)
+  image:
+    type: string
+    default: debian13
+  gabarit:
+    type: string
+    default: m1.1g
+  bastion:
+    type: string
+    default: 10.0.2.1
+    description: adresse de l'hôte côté OpenStack (bastion, proxy, heure)
+  adresse_publication:
+    type: string
+    default: 10.0.2.150
+
+resources:
+
+  # --- Réseaux (TP 13, étape 1) ---------------------------------------------------------------
+  reseau_pub:
+    type: OS::Neutron::Net
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, network, pub, demo]] }
+      tags: [{ get_param: etiquette }]
+  sous_reseau_pub:
+    type: OS::Neutron::Subnet
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, subnet, pub, demo]] }
+      network: { get_resource: reseau_pub }
+      cidr: 192.168.120.0/24
+      gateway_ip: 192.168.120.1
+      allocation_pools: [{ start: 192.168.120.2, end: 192.168.120.254 }]
+      tags: [{ get_param: etiquette }]
+
+  reseau_adm:
+    type: OS::Neutron::Net
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, network, adm, demo]] }
+      tags: [{ get_param: etiquette }]
+  sous_reseau_adm:
+    type: OS::Neutron::Subnet
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, subnet, adm, demo]] }
+      network: { get_resource: reseau_adm }
+      cidr: 192.168.121.0/24
+      gateway_ip: ~
+      allocation_pools: [{ start: 192.168.121.2, end: 192.168.121.254 }]
+      host_routes: [{ destination: { list_join: ['', [{ get_param: bastion }, '/32']] }, nexthop: 192.168.121.1 }]
+      tags: [{ get_param: etiquette }]
+
+  reseau_data:
+    type: OS::Neutron::Net
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, network, data, demo]] }
+      tags: [{ get_param: etiquette }]
+  sous_reseau_data:
+    type: OS::Neutron::Subnet
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, subnet, data, demo]] }
+      network: { get_resource: reseau_data }
+      cidr: 192.168.122.0/24
+      gateway_ip: ~
+      allocation_pools: [{ start: 192.168.122.2, end: 192.168.122.254 }]
+      tags: [{ get_param: etiquette }]
+
+  # --- Routeurs sans SNAT (étape 2) -----------------------------------------------------------
+  routeur_pub:
+    type: OS::Neutron::Router
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, router, pub, demo]] }
+      external_gateway_info: { network: public1, enable_snat: false }
+      tags: [{ get_param: etiquette }]
+  interface_pub:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: routeur_pub }
+      subnet: { get_resource: sous_reseau_pub }
+
+  routeur_adm:
+    type: OS::Neutron::Router
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, router, adm, demo]] }
+      external_gateway_info: { network: public1, enable_snat: false }
+      tags: [{ get_param: etiquette }]
+  port_routeur_adm:
+    type: OS::Neutron::Port
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, port, adm, router, demo]] }
+      network: { get_resource: reseau_adm }
+      fixed_ips: [{ subnet: { get_resource: sous_reseau_adm }, ip_address: 192.168.121.1 }]
+      port_security_enabled: false
+      tags: [{ get_param: etiquette }]
+  interface_adm:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: routeur_adm }
+      port: { get_resource: port_routeur_adm }
+
+  # --- Security groups (étapes 5 et 7) --------------------------------------------------------
+  # Heat ne retire les sorties par défaut (0.0.0.0/0 et ::/0) que si le security group déclare au
+  # moins une règle de sortie. Les security groups web et data-bdd n'ont aucune sortie autorisée : ils
+  # reçoivent une sortie vers leur propre security group (remote_group_id sans valeur), qui n'atteint
+  # que leur propre port.
+  groupe_web:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, sg, web, demo]] }
+      description: TP 13, carte web
+      rules:
+        - { direction: ingress, protocol: tcp, port_range_min: 80, port_range_max: 80, remote_ip_prefix: 0.0.0.0/0 }
+        - { direction: egress, remote_mode: remote_group_id }
+
+  groupe_adm:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, sg, adm, demo]] }
+      description: TP 13, carte adm
+      rules:
+        - { direction: ingress, protocol: tcp, port_range_min: 22, port_range_max: 22, remote_ip_prefix: { list_join: ['', [{ get_param: bastion }, '/32']] } }
+        - { direction: egress, protocol: tcp, port_range_min: 3128, port_range_max: 3128, remote_ip_prefix: { list_join: ['', [{ get_param: bastion }, '/32']] } }
+        - { direction: egress, protocol: udp, port_range_min: 123, port_range_max: 123, remote_ip_prefix: { list_join: ['', [{ get_param: bastion }, '/32']] } }
+        - { direction: egress, protocol: tcp, port_range_min: 80, port_range_max: 80, remote_ip_prefix: 169.254.169.254/32 }
+
+  groupe_data_bdd:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, sg, data, bdd, demo]] }
+      description: TP 13, carte data-bdd
+      rules:
+        - { direction: egress, remote_mode: remote_group_id }
+
+  groupe_data_web:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, sg, data, web, demo]] }
+      description: TP 13, carte data-web
+      rules:
+        - { direction: egress, protocol: tcp, port_range_min: 5432, port_range_max: 5432, remote_mode: remote_group_id, remote_group_id: { get_resource: groupe_data_bdd } }
+
+  # Les security groups data-web et data-bdd se désignent l'un l'autre : la règle d'entrée de
+  # data-bdd est une ressource à part, sinon chacun dépendrait de l'autre.
+  regle_bdd_depuis_web:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      security_group: { get_resource: groupe_data_bdd }
+      direction: ingress
+      protocol: tcp
+      port_range_min: 5432
+      port_range_max: 5432
+      remote_group: { get_resource: groupe_data_web }
+      description: depuis l'application
+
+  # --- Ports à adresse fixe (étape 6) ---------------------------------------------------------
+  port_pub_web:
+    type: OS::Neutron::Port
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, port, pub, web, demo]] }
+      network: { get_resource: reseau_pub }
+      fixed_ips: [{ subnet: { get_resource: sous_reseau_pub }, ip_address: 192.168.120.10 }]
+      security_groups: [{ get_resource: groupe_web }]
+      tags: [{ get_param: etiquette }]
+  port_adm_web:
+    type: OS::Neutron::Port
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, port, adm, web, demo]] }
+      network: { get_resource: reseau_adm }
+      fixed_ips: [{ subnet: { get_resource: sous_reseau_adm }, ip_address: 192.168.121.11 }]
+      security_groups: [{ get_resource: groupe_adm }]
+      tags: [{ get_param: etiquette }]
+  port_data_web:
+    type: OS::Neutron::Port
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, port, data, web, demo]] }
+      network: { get_resource: reseau_data }
+      fixed_ips: [{ subnet: { get_resource: sous_reseau_data }, ip_address: 192.168.122.11 }]
+      security_groups: [{ get_resource: groupe_data_web }]
+      tags: [{ get_param: etiquette }]
+  port_adm_bdd:
+    type: OS::Neutron::Port
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, port, adm, bdd, demo]] }
+      network: { get_resource: reseau_adm }
+      fixed_ips: [{ subnet: { get_resource: sous_reseau_adm }, ip_address: 192.168.121.12 }]
+      security_groups: [{ get_resource: groupe_adm }]
+      tags: [{ get_param: etiquette }]
+  port_data_bdd:
+    type: OS::Neutron::Port
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, port, data, bdd, demo]] }
+      network: { get_resource: reseau_data }
+      fixed_ips: [{ subnet: { get_resource: sous_reseau_data }, ip_address: 192.168.122.12 }]
+      security_groups: [{ get_resource: groupe_data_bdd }]
+      tags: [{ get_param: etiquette }]
+
+  # --- Clé et VM (étape 7) --------------------------------------------------------------------
+  cle:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, keypair, adm, demo]] }
+      public_key: { get_param: cle_publique }
+
+  vm_bdd:
+    type: OS::Nova::Server
+    depends_on: [interface_adm]
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, vm, bdd, demo]] }
+      image: { get_param: image }
+      flavor: { get_param: gabarit }
+      key_name: { get_resource: cle }
+      networks: [{ port: { get_resource: port_adm_bdd } }, { port: { get_resource: port_data_bdd } }]
+      metadata: { role: db }
+      user_data: { get_file: ../tp13/user-data-tp13.yaml }
+      user_data_format: RAW
+      tags: [{ get_param: etiquette }]
+
+  vm_web:
+    type: OS::Nova::Server
+    depends_on: [interface_adm, interface_pub]
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, vm, web, haproxy, demo]] }
+      image: { get_param: image }
+      flavor: { get_param: gabarit }
+      key_name: { get_resource: cle }
+      networks: [{ port: { get_resource: port_adm_web } }, { port: { get_resource: port_pub_web } }, { port: { get_resource: port_data_web } }]
+      metadata: { role: lb-app }
+      user_data: { get_file: ../tp13/user-data-tp13.yaml }
+      user_data_format: RAW
+      tags: [{ get_param: etiquette }]
+
+  # --- Volume chiffré (étape 9) ---------------------------------------------------------------
+  type_luks:
+    type: OS::Cinder::VolumeType
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, cinder, type, luks, demo]] }
+  chiffrement_luks:
+    type: OS::Cinder::EncryptedVolumeType
+    properties:
+      volume_type: { get_resource: type_luks }
+      provider: luks
+      cipher: aes-xts-plain64
+      key_size: 256
+      control_location: front-end
+  volume_bdd:
+    type: OS::Cinder::Volume
+    depends_on: [chiffrement_luks]
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, cinder, bdd, demo]] }
+      size: 2
+      volume_type: { get_resource: type_luks }
+  attachement_bdd:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: { get_resource: vm_bdd }
+      volume_id: { get_resource: volume_bdd }
+
+  # --- FIP de publication (étape 11) ----------------------------------------------------------
+  fip_publication:
+    type: OS::Neutron::FloatingIP
+    depends_on: [interface_pub]
+    properties:
+      floating_network: public1
+      floating_ip_address: { get_param: adresse_publication }
+      port_id: { get_resource: port_pub_web }
+
+outputs:
+  routeur_adm_public1:
+    description: adresse du routeur adm sur public1, pour la route de l'hôte (TP 13, étape 3)
+    value: { get_attr: [routeur_adm, external_gateway_info, external_fixed_ips, 0, ip_address] }
+  volume_bdd:
+    description: identifiant du volume de la base (TP 13, étape 9, partie dans la VM)
+    value: { get_resource: volume_bdd }
+  fip:
+    description: adresse de publication
+    value: { get_attr: [fip_publication, floating_ip_address] }

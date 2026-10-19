@@ -103,7 +103,7 @@ Les paramètres se règlent dans le fichier de scénario, ou en variable d'envir
 | `ENABLE_CINDER` | `no` | Active Cinder (backend LVM) |
 | `CINDER_DEVICE` | vide | Disque vide dédié à Cinder ; vide = fichier loop |
 | `CINDER_LOOP_SIZE_GB` | `20` | Taille du fichier loop |
-| `ENABLE_HEAT` | `no` | Orchestration Heat (~1 Go de RAM en plus) |
+| `ENABLE_HEAT` | `no` | Orchestration Heat (environ 1 Go de mémoire en plus, mesuré) ; le TP 14 l'active |
 | `ENABLE_BARBICAN` | `no` | Gestion des secrets ; nécessaire pour chiffrer les volumes Cinder |
 | `ENABLE_DESIGNATE` | `no` | DNS (backend bind9 sur l'hôte, port 53) |
 | `ENABLE_LAB_BACKUP` | `no` | Stockage objet S3 (Garage, hors Kolla), restic et s3cmd, pour le TP 10 |
@@ -225,7 +225,8 @@ Pas de VIP non plus : HAProxy/keepalived/ProxySQL sont désactivés et `kolla_in
 | Fluentd, cron, kolla_toolbox | Logs, rotation, outils | `fluentd`, `cron`, `kolla_toolbox` | aucun |
 
 Non déployés :
-- Heat (orchestration) : désactivé pour économiser la RAM (`ENABLE_HEAT=yes` pour l'activer) ;
+- Heat (orchestration) : désactivé pour économiser la mémoire ; le TP 14 l'ajoute (`ENABLE_HEAT=yes`
+  dans le scénario 04), puis le retire ;
 - Barbican et Designate : seulement dans le scénario 04 ;
 - **Swift (stockage objet) : n'existe plus dans Kolla-Ansible 2025.1** (aucun rôle ni variable `enable_swift`).
   L'alternative Kolla, `ceph-rgw` (API compatible Swift), exige un cluster Ceph externe. Pour le TP 10,

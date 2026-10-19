@@ -105,6 +105,7 @@ SSH. Chaque TP apporte une brique que le TP final réutilise.
 | 11 | DNS as a Service avec Designate | Extension | Extension possible |
 | 12 | Configurer les VM au démarrage avec cloud-init | Extension | Image, gabarit, proxy, métadonnées |
 | 13 | TP final : architecture de déploiement sur OpenStack | Synthèse | Tout le parcours |
+| 14 | TP bonus : la même architecture redéployée avec Heat, décrite en code | Bonus | Reprend le TP 13 |
 
 ---
 
@@ -299,9 +300,7 @@ objectif se valide par deux tests : le flux autorisé fonctionne, le flux interd
 
 ### 4.5 Ressources et nommage
 
-Convention : `tp13-<type>-[<réseau>-]<fonction>-demo`, en minuscules avec des tirets. L'étiquette
-`tp13` est posée sur tout ce qui l'accepte. La FIP, qui n'a pas de nom, porte la description
-`FIP_PUBLICATION`.
+Convention : `<numero_de_tp>-<type|fonction>-<group>-<phase>`, en minuscules avec des tirets. 
 
 | Type | Nom | Remarque | Statut |
 |---|---|---|---|

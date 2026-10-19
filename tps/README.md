@@ -30,9 +30,29 @@ exploite et on étend la plateforme.
 | [11](tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
 | [12](tp12-cloud-init.md) | Configurer les VM au démarrage avec cloud-init | Extension | 02 ou 04 | Prêt |
 | [13](tp13-deploiement.md) | TP final : déployer une architecture sécurisée sur OpenStack ([architecture](tp13-architecture.md)) | Synthèse | 04 | Prêt (étape 15 optionnelle et payante) |
+| [14](tp14-heat.md) | TP bonus : redéployer la même architecture avec Heat, l'infrastructure décrite en code | Bonus | 04, Heat ajouté par le TP | Prêt |
 
 Non testés sur le lab, et signalés comme tels dans les énoncés : `sshuttle` et la redirection de port
 (TP 02, contraintes techniques), la partie AWS du scénario 03 et le niveau 3 « cloud » du TP 10 (payants).
+
+### TP 13 puis TP 14 (bonus) : la même architecture, deux méthodes
+
+Le TP 13, TP final du parcours, construit l'architecture ressource par ressource, en ligne de commande. Le TP 14, en
+bonus, la reconstruit avec Heat, à partir d'un modèle qui la décrit. Les deux constructions passent les mêmes
+contrôles : c'est ce qui permet de les comparer.
+
+| | TP 13 : commande par commande | TP 14 : modèle Heat |
+|---|---|---|
+| Ce qu'on écrit | Une commande par ressource, dans le bon ordre | Un fichier qui décrit l'état voulu ; Heat déduit l'ordre des dépendances |
+| Construire, détruire | Toutes les étapes ; nettoyage en ordre inverse, étape par étape | Une commande : `openstack stack create`, `openstack stack delete` |
+| Modifier | Une commande ciblée ; rien ne garde l'état voulu | `openstack stack update` : Heat ne change que ce qui diffère (constaté : une règle modifiée sur place, la VM conservée) |
+| Reproduire à l'identique | Rejouer toutes les commandes sans erreur | Rejouer le même modèle ; le fichier se range dans git |
+| Ce qu'on apprend | Le rôle de chaque brique, le diagnostic couche par couche | Décrire, paramétrer, versionner une infrastructure |
+| Ce qui reste à faire à la main | Tout | La route, le pare-feu, le proxy et l'heure de l'hôte ; le secret de la base, qu'un modèle ne doit jamais contenir |
+| Limites constatées | Oublis et erreurs de saisie ; durée | Heat ne pose pas d'étiquette sur les security groups ni sur la FIP, ni la description de la FIP ; un groupe sans aucune sortie demande une règle de plus ; le service consomme environ 1 Go de mémoire (mesuré) |
+
+Ressources créées par Heat : leur nom commence par `ht-` (par exemple `ht-tp13-vm-web-haproxy-demo`),
+pour les distinguer au premier coup d'œil de celles créées à la main.
 
 ---
 
@@ -128,3 +148,6 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 13 | segmenter un réseau et écrire des security groups au plus juste, en entrée et en sortie |  |  |
 | 13 | administrer des VM par un bastion, et contrôler leurs sorties par un proxy |  |  |
 | 13 | diagnostiquer un routage asymétrique avec `tcpdump`, et prouver chaque refus par un test |  |  |
+| 14 | ajouter un service à un cloud en fonctionnement, puis le retirer proprement |  |  |
+| 14 | décrire une infrastructure dans un modèle Heat, la créer, la modifier et la détruire |  |  |
+| 14 | comparer une construction à la main et une construction par modèle, et dire ce qui reste hors du modèle |  |  |

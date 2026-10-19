@@ -207,6 +207,10 @@ pip install -q -U pip
 pip install -q "git+https://opendev.org/openstack/kolla-ansible@stable/$OPENSTACK_RELEASE"
 pip install -q docker dbus-python python-openstackclient python-barbicanclient python-designateclient \
     -c "https://releases.openstack.org/constraints/upper/$OPENSTACK_RELEASE"
+# Client de Heat (commandes « openstack stack … ») : seulement si le service est activé
+if [[ "$ENABLE_HEAT" == "yes" ]]; then
+  pip install -q python-heatclient -c "https://releases.openstack.org/constraints/upper/$OPENSTACK_RELEASE"
+fi
 
 sudo mkdir -p /etc/kolla/config/nova
 sudo chown -R "$USER:$USER" /etc/kolla

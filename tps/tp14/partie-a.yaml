@@ -1,0 +1,67 @@
+heat_template_version: 2021-04-16
+
+description: >
+  TP 14, partie A : une VM CirrOS sur demo-net, son port, un security group qui n'ouvre SSH et
+  ping qu'à l'hôte, et une floating IP.
+
+parameters:
+  prefixe:
+    type: string
+    default: ht-tp14
+    description: début du nom de chaque ressource (ht = déployé par Heat)
+  image:
+    type: string
+    default: cirros
+  gabarit:
+    type: string
+    default: m1.tiny
+  cle:
+    type: string
+    default: mykey
+  reseau:
+    type: string
+    default: demo-net
+  acces_admin:
+    type: string
+    default: 10.0.2.1/32
+    description: seule adresse autorisée en SSH et en ping (l'hôte, côté OpenStack)
+
+resources:
+  groupe:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, sg, admin, demo]] }
+      description: SSH et ping depuis l'hôte seulement
+      rules:
+        - { protocol: icmp, remote_ip_prefix: { get_param: acces_admin } }
+        - { protocol: tcp, port_range_min: 22, port_range_max: 22, remote_ip_prefix: { get_param: acces_admin } }
+
+  port:
+    type: OS::Neutron::Port
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, port, demo]] }
+      network: { get_param: reseau }
+      security_groups: [{ get_resource: groupe }]
+
+  vm:
+    type: OS::Nova::Server
+    properties:
+      name: { list_join: ['-', [{ get_param: prefixe }, vm, demo]] }
+      image: { get_param: image }
+      flavor: { get_param: gabarit }
+      key_name: { get_param: cle }
+      networks: [{ port: { get_resource: port } }]
+
+  fip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public1
+      port_id: { get_resource: port }
+
+outputs:
+  fip:
+    description: floating IP de la VM
+    value: { get_attr: [fip, floating_ip_address] }
+  adresse_privee:
+    description: adresse de la VM sur le réseau du projet
+    value: { get_attr: [vm, first_address] }

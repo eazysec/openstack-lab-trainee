@@ -4,7 +4,8 @@
 #  Usage : ./verify.sh [--keep]     (--keep : ne supprime pas la VM de test)
 #  Code retour : 0 si tous les tests passent, 1 sinon.
 #  Crée puis supprime (ressources préfixées verify-) : 1 VM, 2 floating IP, et selon les
-#  services présents : 2 volumes de 1 Go, 1 type de volume chiffré, 1 secret, 1 zone DNS.
+#  services présents : 2 volumes de 1 Go, 1 type de volume chiffré, 1 secret, 1 zone DNS,
+#  1 pile Heat (avec 1 security group).
 # =============================================================================
 set -uo pipefail
 KEEP="${1:-}"
@@ -80,6 +81,11 @@ purge_test_resources() {
   if openstack service show dns >/dev/null 2>&1; then
     for id in $(openstack zone list -f value -c id -c name 2>/dev/null | awk '$2 ~ /^verify-/{print $1}'); do
       openstack zone delete "$id" >/dev/null 2>&1
+    done
+  fi
+  if openstack service show orchestration >/dev/null 2>&1; then
+    for id in $(openstack stack list -f value -c ID -c "Stack Name" 2>/dev/null | awk '$2 ~ /^verify-/{print $1}'); do
+      openstack stack delete -y --wait "$id" >/dev/null 2>&1
     done
   fi
 }
@@ -192,6 +198,27 @@ if sudo docker ps --format '{{.Names}}' | grep -qx lab-s3; then
   # --group-by host : les sauvegardes portent sur des dossiers temporaires différents à chaque passage
   rs forget --group-by host --keep-last 1 --prune -q >/dev/null 2>&1 || true
   sudo rm -rf "$VD" "$VR"
+fi
+
+if openstack service show orchestration >/dev/null 2>&1; then
+  echo "== Heat (orchestration)"
+  check "Heat : moteurs up"                       bash -c '! openstack orchestration service list -f value -c Status | grep -qv up'
+  MODELE=$(mktemp --suffix=.yaml)
+  cat > "$MODELE" <<EOF
+heat_template_version: 2021-04-16
+resources:
+  groupe:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: $NAME-sg
+outputs:
+  groupe_id:
+    value: { get_resource: groupe }
+EOF
+  check "pile créée (CREATE_COMPLETE)"            openstack stack create -t "$MODELE" --wait "$NAME-pile"
+  check "ressource créée par la pile"             openstack security group show "$NAME-sg"
+  check "pile supprimée avec sa ressource"        bash -c "openstack stack delete -y --wait $NAME-pile && ! openstack security group show $NAME-sg"
+  rm -f "$MODELE"
 fi
 
 if [[ -s /etc/openstack-lab/public-fip.map ]]; then
