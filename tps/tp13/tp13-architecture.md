@@ -371,14 +371,37 @@ extensions possibles, non retenues.
 
 ## 7. Glossaire
 
+### 7.1 OpenStack
+
+| Terme | Définition |
+|---|---|
+| Projet (tenant) | Espace isolé du cloud, qui possède des ressources (instances, réseaux, volumes) et des quotas. Les utilisateurs y reçoivent des rôles. « Tenant » est l'ancien nom. |
+| Rôle | Ce qu'un utilisateur a le droit de faire dans un projet : `reader`, `member`, `admin`, ou le rôle d'un service, comme `creator` pour Barbican. |
+| Quota | Limite des ressources d'un projet : instances, vCPU, RAM, volumes, FIP… |
+| Instance | Machine virtuelle créée à partir d'une image et d'un gabarit ; dans ce document, « VM ». |
+| Gabarit (flavor) | Taille d'une instance : vCPU, RAM, disque racine. Les volumes n'en font pas partie. Ici, `m1.1g`. |
+| Image | Modèle de disque (Glance), avec un système déjà installé, à partir duquel on crée les instances. Ici, `debian13`. |
+| Paire de clés | Clé SSH publique déposée dans l'instance à sa création ; la clé privée reste sur le poste. |
+| User data | Configuration lue par cloud-init au premier démarrage, depuis le service de métadonnées : un script shell ou un fichier `#cloud-config`. Jamais de secret dedans (TP 12). |
+| Volume | Disque persistant (Cinder), qui ne disparaît pas avec l'instance. Ici, chiffré, pour la base de données. |
+| Réseau | Réseau virtuel (Neutron), découpé en sous-réseaux, qui relie des instances. Par défaut privé : interne au projet. |
+| Réseau externe | Réseau relié à l'extérieur d'OpenStack : les routeurs y ont leur passerelle et les FIP y sont prises. Ici, `public1`. |
+| Réseau partagé | Réseau sur lequel des instances de plusieurs projets peuvent se brancher. « Externe » et « partagé » sont deux réglages distincts. |
+| Routeur | Relie des sous-réseaux entre eux et à un réseau externe ; il traduit les adresses (SNAT) et porte les FIP. Ici, deux routeurs sans SNAT. |
+| Port | Carte réseau virtuelle d'une instance sur un réseau ; elle porte l'adresse IP et les groupes de sécurité. |
+| FIP (floating IP) | Adresse du réseau externe associée à un port d'instance ; le routeur traduit les flux. Elle ne filtre rien. Elle n'est pas forcément publique : sur le lab, `10.0.2.x`, joignable depuis l'hôte seulement. |
+| Groupe de sécurité (security group) | Pare-feu à état, appliqué par Neutron aux ports, hors de la VM. Il ne contient que des autorisations : le reste est refusé. |
+| Stack Heat | Ensemble des ressources créées à partir d'un template, et gérées ensemble : création, mise à jour, suppression (TP 14). |
+| Template Heat | Fichier YAML (format HOT) qui décrit les ressources à créer, leurs paramètres et leurs sorties. Il fait référence aux gabarits et aux images existants. |
+
+### 7.2 Réseau, sécurité et AWS
+
 | Terme | Définition |
 |---|---|
 | ENI | Interface réseau d'une instance EC2. Elle porte une IP privée principale et peut recevoir des IP privées secondaires. |
 | Elastic IP | IP publique fixe d'AWS, associée à une IP privée de l'ENI. Facturée jusqu'à sa libération. |
 | DNAT | Traduction de l'adresse de destination ; ici, l'hôte redirige l'IP secondaire vers la FIP. |
-| FIP | Adresse du réseau externe Neutron associée à une carte de VM par le routeur. Elle ne filtre rien. |
 | SNAT | Traduction de l'adresse source, qui permet aux VM sans FIP de sortir. Désactivé sur les deux routeurs. |
-| Security group | Pare-feu *stateful* appliqué à une carte réseau, pas à un logiciel. |
 | `remote_group_id` | Source ou destination d'une règle désignée par un groupe : toutes les cartes membres du groupe. |
 | `remote_ip_prefix` | Source ou destination désignée par une plage d'adresses ; utilisée pour ce qui n'est pas un port Neutron. |
 | Bastion | Point de passage unique pour l'administration ; ici l'hôte OpenStack. |

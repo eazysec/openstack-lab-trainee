@@ -787,13 +787,33 @@ header.top a{color:var(--band-ink)}
     <span class="eyebrow">Repères</span>
     <h2 id="h-glossaire">Glossaire</h2>
   </div>
+  <h3>OpenStack</h3>
+  <dl class="glossary">
+    <div><dt>Projet (tenant)</dt><dd>Espace isolé du cloud, qui possède des ressources (instances, réseaux, volumes) et des quotas. Les utilisateurs y reçoivent des rôles. « Tenant » est l'ancien nom.</dd></div>
+    <div><dt>Rôle</dt><dd>Ce qu'un utilisateur a le droit de faire dans un projet : <code>reader</code>, <code>member</code>, <code>admin</code>, ou le rôle d'un service, comme <code>creator</code> pour Barbican.</dd></div>
+    <div><dt>Quota</dt><dd>Limite des ressources d'un projet : instances, vCPU, RAM, volumes, FIP…</dd></div>
+    <div><dt>Instance</dt><dd>Machine virtuelle créée à partir d'une image et d'un gabarit ; dans ce document, « VM ».</dd></div>
+    <div><dt>Gabarit (flavor)</dt><dd>Taille d'une instance : vCPU, RAM, disque racine. Les volumes n'en font pas partie. Ici, <code>m1.1g</code>.</dd></div>
+    <div><dt>Image</dt><dd>Modèle de disque (Glance), avec un système déjà installé, à partir duquel on crée les instances. Ici, <code>debian13</code>.</dd></div>
+    <div><dt>Paire de clés</dt><dd>Clé SSH publique déposée dans l'instance à sa création ; la clé privée reste sur le poste.</dd></div>
+    <div><dt>User data</dt><dd>Configuration lue par cloud-init au premier démarrage, depuis le service de métadonnées : un script shell ou un fichier <code>#cloud-config</code>. Jamais de secret dedans (TP 12).</dd></div>
+    <div><dt>Volume</dt><dd>Disque persistant (Cinder), qui ne disparaît pas avec l'instance. Ici, chiffré, pour la base de données.</dd></div>
+    <div><dt>Réseau</dt><dd>Réseau virtuel (Neutron), découpé en sous-réseaux, qui relie des instances. Par défaut privé : interne au projet.</dd></div>
+    <div><dt>Réseau externe</dt><dd>Réseau relié à l'extérieur d'OpenStack : les routeurs y ont leur passerelle et les FIP y sont prises. Ici, <code>public1</code>.</dd></div>
+    <div><dt>Réseau partagé</dt><dd>Réseau sur lequel des instances de plusieurs projets peuvent se brancher. « Externe » et « partagé » sont deux réglages distincts.</dd></div>
+    <div><dt>Routeur</dt><dd>Relie des sous-réseaux entre eux et à un réseau externe ; il traduit les adresses (SNAT) et porte les FIP. Ici, deux routeurs sans SNAT.</dd></div>
+    <div><dt>Port</dt><dd>Carte réseau virtuelle d'une instance sur un réseau ; elle porte l'adresse IP et les groupes de sécurité.</dd></div>
+    <div><dt>FIP (floating IP)</dt><dd>Adresse du réseau externe associée à un port d'instance ; le routeur traduit les flux. Elle ne filtre rien. Elle n'est pas forcément publique : sur le lab, <code>10.0.2.x</code>, joignable depuis l'hôte seulement.</dd></div>
+    <div><dt>Groupe de sécurité (security group)</dt><dd>Pare-feu à état, appliqué par Neutron aux ports, hors de la VM. Il ne contient que des autorisations : le reste est refusé.</dd></div>
+    <div><dt>Stack Heat</dt><dd>Ensemble des ressources créées à partir d'un template, et gérées ensemble : création, mise à jour, suppression (TP 14).</dd></div>
+    <div><dt>Template Heat</dt><dd>Fichier YAML (format HOT) qui décrit les ressources à créer, leurs paramètres et leurs sorties. Il fait référence aux gabarits et aux images existants.</dd></div>
+  </dl>
+  <h3>Réseau, sécurité et AWS</h3>
   <dl class="glossary">
     <div><dt>ENI</dt><dd>Interface réseau d'une instance EC2. Elle porte une IP privée principale et peut recevoir des IP privées secondaires.</dd></div>
     <div><dt>Elastic IP</dt><dd>IP publique fixe d'AWS, associée à une IP privée de l'ENI. Facturée jusqu'à sa libération.</dd></div>
     <div><dt>DNAT</dt><dd>Traduction de l'adresse de destination ; ici, l'hôte redirige l'IP secondaire vers la FIP.</dd></div>
-    <div><dt>FIP</dt><dd>Adresse du réseau externe Neutron associée à une carte de VM par le routeur. Elle ne filtre rien.</dd></div>
     <div><dt>SNAT</dt><dd>Traduction de l'adresse source, qui permet aux VM sans FIP de sortir. Désactivé sur les deux routeurs.</dd></div>
-    <div><dt>Security group</dt><dd>Pare-feu stateful appliqué à une carte réseau, pas à un logiciel.</dd></div>
     <div><dt>remote_group_id</dt><dd>Source ou destination d'une règle désignée par un groupe : toutes les cartes membres du groupe.</dd></div>
     <div><dt>remote_ip_prefix</dt><dd>Source ou destination désignée par une plage d'adresses ; utilisée pour ce qui n'est pas un port Neutron.</dd></div>
     <div><dt>Bastion</dt><dd>Point de passage unique pour l'administration ; ici l'hôte OpenStack.</dd></div>
