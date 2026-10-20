@@ -261,6 +261,9 @@ unset -f en; unset MDP H H2 HV HE HU K E M X C
    Que faut-il partager en plus ?
 5. Le journal de Barbican dit qui a lu la valeur du secret. Qu'est-ce qu'il ne permet pas de savoir,
    et qui pourrait l'effacer ?
+6. Au TP 13, l'application lit le mot de passe de sa base dans un fichier, déposé depuis le bastion.
+   Pourquoi ne pas lui donner plutôt un identifiant d'application (TP 06 bis) limité à la lecture de ce
+   seul secret dans Barbican ?
 
 ## Validation
 

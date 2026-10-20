@@ -156,6 +156,7 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 09 | protéger la clé d'un volume chiffré contre sa suppression |  |  |
 | 10 | sauvegarder et restaurer une VM, et expliquer la règle 3-2-1 et le séquestre du mot de passe |  |  |
 | 11 | publier des noms DNS, à la main et automatiquement par Neutron |  |  |
+| 11 | limiter un automate aux seuls enregistrements d'une zone DNS |  |  |
 | 12 | décrire la configuration d'une VM dans un user-data cloud-init, la valider et la vérifier |  |  |
 | 12 | dire pourquoi un secret ne va jamais dans un user-data, et appliquer l'immutabilité |  |  |
 | 13 | segmenter un réseau et écrire des security groups au plus juste, en entrée et en sortie |  |  |

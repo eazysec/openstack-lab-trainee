@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Prérequis | TP 03 et TP 06 ; Designate déployé (scénario 04) |
+| Prérequis | TP 03, TP 06 et TP 06 bis ; Designate déployé (scénario 04) |
 | À la fin du TP | Vous savez publier des noms DNS pour vos VM, à la main ou automatiquement |
 
 ## Objectifs
@@ -14,6 +14,7 @@
 Sur ce lab, Designate s'appuie sur un serveur bind9 qui tourne sur l'instance et répond sur son
 IP privée, port 53. Les zones (`lab.example.`, réservé aux exemples) ne sont pas publiées sur
 Internet : on interroge directement ce serveur.
+- Limiter un automate aux seuls enregistrements d'une zone (règles d'accès).
 
 ---
 
@@ -161,7 +162,47 @@ openstack zone create --email a@lab.example autre.lab.example.          # accept
 Relevez les deux messages d'erreur : `Zone already exists, owned by a different tenant` et
 `Unable to create subzone in another tenants zone`.
 
-## Étape 5. Nettoyage
+## Étape 5. Un automate qui ne gère que les enregistrements d'une zone
+
+Un script doit publier et retirer des noms dans `tp11.lab.example.`, rien d'autre. On lui donne un
+identifiant d'application (TP 06 bis) dont les règles d'accès ne visent **que cette zone**, par son
+identifiant. Les appels nécessaires ont été relevés avec `--debug`, comme au TP 06 bis : la recherche
+de la zone par son nom, la lecture de la zone, la liste, l'ajout et la suppression de ses
+enregistrements.
+
+```bash
+# [instance]
+source /etc/kolla/admin-openrc.sh
+openstack zone create --email admin@lab.example tp11-temoin.lab.example.     # une zone témoin
+Z=$(openstack zone show tp11.lab.example. -f value -c id)
+REGLES='[{"service": "dns", "method": "GET", "path": "/v2/zones"},
+  {"service": "dns", "method": "GET", "path": "/v2/zones/'$Z'"},
+  {"service": "dns", "method": "GET", "path": "/v2/zones/'$Z'/recordsets"},
+  {"service": "dns", "method": "POST", "path": "/v2/zones/'$Z'/recordsets"},
+  {"service": "dns", "method": "DELETE", "path": "/v2/zones/'$Z'/recordsets/*"}]'
+{ read -r ID; read -r SECRET; } < <(openstack application credential create tp11-appcred-dns \
+  --role member --access-rules "$REGLES" -f value -c id -c secret)
+appli() {  # appli <id> <secret> <commande…> : la commande, avec l'identifiant d'application seul
+  local id=$1 secret=$2; shift 2
+  env $(env | grep -o '^OS_[A-Z_]*' | sed 's/^/-u /') OS_AUTH_URL=$OS_AUTH_URL OS_IDENTITY_API_VERSION=3 \
+    OS_AUTH_TYPE=v3applicationcredential OS_APPLICATION_CREDENTIAL_ID=$id \
+    OS_APPLICATION_CREDENTIAL_SECRET=$secret "$@"
+}
+appli $ID $SECRET openstack recordset create --type A --record 192.0.2.30 tp11.lab.example. automate   # accepté
+appli $ID $SECRET openstack recordset list tp11.lab.example. -c name -c type                           # accepté
+appli $ID $SECRET openstack recordset delete tp11.lab.example. automate.tp11.lab.example.              # accepté
+appli $ID $SECRET openstack recordset create --type A --record 192.0.2.31 tp11-temoin.lab.example. intrus   # refusé
+appli $ID $SECRET openstack zone delete tp11.lab.example.        # refusé
+appli $ID $SECRET openstack server list                          # refusé : autre service
+openstack application credential delete tp11-appcred-dns
+openstack zone delete tp11-temoin.lab.example.
+```
+
+Designate répond `Forbidden` (403) aux appels hors règle, là où Nova répondait `401` au TP 06 bis :
+le code dépend du service, le refus est le même. L'automate ne peut ni toucher une autre zone, ni
+supprimer ou modifier la sienne, ni sortir du DNS.
+
+## Étape 6. Nettoyage
 
 ```bash
 # [instance]
@@ -190,12 +231,15 @@ rm ~/tp11-openrc.sh
    cela évite-t-il ?
 5. Les zones de ce lab ne sont pas joignables depuis Internet. Que faudrait-il pour qu'un vrai domaine
    soit résolu par tout le monde ?
+6. À l'étape 5, pourquoi viser la zone par son identifiant plutôt que par `/v2/zones/*` ? Que
+   pourrait faire l'automate avec `*` ?
 
 ## Validation
 
 - [ ] `www`, `intranet` et `tp11-vm-web` résolus par `dig` ; `www` résolu depuis une VM.
 - [ ] Publication et suppression automatiques de `tp11-vm-web` observées ; `api` publié par la floating IP.
 - [ ] Les deux refus de l'étape 4 relevés.
+- [ ] Automate de l'étape 5 : enregistrements de sa zone gérés ; zone témoin, suppression de zone et autre service refusés.
 - [ ] Nettoyage fait.
 
 ## Sources
