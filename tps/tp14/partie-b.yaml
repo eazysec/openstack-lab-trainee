@@ -120,7 +120,7 @@ resources:
   # moins une règle de sortie. Les security groups web et data-bdd n'ont aucune sortie autorisée : ils
   # reçoivent une sortie vers leur propre security group (remote_group_id sans valeur), qui n'atteint
   # que leur propre port.
-  groupe_web:
+  sg_web:
     type: OS::Neutron::SecurityGroup
     properties:
       name: { list_join: ['-', [{ get_param: prefixe }, sg, web, demo]] }
@@ -129,7 +129,7 @@ resources:
         - { direction: ingress, protocol: tcp, port_range_min: 80, port_range_max: 80, remote_ip_prefix: 0.0.0.0/0 }
         - { direction: egress, remote_mode: remote_group_id }
 
-  groupe_adm:
+  sg_adm:
     type: OS::Neutron::SecurityGroup
     properties:
       name: { list_join: ['-', [{ get_param: prefixe }, sg, adm, demo]] }
@@ -140,7 +140,7 @@ resources:
         - { direction: egress, protocol: udp, port_range_min: 123, port_range_max: 123, remote_ip_prefix: { list_join: ['', [{ get_param: bastion }, '/32']] } }
         - { direction: egress, protocol: tcp, port_range_min: 80, port_range_max: 80, remote_ip_prefix: 169.254.169.254/32 }
 
-  groupe_data_bdd:
+  sg_data_bdd:
     type: OS::Neutron::SecurityGroup
     properties:
       name: { list_join: ['-', [{ get_param: prefixe }, sg, data, bdd, demo]] }
@@ -148,25 +148,25 @@ resources:
       rules:
         - { direction: egress, remote_mode: remote_group_id }
 
-  groupe_data_web:
+  sg_data_web:
     type: OS::Neutron::SecurityGroup
     properties:
       name: { list_join: ['-', [{ get_param: prefixe }, sg, data, web, demo]] }
       description: TP 13, carte data-web
       rules:
-        - { direction: egress, protocol: tcp, port_range_min: 5432, port_range_max: 5432, remote_mode: remote_group_id, remote_group_id: { get_resource: groupe_data_bdd } }
+        - { direction: egress, protocol: tcp, port_range_min: 5432, port_range_max: 5432, remote_mode: remote_group_id, remote_group_id: { get_resource: sg_data_bdd } }
 
   # Les security groups data-web et data-bdd se désignent l'un l'autre : la règle d'entrée de
   # data-bdd est une ressource à part, sinon chacun dépendrait de l'autre.
   regle_bdd_depuis_web:
     type: OS::Neutron::SecurityGroupRule
     properties:
-      security_group: { get_resource: groupe_data_bdd }
+      security_group: { get_resource: sg_data_bdd }
       direction: ingress
       protocol: tcp
       port_range_min: 5432
       port_range_max: 5432
-      remote_group: { get_resource: groupe_data_web }
+      remote_group: { get_resource: sg_data_web }
       description: depuis l'application
 
   # --- Ports à adresse fixe (étape 6) ---------------------------------------------------------
@@ -176,7 +176,7 @@ resources:
       name: { list_join: ['-', [{ get_param: prefixe }, port, pub, web, demo]] }
       network: { get_resource: reseau_pub }
       fixed_ips: [{ subnet: { get_resource: sous_reseau_pub }, ip_address: 192.168.120.10 }]
-      security_groups: [{ get_resource: groupe_web }]
+      security_groups: [{ get_resource: sg_web }]
       tags: [{ get_param: etiquette }]
   port_adm_web:
     type: OS::Neutron::Port
@@ -184,7 +184,7 @@ resources:
       name: { list_join: ['-', [{ get_param: prefixe }, port, adm, web, demo]] }
       network: { get_resource: reseau_adm }
       fixed_ips: [{ subnet: { get_resource: sous_reseau_adm }, ip_address: 192.168.121.11 }]
-      security_groups: [{ get_resource: groupe_adm }]
+      security_groups: [{ get_resource: sg_adm }]
       tags: [{ get_param: etiquette }]
   port_data_web:
     type: OS::Neutron::Port
@@ -192,7 +192,7 @@ resources:
       name: { list_join: ['-', [{ get_param: prefixe }, port, data, web, demo]] }
       network: { get_resource: reseau_data }
       fixed_ips: [{ subnet: { get_resource: sous_reseau_data }, ip_address: 192.168.122.11 }]
-      security_groups: [{ get_resource: groupe_data_web }]
+      security_groups: [{ get_resource: sg_data_web }]
       tags: [{ get_param: etiquette }]
   port_adm_bdd:
     type: OS::Neutron::Port
@@ -200,7 +200,7 @@ resources:
       name: { list_join: ['-', [{ get_param: prefixe }, port, adm, bdd, demo]] }
       network: { get_resource: reseau_adm }
       fixed_ips: [{ subnet: { get_resource: sous_reseau_adm }, ip_address: 192.168.121.12 }]
-      security_groups: [{ get_resource: groupe_adm }]
+      security_groups: [{ get_resource: sg_adm }]
       tags: [{ get_param: etiquette }]
   port_data_bdd:
     type: OS::Neutron::Port
@@ -208,7 +208,7 @@ resources:
       name: { list_join: ['-', [{ get_param: prefixe }, port, data, bdd, demo]] }
       network: { get_resource: reseau_data }
       fixed_ips: [{ subnet: { get_resource: sous_reseau_data }, ip_address: 192.168.122.12 }]
-      security_groups: [{ get_resource: groupe_data_bdd }]
+      security_groups: [{ get_resource: sg_data_bdd }]
       tags: [{ get_param: etiquette }]
 
   # --- Clé et VM (étape 7) --------------------------------------------------------------------
