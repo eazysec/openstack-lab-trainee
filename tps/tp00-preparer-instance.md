@@ -14,6 +14,18 @@
 
 ---
 
+## Étape 0. Vérifier les conditions d'entrée
+
+```bash
+# [poste] : dans le dossier qui contient openstack-lab-trainee/ et ec2_key
+./openstack-lab-trainee/tps/tp00/verifier-entree.sh <IP_PUBLIQUE>    # sans adresse si l'instance n'existe pas encore
+```
+
+Ce script ne modifie rien. Il vérifie que votre poste a un client SSH et l'AWS CLI, que la clé
+`ec2_key` et le dépôt sont dans le dossier courant, et, si vous donnez l'adresse de l'instance, que son
+port SSH répond. Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la
+dernière ligne n'est pas `Prêt pour le TP 00.`
+
 ## Étape 1. Les caractéristiques de l'instance
 
 Si vous créez vous-même l'instance, utilisez ces paramètres (déjà validés) :

@@ -13,13 +13,25 @@
 
 ---
 
-## Étape 1. Copier le dépôt et lancer le déploiement
+## Étape 0. Copier le dépôt et vérifier les conditions d'entrée
 
 ```bash
 # [poste] : dans le dossier qui contient openstack-lab-trainee/ et ec2_key
 scp -r -i ec2_key openstack-lab-trainee ubuntu@<IP_PUBLIQUE>:
 ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
 ```
+
+```bash
+# [instance]
+./openstack-lab-trainee/tps/tp01/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 01."
+```
+
+Ce script ne modifie rien. Il vérifie que l'instance convient au lab (Ubuntu 24.04, mémoire,
+processeurs, `sudo`, `tmux`) et qu'elle joint les sites d'où le déploiement télécharge Kolla-Ansible et
+ses images. Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière
+ligne n'est pas `Lab prêt pour le TP 01.`
+
+## Étape 1. Lancer le déploiement
 
 Le déploiement dure environ 15 minutes. On le lance dans tmux : si la connexion SSH coupe, il
 continue, et on le retrouve avec `tmux attach -t deploy`.

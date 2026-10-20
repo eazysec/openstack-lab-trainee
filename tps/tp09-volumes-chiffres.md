@@ -14,6 +14,19 @@
 
 ---
 
+## Étape 0. Vérifier les conditions d'entrée
+
+```bash
+# [instance]
+./openstack-lab-trainee/tps/tp09/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 09."
+```
+
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+`demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`), que Cinder et Barbican sont déployés (scénario 04) et
+qu'il ne reste rien d'un essai précédent (`tp09-`, type de volume compris).
+Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
+pas `Lab prêt pour le TP 09.`
+
 ## Étape 1. Un type de volume chiffré (en admin)
 
 Le chiffrement se décide par le type du volume.

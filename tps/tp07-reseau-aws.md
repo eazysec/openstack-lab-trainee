@@ -18,6 +18,19 @@
 
 ---
 
+## Étape 0. Vérifier les conditions d'entrée
+
+```bash
+# [instance]
+./openstack-lab-trainee/tps/tp07/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 07."
+```
+
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+`demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`), qu'aucune publication de floating IP ni *namespace*
+`client` d'un test interrompu n'est restée sur l'hôte, et qu'il ne reste rien d'un essai précédent.
+Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
+pas `Lab prêt pour le TP 07.`
+
 ## Étape 1. Constater le problème
 
 ```bash

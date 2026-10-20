@@ -14,7 +14,18 @@
 
 ---
 
-## Étape 0. Vérifier que Barbican est déployé
+## Étape 0. Vérifier les conditions d'entrée et Barbican
+
+```bash
+# [instance]
+./openstack-lab-trainee/tps/tp08/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 08."
+```
+
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+`demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`) et qu'il ne reste rien d'un essai précédent
+(`tp08-`, fichier `~/tp08-openrc.sh`). Si Barbican manque, il le signale : déployez-le ci-dessous.
+Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
+pas `Lab prêt pour le TP 08.`
 
 ```bash
 # [instance]

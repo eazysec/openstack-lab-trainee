@@ -28,7 +28,18 @@ site. Les trois niveaux du TP s'en rapprochent pas à pas :
 
 ---
 
-## Étape 0. Vérifier les outils
+## Étape 0. Vérifier les conditions d'entrée et les outils
+
+```bash
+# [instance]
+./openstack-lab-trainee/tps/tp10/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 10."
+```
+
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+`demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`), que Cinder, Barbican, le stockage objet du lab et
+`restic` sont là, et qu'il ne reste rien d'un essai précédent (`tp10-`, bucket et clé compris).
+Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
+pas `Lab prêt pour le TP 10.`
 
 ```bash
 # [instance]

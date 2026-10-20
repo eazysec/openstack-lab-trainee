@@ -14,6 +14,19 @@
 
 ---
 
+## Étape 0. Vérifier les conditions d'entrée
+
+```bash
+# [instance]
+./openstack-lab-trainee/tps/tp02/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 02."
+```
+
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+`demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`), que la clé des VM est sur l'instance, qu'aucune
+floating IP n'est allouée pour rien, et qu'il ne reste rien d'un essai précédent (`tp02-`).
+Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
+pas `Lab prêt pour le TP 02.`
+
 ## Étape 1. Charger l'environnement et faire l'inventaire
 
 ```bash

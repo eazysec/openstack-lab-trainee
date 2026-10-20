@@ -14,7 +14,18 @@
 
 ---
 
-## Étape 0. Ajouter Cinder (si ce n'est pas déjà fait)
+## Étape 0. Vérifier les conditions d'entrée, ajouter Cinder si besoin
+
+```bash
+# [instance]
+./openstack-lab-trainee/tps/tp04/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 04."
+```
+
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+`demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`) et qu'il ne reste rien d'un essai précédent
+(`tp04-`). Si Cinder manque, il le signale : ajoutez-le ci-dessous.
+Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
+pas `Lab prêt pour le TP 04.`
 
 ```bash
 # [instance]

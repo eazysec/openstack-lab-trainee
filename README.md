@@ -33,7 +33,8 @@ openstack-lab-trainee/
 │   └── public-fip.sh          publication d'une floating IP via une IP secondaire (scénario 03)
 ├── tests/
 │   └── test-public-fip.sh     test du scénario 03 côté hôte, sans ressource AWS (TP 07)
-├── tps/                       parcours de TP : énoncés, conventions, grille de suivi, sources
+├── tps/                       parcours de TP : énoncés, conventions, grille de suivi, sources ;
+│                              un dossier tpNN/ par TP (verifier-entree.sh, fichiers fournis)
 ├── VERSION                    version du dépôt
 ├── LICENSE                    licence des scripts (MIT)
 ├── LICENSE-CONTENU.md         licence des contenus pédagogiques (CC BY-SA 4.0)
