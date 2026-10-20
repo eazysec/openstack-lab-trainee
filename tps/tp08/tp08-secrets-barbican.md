@@ -182,4 +182,4 @@ openstack secret list
 - Barbican : <https://docs.openstack.org/barbican/2025.1/>
 - Keystone : projets, utilisateurs, rôles : <https://docs.openstack.org/keystone/2025.1/>
 - Guide de sécurité OpenStack : <https://docs.openstack.org/security-guide/>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

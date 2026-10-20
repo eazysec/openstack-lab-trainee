@@ -163,4 +163,4 @@ rm ~/tp09-openrc.sh
 - Barbican : <https://docs.openstack.org/barbican/2025.1/>
 - Cinder dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/reference/storage/cinder-guide.html>
 - Guide de sécurité OpenStack : <https://docs.openstack.org/security-guide/>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

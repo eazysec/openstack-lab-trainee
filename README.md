@@ -53,7 +53,7 @@ personnes expérimentées, voire très expérimentées. Pas forcément par manqu
 techniques, mais souvent par manque d'expérience et de culture de la sécurité.
 
 C'est ce constat qui m'a donné envie de créer ces travaux pratiques et de les partager. Je remercie au
-passage mon assistant invisible, qui m'a fait gagner beaucoup de temps pour les construire.
+passage mon « assistant invisible », qui m'a fait gagner beaucoup de temps pour les construire.
 
 ## Contribuer
 
@@ -103,7 +103,7 @@ openstack-lab-trainee/
 ├── tests/
 │   └── test-public-fip.sh     test du scénario 03 côté hôte, sans ressource AWS (TP 07)
 ├── tps/                       parcours de TP : énoncés, conventions, grille de suivi, sources ;
-│                              un dossier tpNN/ par TP (verifier-entree.sh, fichiers fournis)
+│                              un dossier tpNN/ par TP : énoncé, verifier-entree.sh, fichiers fournis
 ├── VERSION                    version du dépôt
 ├── LICENSE                    licence des scripts (MIT)
 ├── LICENSE-CONTENU.md         licence des contenus pédagogiques (CC BY-SA 4.0)
@@ -362,7 +362,7 @@ openstack server add volume vm1 vol1        # visible dans la VM en /dev/vdb
 La clé privée de `mykey` est sur l'instance et la floating IP n'existe que dans l'instance. Il faut
 donc créer la VM avec sa propre keypair et rebondir par l'instance. Les méthodes possibles (ProxyJump,
 ProxyCommand, `~/.ssh/config`, transfert d'agent, tunnel de port…) sont décrites et testées dans le
-[TP 02, étape 6](tps/tp02-instances-ssh.md). La connexion directe depuis Internet passe par le
+[TP 02, étape 6](tps/tp02/tp02-instances-ssh.md). La connexion directe depuis Internet passe par le
 scénario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
 
 ---

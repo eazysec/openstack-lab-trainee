@@ -96,7 +96,7 @@ Les coûts indiqués sont des ordres de grandeur ; le détail est dans [finops.m
 
 | Option | Principe | Coût AWS | Statut |
 |---|---|---|---|
-| Rebond SSH par l'instance (`ProxyJump`, `ProxyCommand`, `~/.ssh/config`) | SSH relaie la connexion vers la VM à travers l'instance ; la VM doit utiliser votre keypair | Aucun | Recommandé ; testé depuis un poste ([../tps/tp02-instances-ssh.md](../tps/tp02-instances-ssh.md), étape 6) |
+| Rebond SSH par l'instance (`ProxyJump`, `ProxyCommand`, `~/.ssh/config`) | SSH relaie la connexion vers la VM à travers l'instance ; la VM doit utiliser votre keypair | Aucun | Recommandé ; testé depuis un poste ([../tps/tp02/tp02-instances-ssh.md](../tps/tp02/tp02-instances-ssh.md), étape 6) |
 | Transfert d'agent SSH (`ssh -A`) | Votre clé reste sur le poste, l'instance l'utilise à distance | Aucun | Testé ; à réserver aux hôtes de confiance (root sur l'instance peut utiliser votre agent) |
 | Tunnel de port (`ssh -L`) | Un port local du poste mène au port d'une VM (SSH, web…) | Aucun | Testé |
 | `sshuttle` | `sshuttle -r ubuntu@<IP_PUBLIQUE> 10.0.2.0/24` : votre poste route le réseau externe Neutron via SSH | Aucun | Non testé (nécessite les droits root sur le poste) |

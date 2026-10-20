@@ -248,7 +248,7 @@ région**. Sur AWS : un bucket S3 dans une autre région, un utilisateur IAM lim
 clés dans Barbican), une règle de cycle de vie qui supprime les anciennes données, éventuellement
 *Object Lock* pour empêcher toute suppression pendant une durée donnée (protection contre un
 rançongiciel). Le coût est de quelques centimes par mois pour un TP (voir
-[../aws/finops.md](../aws/finops.md)), à condition de supprimer le bucket à la fin. Cette étape
+[../../aws/finops.md](../../aws/finops.md)), à condition de supprimer le bucket à la fin. Cette étape
 n'a pas été réalisée sur le lab.
 
 ## Étape 6. Nettoyage
@@ -306,4 +306,4 @@ openstack secret delete $HS3
 - AWS S3 : verrouillage d'objets : <https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html>
 - AWS S3 : cycle de vie : <https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html>
 - AWS S3 : tarifs : <https://aws.amazon.com/s3/pricing/>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

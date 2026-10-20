@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Prérequis | TP 03 ; avoir lu [../aws/aws-setup.md §2.3 et §4](../aws/aws-setup.md) |
+| Prérequis | TP 03 ; avoir lu [../../aws/aws-setup.md §2.3 et §4](../../aws/aws-setup.md) |
 | Coût | **Aucun** : la partie AWS est simulée. La version réelle (Elastic IP payante) se fait uniquement avec l'accord du tuteur |
 | À la fin du TP | Vous savez pourquoi une floating IP n'est pas joignable depuis Internet sur AWS, et comment la publier |
 
@@ -49,7 +49,7 @@ l'hôte, que ni Internet ni le VPC AWS ne connaissent.
 
 ## Étape 2. Le montage du scénario 03, sur le papier
 
-Lisez [../aws/aws-setup.md §4](../aws/aws-setup.md) et complétez ce tableau dans votre compte rendu :
+Lisez [../../aws/aws-setup.md §4](../../aws/aws-setup.md) et complétez ce tableau dans votre compte rendu :
 
 | Étape | Adresse destination du paquet | Qui fait la traduction | Couche (AWS / hôte / OpenStack) |
 |---|---|---|---|
@@ -91,7 +91,7 @@ Lisez le script et la sortie, et repérez :
 
 ## Étape 4. (Optionnel, payant, accord du tuteur) La version réelle
 
-Suivre [../aws/aws-setup.md §4](../aws/aws-setup.md), étapes 1 à 7, y compris le nettoyage qui
+Suivre [../../aws/aws-setup.md §4](../../aws/aws-setup.md), étapes 1 à 7, y compris le nettoyage qui
 libère l'Elastic IP et arrête la facturation.
 
 ## Étape 5. Nettoyage
@@ -109,9 +109,9 @@ rm -f ~/tp07.out
 2. Dans le scénario 03, pourquoi faut-il déclarer l'IP secondaire côté AWS (sur l'ENI) en plus de
    la poser sur l'hôte ?
 3. Pourquoi l'IP secondaire ne doit-elle jamais être utilisée comme adresse source par l'hôte ?
-   Que s'est-il passé quand c'est arrivé ? ([../aws/aws-setup.md §6](../aws/aws-setup.md))
+   Que s'est-il passé quand c'est arrivé ? ([../../aws/aws-setup.md §6](../../aws/aws-setup.md))
 4. Citez deux autres façons d'accéder à une VM depuis votre poste, sans aucun coût.
-   ([../aws/aws-setup.md §3.2](../aws/aws-setup.md))
+   ([../../aws/aws-setup.md §3.2](../../aws/aws-setup.md))
 
 ## Validation
 
@@ -127,5 +127,5 @@ rm -f ~/tp07.out
 - systemd-networkd : fichiers `.network` : <https://man7.org/linux/man-pages/man5/systemd.network.5.html>
 - networkd-dispatcher : <https://gitlab.com/craftyguy/networkd-dispatcher>
 - Récupération par user-data (AWS) : <https://repost.aws/knowledge-center/execute-user-data-ec2>
-- Incident réseau du lab : [../aws/aws-setup.md](../aws/aws-setup.md)
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Incident réseau du lab : [../../aws/aws-setup.md](../../aws/aws-setup.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

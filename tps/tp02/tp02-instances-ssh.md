@@ -326,7 +326,7 @@ toucher au port 22 de l'instance. Ce montage n'a pas été testé sur le lab.
 
 ### I. IP publique dédiée (payant)
 
-Scénario 03 : voir le TP 07 et [../aws/aws-setup.md §4](../aws/aws-setup.md).
+Scénario 03 : voir le TP 07 et [../../aws/aws-setup.md §4](../../aws/aws-setup.md).
 
 ## Étape 7. Nettoyage
 
@@ -374,4 +374,4 @@ openstack server list
 - SSH (options `-A`, `-J`, `-L`, `-W`) : <https://man.openbsd.org/ssh>
 - Agent SSH : <https://man.openbsd.org/ssh-agent>
 - sshuttle : <https://sshuttle.readthedocs.io/en/stable/>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

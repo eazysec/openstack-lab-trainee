@@ -64,7 +64,7 @@ vous** : l'énoncé donne le besoin, la syntaxe sur un exemple et le contrôle �
 | Preuve du refus autant que de l'accès | étapes 8, 12, 14 |
 | Traçabilité : nommage, étiquette `tp13`, nettoyage complet | étapes 1 à 16 |
 
-**Fichiers fournis** dans le dépôt, dossier [tp13/](tp13/) : l'application (`appli/`), le user-data
+**Fichiers fournis** dans le dépôt, dossier [tps/tp13/](./) : l'application (`appli/`), le user-data
 des VM (`user-data-tp13.yaml`) et un modèle de configuration SSH (`ssh_config.exemple`).
 
 **Avant chaque bloc `[instance]`**, chargez l'environnement OpenStack (comme aux TP précédents) :
@@ -369,7 +369,7 @@ scp -i ec2_key ~/.ssh/tp13-keypair-adm-demo.pub ubuntu@<IP_PUBLIQUE>:
 openstack keypair create --public-key ~/tp13-keypair-adm-demo.pub tp13-keypair-adm-demo
 ```
 
-Lisez [tp13/user-data-tp13.yaml](tp13/user-data-tp13.yaml). Il est commun aux deux VM :
+Lisez [user-data-tp13.yaml](user-data-tp13.yaml). Il est commun aux deux VM :
 
 | Bloc | Effet |
 |---|---|
@@ -608,7 +608,7 @@ psql -h 192.168.122.12 -U tp13app -w tp13 -c "select 1" 2>&1 | head -1   # refus
 
 ## Étape 10. La VM web : application et HAProxy
 
-L'application vous est fournie ([tp13/appli/](tp13/appli/)) : une page qui montre le parcours réel de
+L'application vous est fournie ([appli/](appli/)) : une page qui montre le parcours réel de
 votre requête et l'état de la base, et un formulaire de messages. Copiez-la par votre poste (aucune
 clé de VM sur le bastion), puis déposez le mot de passe dans un fichier lisible de root seul :
 
@@ -629,7 +629,7 @@ sudo cp -r ~/appli/app.py ~/appli/templates ~/appli/static /opt/tp13-appli/
 cd ~/appli && sudo bash installer-appli.sh | tail -2       # active active
 ```
 
-Lisez [tp13/appli/tp13-appli.service](tp13/appli/tp13-appli.service) : l'application tourne sous un
+Lisez [appli/tp13-appli.service](appli/tp13-appli.service) : l'application tourne sous un
 utilisateur créé au démarrage, sur un système en lecture seule, sans aucune capacité, avec un filtre
 d'appels système, et ne peut joindre que la boucle locale et la base (`IPAddressAllow`). Le mot de passe
 lui est remis par systemd (`LoadCredential`), jamais par une variable d'environnement.
@@ -927,4 +927,4 @@ Conservez l'image `debian13` et le gabarit `m1.1g`.
 - HAProxy 3.0, `option forwardfor` : <https://docs.haproxy.org/3.0/configuration.html>
 - GitHub, clés d'hôte SSH : <https://docs.github.com/fr/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints>
 - AWS, adresses IP Elastic : <https://docs.aws.amazon.com/fr_fr/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

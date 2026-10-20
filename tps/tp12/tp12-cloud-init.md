@@ -484,4 +484,4 @@ for ip in $FIP $FIPS $FIPC; do ssh-keygen -R $ip; done
 - NFS et automontage : <https://man7.org/linux/man-pages/man5/exports.5.html>,
   <https://man7.org/linux/man-pages/man5/nfs.conf.5.html>,
   <https://man7.org/linux/man-pages/man5/systemd.automount.5.html>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

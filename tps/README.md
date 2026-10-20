@@ -16,21 +16,21 @@ exploite et on étend la plateforme.
 
 | TP | Titre | Phase du projet | Scénario | État |
 |---|---|---|---|---|
-| [00](tp00-preparer-instance.md) | Préparer et découvrir l'instance AWS | Avant le déploiement | aucun | Prêt |
-| [01](tp01-deployer.md) | Déployer OpenStack et vérifier le déploiement | Déploiement | 01 | Prêt |
-| [02](tp02-instances-ssh.md) | Lancer des instances depuis l'hôte et s'y connecter en SSH | Utilisation | 01 | Prêt |
-| [03](tp03-reseau-neutron.md) | Comprendre le réseau Neutron | Utilisation | 01 | Prêt |
-| [04](tp04-volumes-cinder.md) | Stockage persistant : volumes, montage, snapshots | Utilisation | 02 | Prêt |
-| [05](tp05-exploitation.md) | Exploiter la plateforme : logs, pannes, reconfiguration | Exploitation | 01 ou 02 | Prêt |
-| [06](tp06-projets-quotas.md) | Projets, utilisateurs, rôles et quotas | Exploitation | 01 ou 02 | Prêt |
-| [07](tp07-reseau-aws.md) | Floating IP publiques et réseau AWS | Extension | 03 | Prêt (sans coût) |
-| [08](tp08-secrets-barbican.md) | Gérer des secrets avec Barbican | Extension | 04 | Prêt |
-| [09](tp09-volumes-chiffres.md) | Chiffrer les volumes Cinder | Extension | 04 | Prêt |
-| [10](tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | Prêt (sans coût) |
-| [11](tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
-| [12](tp12-cloud-init.md) | Configurer les VM au démarrage avec cloud-init | Extension | 02 ou 04 | Prêt |
-| [13](tp13-deploiement.md) | TP final : déployer une architecture sécurisée sur OpenStack ([architecture](tp13-architecture.md)) | Synthèse | 04 | Prêt (étape 15 optionnelle et payante) |
-| [14](tp14-heat.md) | TP bonus : redéployer la même architecture avec Heat, l'infrastructure décrite en code | Bonus | 04, Heat ajouté par le TP | Prêt |
+| [00](tp00/tp00-preparer-instance.md) | Préparer et découvrir l'instance AWS | Avant le déploiement | aucun | Prêt |
+| [01](tp01/tp01-deployer.md) | Déployer OpenStack et vérifier le déploiement | Déploiement | 01 | Prêt |
+| [02](tp02/tp02-instances-ssh.md) | Lancer des instances depuis l'hôte et s'y connecter en SSH | Utilisation | 01 | Prêt |
+| [03](tp03/tp03-reseau-neutron.md) | Comprendre le réseau Neutron | Utilisation | 01 | Prêt |
+| [04](tp04/tp04-volumes-cinder.md) | Stockage persistant : volumes, montage, snapshots | Utilisation | 02 | Prêt |
+| [05](tp05/tp05-exploitation.md) | Exploiter la plateforme : logs, pannes, reconfiguration | Exploitation | 01 ou 02 | Prêt |
+| [06](tp06/tp06-projets-quotas.md) | Projets, utilisateurs, rôles et quotas | Exploitation | 01 ou 02 | Prêt |
+| [07](tp07/tp07-reseau-aws.md) | Floating IP publiques et réseau AWS | Extension | 03 | Prêt (sans coût) |
+| [08](tp08/tp08-secrets-barbican.md) | Gérer des secrets avec Barbican | Extension | 04 | Prêt |
+| [09](tp09/tp09-volumes-chiffres.md) | Chiffrer les volumes Cinder | Extension | 04 | Prêt |
+| [10](tp10/tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | Prêt (sans coût) |
+| [11](tp11/tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
+| [12](tp12/tp12-cloud-init.md) | Configurer les VM au démarrage avec cloud-init | Extension | 02 ou 04 | Prêt |
+| [13](tp13/tp13-deploiement.md) | TP final : déployer une architecture sécurisée sur OpenStack ([architecture](tp13/tp13-architecture.md)) | Synthèse | 04 | Prêt (étape 15 optionnelle et payante) |
+| [14](tp14/tp14-heat.md) | TP bonus : redéployer la même architecture avec Heat, l'infrastructure décrite en code | Bonus | 04, Heat ajouté par le TP | Prêt |
 
 Non testés sur le lab, et signalés comme tels dans les énoncés : `sshuttle` et la redirection de port
 (TP 02, contraintes techniques), la partie AWS du scénario 03 et le niveau 3 « cloud » du TP 10 (payants).

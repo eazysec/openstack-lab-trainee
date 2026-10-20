@@ -39,7 +39,7 @@ Si vous créez vous-même l'instance, utilisez ces paramètres (déjà validés)
 | Security Group (entrant) | SSH (22) depuis votre IP uniquement. Port 80 (Horizon) **fermé** : on y accède par un tunnel SSH (TP 02). L'ouvrir, même limité à votre IP, ferait circuler le mot de passe admin en clair |
 
 Avant toute chose, vérifier que l'instance ne peut pas générer de frais de crédits CPU (voir
-[../aws/finops.md §2](../aws/finops.md)). Il faut l'AWS CLI configurée sur votre poste :
+[../../aws/finops.md §2](../../aws/finops.md)). Il faut l'AWS CLI configurée sur votre poste :
 
 ```bash
 # [poste] : dans le dossier qui contient openstack-lab-trainee/
@@ -78,7 +78,7 @@ résultat de `ls -l /dev/kvm`.
    si le port 22 n'est pas ouvert dans le Security Group ?
 4. Pourquoi l'instance doit-elle être en mode de crédits CPU `standard` ?
 
-Pour répondre, lisez [../aws/aws-setup.md §2](../aws/aws-setup.md).
+Pour répondre, lisez [../../aws/aws-setup.md §2](../../aws/aws-setup.md).
 
 ## Validation
 
@@ -90,6 +90,6 @@ Pour répondre, lisez [../aws/aws-setup.md §2](../aws/aws-setup.md).
 - Instances *burstable* et crédits CPU (AWS) : <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html>
 - Security Groups AWS : <https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html>
 - Tarifs EC2 à la demande : <https://aws.amazon.com/ec2/pricing/on-demand/>
-- Contraintes AWS du lab : [../aws/aws-setup.md](../aws/aws-setup.md)
-- Coûts du lab : [../aws/finops.md](../aws/finops.md)
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Contraintes AWS du lab : [../../aws/aws-setup.md](../../aws/aws-setup.md)
+- Coûts du lab : [../../aws/finops.md](../../aws/finops.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

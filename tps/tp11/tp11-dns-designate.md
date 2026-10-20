@@ -203,4 +203,4 @@ rm ~/tp11-openrc.sh
 - Designate : <https://docs.openstack.org/designate/2025.1/>
 - Designate dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/designate-guide.html>
 - Neutron : intégration DNS avec Designate : <https://docs.openstack.org/neutron/2025.1/admin/config-dns-int-ext-serv.html>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

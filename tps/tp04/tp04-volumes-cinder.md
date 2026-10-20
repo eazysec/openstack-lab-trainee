@@ -154,7 +154,7 @@ du snapshot se termine, puis relancez.
 2. Pourquoi faut-il démonter (`umount`) avant de détacher un volume ?
 3. Pourquoi Cinder refuse-t-il par défaut un snapshot de volume attaché ?
 4. Le stockage du lab est un fichier sur le disque de l'instance. Quelles limites cela pose-t-il ?
-   Quelle alternative AWS existe ? (voir [../aws/aws-setup.md §3.3](../aws/aws-setup.md))
+   Quelle alternative AWS existe ? (voir [../../aws/aws-setup.md §3.3](../../aws/aws-setup.md))
 
 ## Validation
 
@@ -168,4 +168,4 @@ du snapshot se termine, puis relancez.
 - Cinder dans Kolla-Ansible (LVM) : <https://docs.openstack.org/kolla-ansible/2025.1/reference/storage/cinder-guide.html>
 - `lvcreate` (LVM) : <https://man7.org/linux/man-pages/man8/lvcreate.8.html>
 - `losetup` : <https://man7.org/linux/man-pages/man8/losetup.8.html>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

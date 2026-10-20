@@ -42,8 +42,8 @@ tmux new -s deploy
 ./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/01-aio-base.env
 ```
 
-Pendant le déploiement, lisez [../README.md §4](../README.md) (ce que fait le script) et
-[../README.md §6](../README.md) (les services).
+Pendant le déploiement, lisez [../../README.md §4](../../README.md) (ce que fait le script) et
+[../../README.md §6](../../README.md) (les services).
 
 À la fin, le script affiche `Déploiement terminé` et un résumé des accès.
 
@@ -97,4 +97,4 @@ openstack network agent list                               # les agents de Neutr
 - Versions OpenStack : <https://releases.openstack.org/>
 - Keystone (identité et catalogue) : <https://docs.openstack.org/keystone/2025.1/>
 - Dépannage Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/user/troubleshooting.html>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

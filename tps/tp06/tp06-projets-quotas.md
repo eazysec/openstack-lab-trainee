@@ -140,4 +140,4 @@ rm ~/tp06-openrc.sh
 - Keystone : projets, utilisateurs, rôles : <https://docs.openstack.org/keystone/2025.1/>
 - Keystone dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/reference/shared-services/keystone-guide.html>
 - Guide de sécurité OpenStack : <https://docs.openstack.org/security-guide/>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

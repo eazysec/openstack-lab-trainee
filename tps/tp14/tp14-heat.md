@@ -116,7 +116,7 @@ liste des services de ce moment-là.
 
 ## Étape 2. Lire un modèle
 
-Ouvrez [tp14/partie-a.yaml](tp14/partie-a.yaml). Il décrit une VM CirrOS, son port, un security group
+Ouvrez [partie-a.yaml](partie-a.yaml). Il décrit une VM CirrOS, son port, un security group
 et une floating IP. Un modèle Heat a quatre parties :
 
 | Partie | Dans `partie-a.yaml` | Rôle |
@@ -200,7 +200,7 @@ Gardez cette pile : vous la supprimerez à l'étape 10.
 
 > **Note : le modèle de la partie B**
 >
-> [tp14/partie-b.yaml](tp14/partie-b.yaml) décrit toute l'architecture du TP 13, y compris les règles
+> [partie-b.yaml](partie-b.yaml) décrit toute l'architecture du TP 13, y compris les règles
 > des security groups que vous avez écrites aux étapes 5 et 7. Ouvrez-le une fois le TP 13 terminé :
 > vous y retrouverez vos propres choix, traduits en code.
 
@@ -586,4 +586,4 @@ Dans Horizon, après une nouvelle connexion, le menu Orchestration a disparu.
 - Heat, types de ressources OpenStack : <https://docs.openstack.org/heat/2025.1/template_guide/openstack.html>
 - Client `openstack stack` : <https://docs.openstack.org/python-heatclient/latest/cli/stack.html>
 - Kolla-Ansible, exploitation (`deploy`, `stop`, `reconfigure`, `--tags`) : <https://docs.openstack.org/kolla-ansible/2025.1/user/operating-kolla.html>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)

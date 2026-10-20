@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Prérequis | TP 02 ; avoir lu [../README.md §5](../README.md) |
+| Prérequis | TP 02 ; avoir lu [../../README.md §5](../../README.md) |
 | À la fin du TP | Vous savez construire un réseau complet et suivre un paquet de la VM jusqu'à Internet |
 
 ## Objectifs
@@ -122,7 +122,7 @@ sudo docker exec openvswitch_vswitchd ovs-vsctl list-ports br-ex
 ```
 
 `br-ex` contient `veth-neutron` : c'est l'extrémité de la paire veth créée par le lab (voir
-[../README.md §5.2](../README.md)).
+[../../README.md §5.2](../../README.md)).
 
 Le NAT de l'hôte vers AWS.
 
@@ -187,4 +187,4 @@ openstack security group delete tp03-sg
 - Open vSwitch : <https://docs.openvswitch.org/en/latest/>
 - `tcpdump` : <https://www.tcpdump.org/manpages/tcpdump.1.html>
 - Security Groups AWS : <https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html>
-- Toutes les sources du parcours : [sources.md](sources.md)
+- Toutes les sources du parcours : [sources.md](../sources.md)
