@@ -40,6 +40,7 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | keystonemiddleware : validation et cache des jetons dans les services (TP 06 bis) | <https://docs.openstack.org/keystonemiddleware/latest/middlewarearchitecture.html> |
 | Identifiant de requête global, transmis d'un service à l'autre (TP 05 bis) | <https://specs.openstack.org/openstack/oslo-specs/specs/pike/global-req-id.html> |
 | Nova : actions et événements d'une instance (TP 05 bis) | <https://docs.openstack.org/api-ref/compute/#servers-actions-servers-os-instance-actions> |
+| Cinder : volumes et snapshots en ligne de commande ; revert et re-image (TP 04 bis) | <https://docs.openstack.org/cinder/2025.1/cli/cli-manage-volumes.html>, <https://docs.openstack.org/api-ref/block-storage/v3/#revert-volume-to-snapshot> |
 | Nova (calcul) | <https://docs.openstack.org/nova/2025.1/> |
 | Nova : planificateur (*scheduler*) | <https://docs.openstack.org/nova/2025.1/admin/configuration/schedulers.html> |
 | Neutron (réseau) | <https://docs.openstack.org/neutron/2025.1/> |

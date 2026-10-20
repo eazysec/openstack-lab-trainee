@@ -21,6 +21,7 @@ exploite et on étend la plateforme.
 | [02](tp02/tp02-instances-ssh.md) | Lancer des instances depuis l'hôte et s'y connecter en SSH | Utilisation | 01 | Prêt |
 | [03](tp03/tp03-reseau-neutron.md) | Comprendre le réseau Neutron | Utilisation | 01 | Prêt |
 | [04](tp04/tp04-volumes-cinder.md) | Stockage persistant : volumes, montage, snapshots | Utilisation | 02 | Prêt |
+| [04 bis](tp04-bis/tp04-bis-revenir-en-arriere.md) | Revenir en arrière : snapshots, revert, re-image | Utilisation | 02 | Prêt |
 | [05](tp05/tp05-exploitation.md) | Exploiter la plateforme : logs, pannes, reconfiguration | Exploitation | 01 ou 02 | Prêt |
 | [05 bis](tp05-bis/tp05-bis-qui-a-fait-quoi.md) | Qui a fait quoi ? Tracer les appels aux API (après le TP 06 bis) | Exploitation | 01 ou 02 | Prêt |
 | [06](tp06/tp06-projets-quotas.md) | Projets, utilisateurs, rôles et quotas | Exploitation | 01 ou 02 | Prêt |
@@ -144,6 +145,7 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 03 | suivre le chemin d'un paquet de la VM jusqu'à Internet |  |  |
 | 04 | créer, attacher, formater, monter et détacher un volume |  |  |
 | 04 | expliquer la différence entre disque éphémère et volume |  |  |
+| 04 bis | remettre un volume dans un état antérieur et reconstruire une VM sur volume sans perdre ses données |  |  |
 | 05 | trouver le log d'un service et diagnostiquer une panne simple |  |  |
 | 05 | modifier une option de configuration de façon durable |  |  |
 | 05 bis | retrouver qui a fait une action et suivre une requête dans les journaux, et dire ce qu'ils ne prouvent pas |  |  |

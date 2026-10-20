@@ -121,7 +121,8 @@ openstack volume list
 ```
 
 `tp04-vol-copie` est un nouveau volume contenant les données du snapshot. Pour vérifier, attachez-le
-à `tp04-vm-2` à la place de `tp04-vol` et lisez `preuve.txt`.
+à `tp04-vm-2` à la place de `tp04-vol` et lisez `preuve.txt`. Les autres façons de revenir en arrière
+(revert, re-image, reconstruction d'une VM sur volume) sont au [TP 04 bis](../tp04-bis/tp04-bis-revenir-en-arriere.md).
 
 ## Étape 5. Où sont les volumes sur l'hôte ?
 
