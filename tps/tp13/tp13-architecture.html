@@ -20,7 +20,7 @@
   --warn:#8F5A00; --warn-soft:#FBEFD3;
   --ok:#28724A; --ok-soft:#DCF1E4;
   --on-badge:#FFFFFF;
-  --band:#EFE7D8; --band-ink:#162033; --band-muted:#4F5A6C;
+  --band:#FFFFFF; --band-ink:#162033; --band-muted:#4F5A6C;
   --f-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
   --f-body:"Source Sans 3","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
@@ -255,11 +255,11 @@ tbody tr:nth-child(even) td{background:var(--surface-2)}
 .toc a[aria-current="true"]{background:var(--ink);color:var(--bg)}
 /* Bande d'en-tête */
 .page{padding-block-start:0}
-header.top{margin-inline:calc(50% - 50vw);padding:44px max(clamp(16px,3vw,32px), calc(50vw - 620px + clamp(16px,3vw,32px))) 28px;background:var(--band);color:var(--band-ink)}
+header.top{margin-inline:calc(50% - 50vw);padding:44px max(clamp(16px,3vw,32px), calc(50vw - 620px + clamp(16px,3vw,32px))) 28px;background:var(--band);color:var(--band-ink);border-bottom:1px solid var(--line)}
 header.top .eyebrow,header.top .lede,header.top .meta{color:var(--band-muted)}
 header.top .meta b,header.top h1{color:var(--band-ink)}
 header.top a{color:var(--band-ink)}
-.toc{margin-top:-64px;margin-inline:calc(50% - 50vw);padding:8px max(clamp(16px,3vw,32px), calc(50vw - 620px + clamp(16px,3vw,32px))) 12px;background:var(--band);border-bottom:0}
+.toc{margin-top:-64px;margin-inline:calc(50% - 50vw);padding:8px max(clamp(16px,3vw,32px), calc(50vw - 620px + clamp(16px,3vw,32px))) 12px;background:var(--band);border-bottom:1px solid var(--line)}
 .toc a{color:var(--band-ink)}
 .toc a:hover{border-color:var(--band-muted)}
 .toc a[aria-current="true"]{background:var(--band-ink);color:var(--band)}
