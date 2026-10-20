@@ -1,4 +1,73 @@
-# OpenStack All-in-One sur une instance cloud (Kolla-Ansible)
+# Pratiquez la sécurité dès la conception, sur un vrai cloud
+
+Et si vous preniez la place d'un architecte, d'un responsable sécurité ou d'un auditeur, avant même
+de construire quoi que ce soit ?
+
+Dans beaucoup d'organisations, un projet franchit plusieurs étapes avant sa mise en production :
+
+- **Conception** : le dossier d'architecture est présenté aux instances d'architecture et de sécurité.
+- **Validation** : les décisions sont prises, les écarts identifiés, les mesures correctives définies.
+- **Implémentation** : les équipes construisent la solution en respectant les exigences validées.
+- **Vérification** : on contrôle que ce qui a été construit respecte bien ce qui avait été validé.
+
+Une question demeure : à quel point êtes-vous sûr de vous à chacune de ces étapes ? Comprenez-vous
+les exigences qu'on vous impose, qu'elles viennent de standards internes ou de textes comme NIS 2,
+DORA ou le RGPD ? Savez-vous repérer les risques en amont ? Pouvez-vous prouver que l'implémentation
+correspond à l'architecture validée ?
+
+## Ce que proposent ces travaux pratiques
+
+Une quinzaine de TP vous font parcourir ces étapes sur un cloud OpenStack que vous déployez
+vous-même : de l'instance vide à une architecture segmentée, protégée et publiée, puis décrite en
+code.
+
+- **Concevoir** : partir d'un dossier d'architecture et de ses objectifs de sécurité (TP 13).
+- **Justifier** : chaque choix a sa raison, et chaque TP se termine par des questions et une grille de
+  validation, à faire relire par un tuteur.
+- **Construire** : réseaux, security groups, bastion, proxy, secrets, volumes chiffrés, service
+  durci (TP 01 à 13).
+- **Vérifier** : chaque objectif se prouve par un accès qui doit réussir et un accès qui doit
+  échouer ; la même architecture, reconstruite en code avec Heat, est comparée à la construction à
+  la main (TP 14).
+
+Le but n'est pas de cocher des cases, mais d'apprendre à anticiper les risques, à justifier ses choix
+d'architecture et à vérifier la sécurité de ce qui est réellement construit.
+
+Ces TP ne remplacent pas une analyse de conformité : ils entraînent aux mesures techniques que ces
+textes attendent, comme le chiffrement, le contrôle des accès, les sauvegardes restaurables ou la
+vérification régulière des mesures de sécurité.
+
+## Ce qu'il faut savoir avant de commencer
+
+- Les énoncés, le lab et ses scripts sont libres : contenus sous licence CC BY-SA 4.0, scripts sous
+  licence MIT. Vous pouvez suivre les TP en autonomie, à votre rythme.
+- Le lab tourne sur une instance AWS (4 vCPU, 16 Go), **payante** tant qu'elle est allumée. Lisez
+  [aws/finops.md](aws/finops.md) avant de la créer, et arrêtez-la après chaque séance.
+- Niveau attendu : à l'aise avec un terminal Linux et SSH. Aucune connaissance d'OpenStack n'est
+  supposée.
+
+## Pourquoi ce projet
+
+Au fil de mon expérience, j'ai rencontré des pratiques qui m'ont interpellé, y compris chez des
+personnes expérimentées, voire très expérimentées. Pas forcément par manque de compétences
+techniques, mais souvent par manque d'expérience et de culture de la sécurité.
+
+C'est ce constat qui m'a donné envie de créer ces travaux pratiques et de les partager. Je remercie au
+passage mon assistant invisible, qui m'a fait gagner beaucoup de temps pour les construire.
+
+## Contribuer
+
+Une erreur, une explication à améliorer, un exercice à proposer ? Ouvrez une *issue* ou proposez une
+*pull request* : les contributions et les retours d'expérience sont les bienvenus. Si ces ressources
+vous sont utiles, une étoile au dépôt sur GitHub m'encourage à continuer à les enrichir.
+
+La sécurité se conçoit dès le départ, se vérifie à la construction et se cultive collectivement.
+
+Merlin Tchoffo, expert en cybersécurité et cloud
+
+---
+
+## Le lab : OpenStack All-in-One sur une instance cloud (Kolla-Ansible)
 
 Ce dépôt déploie un lab OpenStack mono-nœud sur une instance qui n'a qu'une interface réseau (cas
 typique : AWS EC2), et fournit un parcours de TP.
