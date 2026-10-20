@@ -815,6 +815,9 @@ sudo ~/openstack-lab-trainee/tools/public-fip.sh del <IP_SECONDAIRE>
 
 ## Étape 16. Nettoyage
 
+> Le [TP 13 bis](../tp13-bis/tp13-bis-administrer-base.md) (administrer la base sans ouvrir de port)
+> se fait sur cette architecture : faites-le avant ce nettoyage.
+
 Dans l'ordre inverse de la création :
 
 ```bash

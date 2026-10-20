@@ -31,6 +31,7 @@ exploite et on étend la plateforme.
 | [11](tp11/tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
 | [12](tp12/tp12-cloud-init.md) | Configurer les VM au démarrage avec cloud-init | Extension | 02 ou 04 | Prêt |
 | [13](tp13/tp13-deploiement.md) | TP final : déployer une architecture sécurisée sur OpenStack ([architecture](tp13/tp13-architecture.md)) | Synthèse | 04 | Prêt (étape 15 optionnelle et payante) |
+| [13 bis](tp13-bis/tp13-bis-administrer-base.md) | Administrer la base sans ouvrir de port : rôle dédié, droits au plus juste, tunnel, traces | Synthèse (après l'étape 14 du TP 13) | 04 | Prêt |
 | [14](tp14/tp14-heat.md) | TP bonus : redéployer la même architecture avec Heat, l'infrastructure décrite en code | Bonus | 04, Heat ajouté par le TP | Prêt |
 
 Non testés sur le lab, et signalés comme tels dans les énoncés : `sshuttle` et la redirection de port
@@ -156,6 +157,7 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 13 | segmenter un réseau et écrire des security groups au plus juste, en entrée et en sortie |  |  |
 | 13 | administrer des VM par un bastion, et contrôler leurs sorties par un proxy |  |  |
 | 13 | diagnostiquer un routage asymétrique avec `tcpdump`, et prouver chaque refus par un test |  |  |
+| 13 bis | administrer une base par un tunnel SSH sans port ouvert, sous un rôle dédié, et relire la trace de chaque action |  |  |
 | 14 | ajouter un service à un cloud en fonctionnement, puis le retirer proprement |  |  |
 | 14 | décrire une infrastructure dans un modèle Heat, la créer, la modifier et la détruire |  |  |
 | 14 | comparer une construction à la main et une construction par modèle, et dire ce qui reste hors du modèle |  |  |

@@ -140,6 +140,8 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | Squid : contrôle d'accès | <https://wiki.squid-cache.org/SquidFaq/SquidAcl> |
 | chrony : `allow` et `bindaddress` | <https://chrony-project.org/doc/4.5/chrony.conf.html> |
 | PostgreSQL 17 : `pg_hba.conf` | <https://www.postgresql.org/docs/17/auth-pg-hba-conf.html> |
+| PostgreSQL 17 : authentification *peer* et correspondances `pg_ident.conf` (TP 13 bis) | <https://www.postgresql.org/docs/17/auth-peer.html>, <https://www.postgresql.org/docs/17/auth-username-maps.html> |
+| PostgreSQL 17 : droits (`GRANT`, propriétaire) et journalisation (TP 13 bis) | <https://www.postgresql.org/docs/17/ddl-priv.html>, <https://www.postgresql.org/docs/17/runtime-config-logging.html> |
 | systemd : durcissement d'un service | <https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html> |
 | HAProxy 3.0 : configuration (`option forwardfor`) | <https://docs.haproxy.org/3.0/configuration.html> |
 | GitHub : empreintes des clés d'hôte SSH | <https://docs.github.com/fr/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints> |
