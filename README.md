@@ -1,4 +1,4 @@
-# Pratiquez la sécurité dès la conception, sur un vrai cloud
+# Pratiquez la sécurité dès la conception, sur un cloud sur mesure
 
 Dans beaucoup d'organisations, un projet franchit plusieurs étapes avant sa mise en production :
 
@@ -14,7 +14,7 @@ DORA ou le RGPD ? Savez-vous repérer les risques en amont ? Pouvez-vous prouver
 
 ## Ce que proposent ces travaux pratiques
 
-20+ TP vous font parcourir ces étapes sur un cloud OpenStack que vous déployez
+20+ TP vous font parcourir ces étapes sur un cloud OpenStack sur mesure que vous déployez
 vous-même : de l'instance vide à une architecture segmentée, protégée et publiée, puis décrite en
 code.
 
