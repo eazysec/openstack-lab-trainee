@@ -1,37 +1,35 @@
 # Pratiquez la sécurité dès la conception, sur un vrai cloud
 
-Et si vous preniez la place d'un architecte, d'un responsable sécurité ou d'un auditeur, avant même
-de construire quoi que ce soit ?
-
 Dans beaucoup d'organisations, un projet franchit plusieurs étapes avant sa mise en production :
 
 - **Conception** : le dossier d'architecture est présenté aux instances d'architecture et de sécurité.
 - **Validation** : les décisions sont prises, les écarts identifiés, les mesures correctives définies.
-- **Implémentation** : les équipes construisent la solution en respectant les exigences validées.
-- **Vérification** : on contrôle que ce qui a été construit respecte bien ce qui avait été validé.
+- **Implémentation et intégration** : les équipes construisent la solution en respectant les exigences validées.
+- **Vérification** : on contrôle que ce qui a été construit respecte bien ce qui était attendue.
+- **Déploiement** : on contrôle que ce qui a été déployé respecte bien ce qui avait été décidé.
 
 Une question demeure : à quel point êtes-vous sûr de vous à chacune de ces étapes ? Comprenez-vous
 les exigences qu'on vous impose, qu'elles viennent de standards internes ou de textes comme NIS 2,
-DORA ou le RGPD ? Savez-vous repérer les risques en amont ? Pouvez-vous prouver que l'implémentation
-correspond à l'architecture validée ?
+DORA ou le RGPD ? Savez-vous repérer les risques en amont ? Pouvez-vous prouver que l'implémentation, l'intégration et le déploiement correspondent à l'architecture validée ?
 
 ## Ce que proposent ces travaux pratiques
 
-Une quinzaine de TP vous font parcourir ces étapes sur un cloud OpenStack que vous déployez
+20+ TP vous font parcourir ces étapes sur un cloud OpenStack que vous déployez
 vous-même : de l'instance vide à une architecture segmentée, protégée et publiée, puis décrite en
 code.
 
 - **Concevoir** : partir d'un dossier d'architecture et de ses objectifs de sécurité (TP 13).
 - **Justifier** : chaque choix a sa raison, et chaque TP se termine par des questions et une grille de
   validation, à faire relire par un tuteur.
-- **Construire** : réseaux, security groups, bastion, proxy, secrets, volumes chiffrés, service
+- **Construire et intégrer** : réseaux, security groups, bastion, proxy, secrets, volumes chiffrés, service
   durci (TP 01 à 13).
 - **Vérifier** : chaque objectif se prouve par un accès qui doit réussir et un accès qui doit
   échouer ; la même architecture, reconstruite en code avec Heat, est comparée à la construction à
   la main (TP 14).
+- **Déployer** : chaque mode de déploiement a des + et des - (TP 13 et TP 14)
 
 Le but n'est pas de cocher des cases, mais d'apprendre à anticiper les risques, à justifier ses choix
-d'architecture et à vérifier la sécurité de ce qui est réellement construit.
+d'architecture et à vérifier la sécurité de ce qui est réellement construit. C'est pourquoi définir un cadre de référence dans les projets et s'en tenir est nécessaire. On ne subit plus la vague, on l'oriente et l'anticipe. 
 
 Ces TP ne remplacent pas une analyse de conformité : ils entraînent aux mesures techniques que ces
 textes attendent, comme le chiffrement, le contrôle des accès, les sauvegardes restaurables ou la
