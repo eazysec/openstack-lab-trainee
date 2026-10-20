@@ -13,6 +13,7 @@
 - Savoir contre qui un secret privé protège, et contre qui il ne protège pas.
 - Regrouper l'identifiant et le mot de passe d'une application dans un conteneur, et le consulter sans
   afficher les valeurs.
+- Retrouver dans le journal de Barbican qui a lu la valeur d'un secret.
 
 ---
 
@@ -218,7 +219,26 @@ en app openstack secret container get $K -c Secrets  # username a disparu du con
 Barbican sait refuser une telle suppression quand l'utilisateur du secret s'est déclaré (*consumer*) :
 le TP 09 s'en sert pour protéger la clé d'un volume chiffré.
 
-## Étape 6. Nettoyage
+## Étape 6. Qui a lu le secret ?
+
+Barbican trace chaque lecture de la valeur d'un secret (`…/payload`), avec l'utilisateur qui l'a
+demandée et la réponse donnée :
+
+```bash
+# [instance]
+ID=${H##*/}                                # l'identifiant du secret : la fin de son adresse
+sudo grep "secrets/$ID/payload" /var/log/kolla/barbican/barbican-api.log \
+  | grep -oE '[0-9a-f]{32} [0-9a-f]{32} - - default default\] Processed request: [0-9]+' \
+  | awk '{print $1, "réponse", $NF}' | sort | uniq -c
+for u in app collegue membre externe; do echo "tp08b-user-$u : $(openstack user show tp08b-user-$u -f value -c id)"; done
+echo "admin : $(openstack user show admin -f value -c id)"
+```
+
+Chaque ligne compte les lectures d'un utilisateur, avec le code de la réponse : `200` lecture
+accordée, `403` refusée. On y retrouve les accès et les refus des étapes 4 et 5, y compris la
+lecture du collègue qui s'était ajouté lui-même à l'ACL.
+
+## Étape 7. Nettoyage
 
 ```bash
 # [instance]
@@ -239,6 +259,8 @@ unset -f en; unset MDP H H2 HV HE HU K E M X C
    pour l'attribution du rôle `creator` ?
 4. Pourquoi partager un conteneur ne suffit-il pas pour que l'autre utilisateur lise les valeurs ?
    Que faut-il partager en plus ?
+5. Le journal de Barbican dit qui a lu la valeur du secret. Qu'est-ce qu'il ne permet pas de savoir,
+   et qui pourrait l'effacer ?
 
 ## Validation
 
@@ -247,6 +269,7 @@ unset -f en; unset MDP H H2 HV HE HU K E M X C
 - [ ] Secret privé : refus du collègue et de l'admin ; lecture accordée au membre et à l'externe par
   l'ACL ; contournement par le collègue `creator` constaté.
 - [ ] Conteneur consulté sans afficher les valeurs ; partage du conteneur sans accès aux secrets.
+- [ ] Lectures et refus de lecture du secret retrouvés dans le journal de Barbican, par utilisateur.
 - [ ] Questions 2 et 3 argumentées.
 - [ ] Nettoyage fait.
 

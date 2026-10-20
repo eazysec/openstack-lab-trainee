@@ -31,7 +31,7 @@ openstack service show key-manager >/dev/null 2>&1 && ok "Barbican présent" \
   || ecart "Barbican absent" "déployer le scénario 04 (TP 08, étape 0)"
 
 echo; echo "== Restes d'un essai précédent du TP 08 bis"
-R="faire le nettoyage du TP 08 bis (étape 6) ; la suppression d'un projet efface aussi ses secrets"
+R="faire le nettoyage du TP 08 bis (étape 7) ; la suppression d'un projet efface aussi ses secrets"
 zero "projets tp08b-*" "$(nb '^tp08b-' openstack project list -f value -c Name)" "$R"
 zero "utilisateurs tp08b-*" "$(nb '^tp08b-' openstack user list -f value -c Name)" "$R"
 zero "secrets tp08b-* du projet admin" "$(nb '"Name": "tp08b-' openstack secret list -f json)" "$R"
