@@ -23,6 +23,7 @@ exploite et on étend la plateforme.
 | [04](tp04/tp04-volumes-cinder.md) | Stockage persistant : volumes, montage, snapshots | Utilisation | 02 | Prêt |
 | [05](tp05/tp05-exploitation.md) | Exploiter la plateforme : logs, pannes, reconfiguration | Exploitation | 01 ou 02 | Prêt |
 | [06](tp06/tp06-projets-quotas.md) | Projets, utilisateurs, rôles et quotas | Exploitation | 01 ou 02 | Prêt |
+| [06 bis](tp06-bis/tp06-bis-identites-automates.md) | Identités pour les automates : jetons, identifiants d'application, règles d'accès | Exploitation | 01 ou 02 | Prêt |
 | [07](tp07/tp07-reseau-aws.md) | Floating IP publiques et réseau AWS | Extension | 03 | Prêt (sans coût) |
 | [08](tp08/tp08-secrets-barbican.md) | Gérer des secrets avec Barbican | Extension | 04 | Prêt |
 | [08 bis](tp08-bis/tp08-bis-faire-vivre-secrets.md) | Faire vivre un secret : renouveler, partager, regrouper | Extension | 04 | Prêt |
@@ -145,6 +146,7 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 05 | trouver le log d'un service et diagnostiquer une panne simple |  |  |
 | 05 | modifier une option de configuration de façon durable |  |  |
 | 06 | créer un projet et un utilisateur, lui donner un rôle et des quotas |  |  |
+| 06 bis | dire ce que vaut un jeton révoqué, et donner à un automate un identifiant limité par rôle, règles d'accès et expiration |  |  |
 | 07 | expliquer pourquoi une floating IP n'est pas joignable depuis Internet sur AWS |  |  |
 | 08 | stocker, générer et protéger un secret ; expliquer les rôles Barbican |  |  |
 | 08 bis | renouveler un secret, le partager par une ACL, regrouper les secrets d'une application ; dire contre qui un secret privé protège |  |  |

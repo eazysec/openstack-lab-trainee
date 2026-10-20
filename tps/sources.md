@@ -35,6 +35,9 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | Client `openstack` | <https://docs.openstack.org/python-openstackclient/latest/> |
 | Liste des commandes du client | <https://docs.openstack.org/python-openstackclient/latest/cli/command-list.html> |
 | Keystone (identité, projets, rôles) | <https://docs.openstack.org/keystone/2025.1/> |
+| Keystone : identifiants d'application et règles d'accès (TP 06 bis) | <https://docs.openstack.org/keystone/2025.1/user/application_credentials.html> |
+| Keystone : jetons Fernet (TP 06 bis) | <https://docs.openstack.org/keystone/2025.1/admin/fernet-token-faq.html> |
+| keystonemiddleware : validation et cache des jetons dans les services (TP 06 bis) | <https://docs.openstack.org/keystonemiddleware/latest/middlewarearchitecture.html> |
 | Nova (calcul) | <https://docs.openstack.org/nova/2025.1/> |
 | Nova : planificateur (*scheduler*) | <https://docs.openstack.org/nova/2025.1/admin/configuration/schedulers.html> |
 | Neutron (réseau) | <https://docs.openstack.org/neutron/2025.1/> |
