@@ -47,7 +47,7 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | Horizon (interface web) | <https://docs.openstack.org/horizon/2025.1/> |
 | Designate (DNS) | <https://docs.openstack.org/designate/2025.1/> |
 | Barbican (secrets) | <https://docs.openstack.org/barbican/2025.1/> |
-| Barbican : guide de l'API (secrets, conteneurs, ACL) | <https://docs.openstack.org/api-guide/key-manager/> |
+| Barbican : guide de l'API (secrets, conteneurs, ACL, *consumers*) | <https://docs.openstack.org/api-guide/key-manager/> |
 | CirrOS (image de test) | <https://github.com/cirros-dev/cirros> |
 | Open vSwitch | <https://docs.openvswitch.org/en/latest/> |
 

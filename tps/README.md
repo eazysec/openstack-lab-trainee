@@ -25,6 +25,7 @@ exploite et on étend la plateforme.
 | [06](tp06/tp06-projets-quotas.md) | Projets, utilisateurs, rôles et quotas | Exploitation | 01 ou 02 | Prêt |
 | [07](tp07/tp07-reseau-aws.md) | Floating IP publiques et réseau AWS | Extension | 03 | Prêt (sans coût) |
 | [08](tp08/tp08-secrets-barbican.md) | Gérer des secrets avec Barbican | Extension | 04 | Prêt |
+| [08 bis](tp08-bis/tp08-bis-faire-vivre-secrets.md) | Faire vivre un secret : renouveler, partager, regrouper | Extension | 04 | Prêt |
 | [09](tp09/tp09-volumes-chiffres.md) | Chiffrer les volumes Cinder | Extension | 04 | Prêt |
 | [10](tp10/tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | Prêt (sans coût) |
 | [11](tp11/tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
@@ -145,7 +146,9 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 06 | créer un projet et un utilisateur, lui donner un rôle et des quotas |  |  |
 | 07 | expliquer pourquoi une floating IP n'est pas joignable depuis Internet sur AWS |  |  |
 | 08 | stocker, générer et protéger un secret ; expliquer les rôles Barbican |  |  |
+| 08 bis | renouveler un secret, le partager par une ACL, regrouper les secrets d'une application ; dire contre qui un secret privé protège |  |  |
 | 09 | chiffrer un volume et dire contre quoi ce chiffrement protège |  |  |
+| 09 | protéger la clé d'un volume chiffré contre sa suppression |  |  |
 | 10 | sauvegarder et restaurer une VM, et expliquer la règle 3-2-1 et le séquestre du mot de passe |  |  |
 | 11 | publier des noms DNS, à la main et automatiquement par Neutron |  |  |
 | 12 | décrire la configuration d'une VM dans un user-data cloud-init, la valider et la vérifier |  |  |
