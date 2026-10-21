@@ -138,6 +138,14 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | NFS : `nfs.conf(5)` | <https://man7.org/linux/man-pages/man5/nfs.conf.5.html> |
 | systemd : automontage | <https://man7.org/linux/man-pages/man5/systemd.automount.5.html> |
 
+## Dépanner une VM (TP 12 bis)
+
+| Sujet | Référence |
+|---|---|
+| Nova : mode rescue | <https://docs.openstack.org/nova/2025.1/user/rescue.html> |
+| sudoers : format des règles et traitement des erreurs | <https://www.sudo.ws/docs/man/sudoers.man/> |
+| GRUB : configuration et édition au démarrage | <https://www.gnu.org/software/grub/manual/grub/grub.html> |
+
 ## Architecture de déploiement (TP 13)
 
 | Sujet | Référence |

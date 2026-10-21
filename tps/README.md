@@ -33,6 +33,7 @@ exploite et on étend la plateforme.
 | [10](tp10/tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | Prêt (sans coût) |
 | [11](tp11/tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
 | [12](tp12/tp12-cloud-init.md) | Configurer les VM au démarrage avec cloud-init | Extension | 02 ou 04 | Prêt |
+| [12 bis](tp12-bis/tp12-bis-depanner-vm.md) | Dépanner une VM : reprendre la main par le mode rescue | Extension | 02 ou 04 | Prêt |
 | [13](tp13/tp13-deploiement.md) | TP final : déployer une architecture sécurisée sur OpenStack ([architecture](tp13/tp13-architecture.md)) | Synthèse | 04 | Prêt (étape 15 optionnelle et payante) |
 | [13 bis](tp13-bis/tp13-bis-administrer-base.md) | Administrer la base sans ouvrir de port : rôle dédié, droits au plus juste, tunnel, traces | Synthèse (après l'étape 14 du TP 13) | 04 | Prêt |
 | [14](tp14/tp14-heat.md) | TP bonus : redéployer la même architecture avec Heat, l'infrastructure décrite en code | Bonus | 04, Heat ajouté par le TP | Prêt |
@@ -162,6 +163,8 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 11 | limiter un automate aux seuls enregistrements d'une zone DNS |  |  |
 | 12 | décrire la configuration d'une VM dans un user-data cloud-init, la valider et la vérifier |  |  |
 | 12 | dire pourquoi un secret ne va jamais dans un user-data, et appliquer l'immutabilité |  |  |
+| 12 bis | réparer le disque d'une VM par le mode rescue, et reconnaître un rescue qui démarre sur le mauvais disque |  |  |
+| 12 bis | dire ce que la console d'une VM permet et expose, et pourquoi la méthode « GRUB, `init=/bin/bash` » ne s'applique pas à une image de cloud |  |  |
 | 13 | segmenter un réseau et écrire des security groups au plus juste, en entrée et en sortie |  |  |
 | 13 | administrer des VM par un bastion, et contrôler leurs sorties par un proxy |  |  |
 | 13 | diagnostiquer un routage asymétrique avec `tcpdump`, et prouver chaque refus par un test |  |  |
