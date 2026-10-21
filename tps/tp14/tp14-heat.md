@@ -146,6 +146,24 @@ openstack orchestration template validate -t openstack-lab-trainee/tps/tp14/part
 
 ## Étape 3. Créer la pile, la regarder
 
+Avant de créer la pile, relevez les ressources qui existent déjà. Vous comparerez ce relevé avec un
+autre à l'étape 10, pour prouver que la suppression des piles n'a rien laissé.
+
+```bash
+# [instance] un nom par ressource, ou son identifiant si elle n'a pas de nom
+inventaire() {
+  for RES in stack server port "security group" "floating ip" network subnet router volume; do
+    openstack $RES list -f json -c ID -c Name | jq --arg r "$RES" '{($r): (map(if (.Name // "") == "" then .ID else .Name end) | sort)}'
+  done | jq -S -s add
+}
+inventaire > avant.json
+jq -c 'map_values(length)' avant.json            # nombre de ressources de chaque type
+```
+
+Avec le rôle `admin`, Neutron liste les ressources réseau de tous les projets : les nombres sont
+élevés, seule la différence compte. Si vous changez de terminal d'ici l'étape 10, redéfinissez la
+fonction (les cinq lignes `inventaire() { … }`), sans relancer `inventaire > avant.json`.
+
 ```bash
 # [instance]
 openstack stack create -t openstack-lab-trainee/tps/tp14/partie-a.yaml --wait ht-tp14-stack-demo
@@ -155,6 +173,15 @@ openstack stack output show ht-tp14-stack-demo --all
 
 `--wait` affiche les événements au fur et à mesure : relevez l'ordre de création, et comparez-le aux
 dépendances de l'étape 2. Les quatre ressources doivent être `CREATE_COMPLETE`.
+
+```bash
+# [instance]
+inventaire > pendant.json
+diff avant.json pendant.json                     # ce que la pile a ajouté
+```
+
+La différence montre la pile, la VM, le security group, la FIP, et deux ports : celui du modèle, et
+un port sans nom, que Neutron a créé pour porter la FIP.
 
 Dans Horizon, **Projet > Orchestration > Piles > `ht-tp14-stack-demo`** : regardez les onglets
 **Topologie**, **Ressources**, **Événements** et **Modèle**. Les mêmes ressources apparaissent aussi dans
@@ -193,6 +220,33 @@ Revenez à la valeur par défaut :
 openstack stack update --existing --parameter acces_admin=10.0.2.1/32 --wait ht-tp14-stack-demo
 ping -c 2 "$F"                                  # de nouveau : réponse
 ```
+
+**Deuxième modification : un disque système plus grand que le gabarit.** Le gabarit `m1.tiny` prévoit
+un disque de 1 Go. Pour donner plus de place à la VM sans changer de gabarit, on la fait démarrer sur
+un volume Cinder, créé depuis l'image à la taille voulue. Ouvrez
+[partie-a-volume.yaml](partie-a-volume.yaml) : seule la ressource `vm` change. La propriété `image`
+disparaît, remplacée par `block_device_mapping_v2`, et un paramètre `taille_disque` (2 Go) apparaît.
+
+```bash
+# [instance]
+openstack flavor show m1.tiny -f value -c disk  # 1 : le disque prévu par le gabarit, en Go
+openstack server show ht-tp14-vm-demo -f value -c id    # notez l'identifiant de la VM
+openstack stack update -t openstack-lab-trainee/tps/tp14/partie-a-volume.yaml --wait ht-tp14-stack-demo
+openstack stack event list ht-tp14-stack-demo -f value -c resource_name -c resource_status | tail -n 6
+openstack server show ht-tp14-vm-demo -f value -c id    # un autre identifiant
+```
+
+```bash
+# [instance]
+R=$(openstack server show ht-tp14-vm-demo -f json -c volumes_attached | jq -r '.volumes_attached[0].id')
+openstack volume show "$R" -f value -c size -c bootable  # 2 Go, amorçable
+until nc -z -w 2 "$F" 22; do sleep 5; done; echo "la VM est prête"
+ssh-keygen -R "$F"                              # nouvelle VM, nouvelle clé d'hôte
+ssh cirros@"$F" hostname                        # ht-tp14-vm-demo (acceptez la nouvelle clé)
+```
+
+Cette fois, la VM a été recréée : Heat ne sait pas changer le disque de démarrage d'une VM qui
+existe. Le port et la FIP n'ont pas bougé : la nouvelle VM a la même adresse.
 
 Gardez cette pile : vous la supprimerez à l'étape 10.
 
@@ -468,6 +522,25 @@ openstack secret delete "$(openstack secret list --name tp13-barbican-bdd-demo -
 rm -f ~/tp13-keypair-adm-demo.pub /tmp/squid-parse.txt
 ```
 
+Comparez avec le relevé de l'étape 3 :
+
+```bash
+# [instance]
+inventaire > apres.json
+diff avant.json apres.json                       # il reste un volume
+openstack volume list -c ID -c Name -c Status -c Size
+```
+
+Le volume qui reste est le disque système de la VM (étape 4) : la pile ne l'a pas créé elle-même,
+c'est Nova qui l'a créé à sa demande. Supprimez-le, puis refaites la comparaison :
+
+```bash
+# [instance] <ID_VOLUME> : l'identifiant affiché par diff
+openstack volume delete <ID_VOLUME>
+inventaire > apres.json && diff avant.json apres.json && echo "rien ne reste"
+rm -f avant.json pendant.json apres.json
+```
+
 L'hôte, lui, n'est pas dans la pile. Défaites-le comme à l'étape 16 du TP 13 :
 
 ```bash
@@ -567,16 +640,23 @@ Dans Horizon, après une nouvelle connexion, le menu Orchestration a disparu.
 7. À l'étape 9, pourquoi ni `stack check` ni `stack update` ne voient-ils la règle ajoutée à la main ?
    Quelles règles d'équipe et quels contrôles éviteraient cette situation ?
 8. Citez deux situations où vous construiriez à la main, et deux où vous écririez un modèle.
+9. À l'étape 4, pourquoi la deuxième modification a-t-elle recréé la VM, alors que la première ne
+   l'avait pas fait ? Que perd-on quand une VM est recréée ?
+10. À l'étape 10, pourquoi le disque système de la VM est-il resté, alors que le volume de la base
+    (partie B) a disparu avec sa pile ? Que faudrait-il écrire dans le modèle pour qu'il disparaisse
+    lui aussi ? Pourquoi ce choix n'est-il pas fait par défaut ?
 
 ## Validation
 
 - [ ] Heat ajouté, mémoire relevée avant et après ; menu Orchestration visible dans Horizon.
 - [ ] Modèle de la partie A lu : paramètres, ressources, dépendances, sorties expliqués.
 - [ ] Pile créée, regardée dans Horizon, modifiée par un paramètre ; test négatif (ping refusé) fait.
+- [ ] VM passée sur un disque système de 2 Go ; recréation de la VM constatée et expliquée.
 - [ ] Architecture du TP 13 créée par Heat ; route posée avant le démarrage des VM.
 - [ ] Clés d'hôte comparées aux empreintes de la console ; base et application en place.
 - [ ] Tests de l'étape 12 du TP 13 rejoués : mêmes résultats ; trois écarts constatés et expliqués.
 - [ ] Modification hors du modèle constatée, puis retirée (étape 9).
+- [ ] Relevés de l'étape 3 et de l'étape 10 comparés ; volume restant expliqué et supprimé.
 - [ ] Nettoyage complet ; Heat retiré ; `verify.sh` sans échec ; `verifier-entree.sh` : lab prêt.
 
 ## Sources

@@ -1,3 +1,6 @@
+# Ce modèle donne la solution du TP 13, security groups compris. Faites d'abord le TP 13 en
+# entier, puis ouvrez ce fichier à l'étape 5 du TP 14.
+
 heat_template_version: 2021-04-16
 
 description: >

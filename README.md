@@ -22,7 +22,8 @@ code.
 - **Justifier** : chaque choix a sa raison, et chaque TP se termine par des questions et une grille de
   validation, à faire relire par un tuteur.
 - **Construire et intégrer** : réseaux, security groups, bastion, proxy, secrets, volumes chiffrés, service
-  durci (TP 01 à 13).
+  durci (TP 01 à 13) ; répartition de charge avec Octavia, HTTPS avec un certificat rangé dans Barbican
+  (TP 15).
 - **Vérifier** : chaque objectif se prouve par un accès qui doit réussir et un accès qui doit
   échouer ; la même architecture, reconstruite en code avec Heat, est comparée à la construction à
   la main (TP 14).
@@ -154,7 +155,8 @@ Pour suivre tous les TP ([tps/README.md](tps/README.md)), déployez plutôt le s
 `./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/04-aio-complet.env`.
 
 `verify.sh` crée une VM de test, vérifie le réseau, et selon les services présents Cinder, Barbican,
-le chiffrement des volumes et Designate, puis nettoie.
+le chiffrement des volumes, Designate et Heat, puis nettoie. Il ne contrôle pas Octavia : son ajout
+se vérifie à l'étape 1 du TP 15.
 Il se termine par `Résultat : N réussis, 0 échoués` et renvoie un code d'erreur si un test échoue.
 
 ### Paramètres
