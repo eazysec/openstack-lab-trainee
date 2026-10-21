@@ -56,6 +56,21 @@ openstack secret get --payload $H         # le contenu
 Un secret est désigné par son adresse (*href*) ; son contenu ne s'obtient qu'à la demande
 (`--payload`).
 
+Un secret a une taille maximale :
+
+```bash
+# [instance]
+GRAND=$(head -c 15000 /dev/zero | tr '\0' 'a')         # 15 000 caractères
+HT=$(openstack secret store --name tp08-secret-taille --payload "$GRAND" -f value -c "Secret href")
+echo $HT                                                 # accepté
+openstack secret store --name tp08-secret-trop-grand --payload "${GRAND}a"   # 15 001 : refusé
+```
+
+Le refus répond `Request Entity Too Large: Provided information too large to process`. Barbican
+limite un secret à 20 000 octets une fois encodé en base64 (réglage `max_allowed_secret_in_bytes`),
+soit 15 000 octets de contenu. Plus grand encore (20 000 caractères, par exemple), la réponse devient
+`Bad Request: Malformed JSON` : un message qui ne dit pas la vraie cause.
+
 ## Étape 2. Faire générer une clé par Barbican
 
 Plutôt que de fabriquer une clé soi-même, on la commande (*order*) : Barbican la génère et la
@@ -130,6 +145,21 @@ openstack secret get --payload <HREF_DU_SECRET_ADMIN>  # la valeur de $H de l'é
 Le dernier accès répond `Forbidden: Secret payload retrieval attempt not allowed`. Les secrets
 appartiennent à un projet : un autre projet ne les lit pas, même avec `creator`.
 
+Un `creator` peut aussi commander une clé. Peut-il supprimer sa commande ?
+
+```bash
+# [instance]
+OU=$(openstack secret order create --name tp08-secret-cle-user --algorithm aes --bit-length 256 \
+  --mode cbc key -f value -c "Order href")
+openstack secret order get $OU -c Status -c "Secret href"     # attendre "ACTIVE"
+SU=$(openstack secret order get $OU -f value -c "Secret href")
+openstack secret order delete $OU                             # refusé
+```
+
+Réponse : `Forbidden: Order deletion attempt not allowed`. Sur ce lab, seul un administrateur du
+projet supprime une commande, même celle qu'on a passée soi-même. Ajouter le rôle `member` n'y change
+rien. La clé, elle, appartient à son créateur : il la supprimera au nettoyage.
+
 ## Étape 4. Comment Barbican protège-t-il les secrets ici ?
 
 ```bash
@@ -148,9 +178,13 @@ MariaDB. La clé qui les chiffre (*KEK*, *key encryption key*) est la valeur `ke
 # [instance]
 source ~/tp08-openrc.sh
 openstack secret delete $HU
+openstack secret delete $SU                # la clé commandée à l'étape 3
 
 source /etc/kolla/admin-openrc.sh
+openstack role add --project tp08-proj-autre --user admin admin
+OS_PROJECT_NAME=tp08-proj-autre openstack secret order delete $OU   # accepté : admin du projet
 openstack secret delete $H                # une seule adresse par commande
+openstack secret delete $HT
 openstack secret delete $S
 openstack secret order delete $O
 openstack user delete tp08-user
@@ -169,11 +203,16 @@ openstack secret list
    faut-il lui donner ?
 4. Sur ce lab, la clé qui chiffre tous les secrets est dans un fichier de l'hôte, à côté de la base de
    données. Qu'est-ce que cela implique si l'hôte est compromis ? Que propose-t-on en production ?
+5. Pourquoi Barbican limite-t-il la taille d'un secret ? Une application doit chiffrer une archive de
+   1 Go : que range-t-elle dans Barbican, et où met-elle l'archive ?
+6. Un `creator` commande une clé, mais ne peut pas supprimer sa commande. Que perdrait-on si chacun
+   pouvait supprimer les siennes ? Supprimer une commande supprime-t-il la clé ?
 
 ## Validation
 
 - [ ] Secret stocké, relu, puis supprimé ; clé AES-256 générée par commande.
 - [ ] Refus avec `member`, accès avec `creator`, refus d'un autre projet : messages relevés.
+- [ ] Taille maximale d'un secret et suppression d'une commande : refus relevés.
 - [ ] Réponse argumentée à la question 4.
 - [ ] Nettoyage fait.
 
