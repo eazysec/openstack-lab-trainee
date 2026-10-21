@@ -99,8 +99,8 @@ Les coûts indiqués sont des ordres de grandeur ; le détail est dans [finops.m
 | Rebond SSH par l'instance (`ProxyJump`, `ProxyCommand`, `~/.ssh/config`) | SSH relaie la connexion vers la VM à travers l'instance ; la VM doit utiliser votre keypair | Aucun | Recommandé ; testé depuis un poste ([../tps/tp02/tp02-instances-ssh.md](../tps/tp02/tp02-instances-ssh.md), étape 6) |
 | Transfert d'agent SSH (`ssh -A`) | Votre clé reste sur le poste, l'instance l'utilise à distance | Aucun | Testé ; à réserver aux hôtes de confiance (root sur l'instance peut utiliser votre agent) |
 | Tunnel de port (`ssh -L`) | Un port local du poste mène au port d'une VM (SSH, web…) | Aucun | Testé |
-| `sshuttle` | `sshuttle -r ubuntu@<IP_PUBLIQUE> 10.0.2.0/24` : votre poste route le réseau externe Neutron via SSH | Aucun | Non testé (nécessite les droits root sur le poste) |
-| Redirection de ports sur l'hôte | DNAT d'un port de l'ENI (ex. 2201) vers `<floating_ip>:22` | Aucun | Non testé : exige d'ouvrir un port dans le Security Group ; un port par service |
+| `sshuttle` | `sshuttle -r ubuntu@<IP_PUBLIQUE> 10.0.2.0/24` : votre poste route le réseau externe Neutron via SSH | Aucun | Testé (TP 02, méthode G) ; nécessite les droits root sur le poste |
+| Redirection de ports sur l'hôte | DNAT d'un port de l'ENI (ex. 2201) vers `<floating_ip>:22` | Aucun | Testé (TP 02, méthode H) : exige d'ouvrir un port dans le Security Group, à une seule adresse ; un port par service |
 | **IP secondaires + Elastic IP** (scénario 03) | Une IP privée secondaire est déclarée côté AWS sur l'ENI ; l'hôte la porte et fait un NAT 1:1 vers une floating IP ; une Elastic IP est associée à l'IP secondaire | IP secondaire : gratuite. Elastic IP : ~0,005 USD/h (~3,6 USD/mois) chacune | Partie hôte vérifiée (`tests/test-public-fip.sh`, 28/28) ; partie AWS non exécutée (voir §4) |
 | 2ᵉ ENI dédiée à `br-ex` | Même principe, sur une interface séparée | Elastic IP payantes, ENI gratuite | Non implémenté |
 | *Prefix delegation* (/28 sur l'ENI) | Attribue 16 IP privées d'un coup à l'ENI | Chaque IP publique reste payante | Non implémenté |

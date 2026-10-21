@@ -41,6 +41,7 @@ zero "VM tp06b-* (tous projets)" "$(nb '^tp06b-' openstack server list --all-pro
 zero "réseaux tp06b-*" "$(nb '^tp06b-' openstack network list -f value -c Name)" "$R"
 zero "projets tp06b-*" "$(nb '^tp06b-' openstack project list -f value -c Name)" "$R"
 zero "utilisateurs tp06b-*" "$(nb '^tp06b-' openstack user list -f value -c Name)" "$R"
+[ -e ~/tp06b-auto ] && ecart "dossier ~/tp06b-auto présent (essai précédent)" "rm -r ~/tp06b-auto (TP 06 bis, nettoyage)" || ok "dossier ~/tp06b-auto : absent"
 
 echo
 if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 06 bis."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi

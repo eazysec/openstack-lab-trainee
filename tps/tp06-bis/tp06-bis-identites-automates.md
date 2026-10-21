@@ -25,7 +25,7 @@
 ```
 
 Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du
-déploiement sont là et qu'il ne reste rien d'un essai précédent (`tp06b-`). Chaque écart est affiché
+déploiement sont là et qu'il ne reste rien d'un essai précédent (`tp06b-`, dossier `~/tp06b-auto`). Chaque écart est affiché
 avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est pas
 `Lab prêt pour le TP 06 bis.`
 
@@ -126,6 +126,64 @@ MDP=$(openssl rand -base64 18); openstack user set --password "$MDP" tp06b-user
 appli $ID $SECRET openstack server list    # toujours accepté
 ```
 
+**Où l'automate range-t-il son identifiant ?** Jusqu'ici, le secret passe par une variable
+d'environnement. Une variable se lit dans `/proc` par le même utilisateur et par root, et chaque
+programme lancé par l'automate en hérite :
+
+```bash
+# [instance]
+appli $ID $SECRET sleep 60 & sleep 1
+P=$(pgrep -P $! -x sleep)                   # le processus lancé, pas le sous-shell de la fonction
+tr '\0' '\n' < /proc/$P/environ | grep -c '^OS_APPLICATION_CREDENTIAL_SECRET='   # 1 : le secret est là
+kill $P
+```
+
+Le client OpenStack sait lire ses paramètres dans deux fichiers : `clouds.yaml` pour la
+configuration, `secure.yaml` pour le secret seul. Le premier peut être relu et partagé ; le second
+reste dans un dossier fermé, en mode `600`.
+
+```bash
+# [instance]
+install -d -m 700 ~/tp06b-auto
+cat > ~/tp06b-auto/clouds.yaml <<EOF
+clouds:
+  tp06b-auto:
+    auth_type: v3applicationcredential
+    auth:
+      auth_url: $OS_AUTH_URL
+      application_credential_id: $ID
+    identity_api_version: 3
+EOF
+( umask 077; printf 'clouds:\n  tp06b-auto:\n    auth:\n      application_credential_secret: %s\n' \
+  "$SECRET" > ~/tp06b-auto/secure.yaml )
+ls -l ~/tp06b-auto                          # secure.yaml : -rw-------
+grep -c secret ~/tp06b-auto/clouds.yaml     # 0 : aucun secret dans la configuration
+```
+
+L'automate ne reçoit plus que le nom du nuage et l'emplacement des deux fichiers :
+
+```bash
+# [instance]
+auto() { env $(env | grep -o '^OS_[A-Z_]*' | sed 's/^/-u /') OS_CLOUD=tp06b-auto \
+  OS_CLIENT_CONFIG_FILE=~/tp06b-auto/clouds.yaml OS_CLIENT_SECURE_FILE=~/tp06b-auto/secure.yaml "$@"; }
+auto openstack server list -c Name          # accepté
+auto sleep 60 & sleep 1
+P=$(pgrep -P $! -x sleep)
+tr '\0' '\n' < /proc/$P/environ | grep -c '^OS_APPLICATION_CREDENTIAL_SECRET='   # 0
+tr '\0' '\n' < /proc/$P/environ | grep -c '^OS_CLOUD='                           # 1 : le nom du nuage seul
+kill $P
+```
+
+Le déploiement range les identifiants de l'administrateur de la même façon, mais en un seul fichier :
+`/etc/kolla/clouds.yaml`, copié dans `~/.config/openstack/clouds.yaml`, mot de passe compris, en mode
+`600`. Les nuages qu'il décrit :
+
+```bash
+# [instance]
+ls -l ~/.config/openstack/clouds.yaml
+grep -E '^  [a-z-]+:$' ~/.config/openstack/clouds.yaml       # les noms, sans afficher le contenu
+```
+
 ## Étape 4. Restreindre aux seuls appels utiles
 
 Une règle d'accès (*access rule*) autorise un service, une méthode HTTP et un chemin d'API. `*`
@@ -188,8 +246,23 @@ appli $ID7 $S7 openstack server reboot tp06b-vm    # accepté aussi !
 ```
 
 `reboot` passe : comme `stop` et `start`, c'est un `POST` sur `/v2.1/servers/<id>/action`. La règle
-filtre le chemin de l'appel, pas l'action demandée dans son contenu ; `rebuild` ou `resize` passeraient
-de même.
+filtre le chemin de l'appel, pas l'action demandée dans son contenu. Et `rebuild`, qui réinstalle la
+VM ?
+
+```bash
+# [instance]
+until moi openstack server show tp06b-vm -f value -c status | grep -qx ACTIVE; do sleep 3; done   # fin du reboot
+appli $ID7 $S7 openstack server rebuild --image cirros tp06b-vm   # refusé : 401, mais sur Glance
+T7=$(appli $ID7 $S7 openstack token issue -f value -c id)
+curl -s -o /dev/null -w '%{http_code}\n' -X POST -H "X-Auth-Token: $T7" -H "Content-Type: application/json" \
+  "$NOVA/servers/$(moi openstack server show tp06b-vm -f value -c id)/action" \
+  -d "{\"rebuild\": {\"imageRef\": \"$(openstack image show cirros -f value -c id)\"}}"   # 202 : accepté
+until moi openstack server show tp06b-vm -f value -c status | grep -qx ACTIVE; do sleep 3; done
+```
+
+Le client refuse parce qu'il lit d'abord l'image dans Glance, appel que la règle n'autorise pas. Un
+appel direct à l'API de Nova, avec l'identifiant de l'image, passe : la VM est réinstallée. `resize`
+se comporte de même. Un refus du client ne prouve pas qu'une règle protège : il faut tester l'API.
 
 ## Étape 6. Défense en profondeur
 
@@ -226,7 +299,8 @@ moi openstack subnet delete tp06b-subnet
 moi openstack network delete tp06b-net
 openstack user delete tp06b-user           # ses identifiants d'application avec lui
 openstack project delete tp06b-proj
-unset -f moi appli nova keystone; unset MDP T TEMOIN D ID SECRET ID1 S1 ID3 S3 ID7 S7 ID9 S9 E NOVA
+rm -r ~/tp06b-auto
+unset -f moi appli auto nova keystone; unset P MDP T T7 TEMOIN D ID SECRET ID1 S1 ID3 S3 ID7 S7 ID9 S9 E NOVA
 ./openstack-lab-trainee/tps/tp06-bis/verifier-entree.sh | tail -1    # "Lab prêt pour le TP 06 bis."
 ```
 
@@ -241,11 +315,15 @@ unset -f moi appli nova keystone; unset MDP T TEMOIN D ID SECRET ID1 S1 ID3 S3 I
    Comment limiter davantage ?
 4. À l'étape 6, quelle limite a refusé `server stop` ? Quelle limite aurait suffi si le secret avait
    fuité après l'échéance ?
+5. Pourquoi ranger le secret de l'automate dans `secure.yaml` plutôt que dans une variable
+   d'environnement ? Qui peut encore le lire ? Que faut-il pour qu'il ne parte pas dans une
+   sauvegarde ou dans un dépôt Git ?
 
 ## Validation
 
 - [ ] Jeton révoqué : refusé par Keystone, accepté par Nova jusqu'à la fin du cache, puis refusé.
 - [ ] Identifiant d'application utilisé sans le mot de passe ; création d'un autre identifiant refusée.
+- [ ] Secret de l'automate lu dans `/proc` quand il passe par une variable, absent avec `secure.yaml`.
 - [ ] Règles d'accès : lecture acceptée, écriture et autre service refusés ; appels de `server stop`
   relevés ; `reboot` accepté par la règle de l'étape 5.
 - [ ] Rôle `reader` et expiration : refus `403` puis `401` relevés.

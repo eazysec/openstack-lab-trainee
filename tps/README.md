@@ -36,9 +36,10 @@ exploite et on étend la plateforme.
 | [13](tp13/tp13-deploiement.md) | TP final : déployer une architecture sécurisée sur OpenStack ([architecture](tp13/tp13-architecture.md)) | Synthèse | 04 | Prêt (étape 15 optionnelle et payante) |
 | [13 bis](tp13-bis/tp13-bis-administrer-base.md) | Administrer la base sans ouvrir de port : rôle dédié, droits au plus juste, tunnel, traces | Synthèse (après l'étape 14 du TP 13) | 04 | Prêt |
 | [14](tp14/tp14-heat.md) | TP bonus : redéployer la même architecture avec Heat, l'infrastructure décrite en code | Bonus | 04, Heat ajouté par le TP | Prêt |
+| [15](tp15/tp15-octavia.md) | TP bonus : répartir la charge avec Octavia, HTTPS avec un certificat rangé dans Barbican, bascule, accès au plus juste | Bonus | 04, Octavia ajouté par le TP | Prêt |
 
-Non testés sur le lab, et signalés comme tels dans les énoncés : `sshuttle` et la redirection de port
-(TP 02, contraintes techniques), la partie AWS du scénario 03 et le niveau 3 « cloud » du TP 10 (payants).
+Non testés sur le lab, et signalés comme tels dans les énoncés : la partie AWS du scénario 03 et le
+niveau 3 « cloud » du TP 10 (payants).
 
 ### TP 13 puis TP 14 (bonus) : la même architecture, deux méthodes
 
@@ -168,3 +169,6 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 | 14 | ajouter un service à un cloud en fonctionnement, puis le retirer proprement |  |  |
 | 14 | décrire une infrastructure dans un modèle Heat, la créer, la modifier et la détruire |  |  |
 | 14 | comparer une construction à la main et une construction par modèle, et dire ce qui reste hors du modèle |  |  |
+| 15 | placer des serveurs derrière un répartiteur et observer la bascule quand l'un tombe |  |  |
+| 15 | terminer le HTTPS avec un certificat rangé dans Barbican, le renouveler et retirer les accès qui ne servent plus |  |  |
+| 15 | limiter les clients d'un service publié, et dire ce que le projet voit de l'infrastructure de l'exploitant |  |  |

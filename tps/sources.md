@@ -30,6 +30,9 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | Cinder dans Kolla-Ansible (LVM) | <https://docs.openstack.org/kolla-ansible/2025.1/reference/storage/cinder-guide.html> |
 | Keystone dans Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2025.1/reference/shared-services/keystone-guide.html> |
 | Designate dans Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/designate-guide.html> |
+| Octavia dans Kolla-Ansible : réseau de gestion, certificats, image (TP 15) | <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/octavia.html> |
+| Octavia : recettes (HTTPS, L7) et politiques (TP 15) | <https://docs.openstack.org/octavia/2025.1/user/guides/basic-cookbook.html> |
+| Images de test des amphores (TP 15) | <https://tarballs.opendev.org/openstack/octavia/test-images/> |
 | Calendrier des versions OpenStack | <https://releases.openstack.org/> |
 | Versions figées des dépendances (*upper-constraints*) | <https://releases.openstack.org/constraints/upper/2025.1> |
 | Client `openstack` | <https://docs.openstack.org/python-openstackclient/latest/> |

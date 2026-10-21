@@ -106,6 +106,7 @@ SSH. Chaque TP apporte une brique que le TP final réutilise.
 | 12 | Configurer les VM au démarrage avec cloud-init | Extension | Image, gabarit, proxy, métadonnées |
 | 13 | TP final : architecture de déploiement sur OpenStack | Synthèse | Tout le parcours |
 | 14 | TP bonus : la même architecture redéployée avec Heat, décrite en code | Bonus | Reprend le TP 13 |
+| 15 | TP bonus : répartir la charge avec Octavia, HTTPS avec un certificat rangé dans Barbican | Bonus | Le répartiteur du TP 13, géré par OpenStack |
 
 ---
 

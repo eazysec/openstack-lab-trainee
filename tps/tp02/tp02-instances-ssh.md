@@ -201,8 +201,8 @@ plusieurs méthodes, résumées ici puis détaillées.
 | D. `~/.ssh/config` | B ou C enregistré une fois pour toutes : `ssh 10.0.2.x` suffit | 0 | Oui |
 | E. Transfert d'agent (`-A`, *ForwardAgent*) | Votre clé reste sur le poste, l'instance l'utilise à distance pour joindre la VM | 0 | Oui |
 | F. Tunnel de port (`-L`) | Un port local de votre poste est relié au port 22 de la VM | 0 | Oui |
-| G. `sshuttle` | Tout le réseau 10.0.2.0/24 devient joignable depuis le poste, comme un VPN | 0 | Non : exige les droits root sur le poste |
-| H. Redirection de port sur l'instance (DNAT) | Un port de l'instance (ex. 2201) renvoie vers la VM | 0 | Non : exige d'ouvrir un port dans le Security Group AWS (accord du tuteur) |
+| G. `sshuttle` | Tout le réseau 10.0.2.0/24 devient joignable depuis le poste, comme un VPN | 0 | Oui (exige les droits root sur le poste) |
+| H. Redirection de port sur l'instance (DNAT) | Un port de l'instance (ex. 2201) renvoie vers la VM | 0 | Oui (port ouvert dans le Security Group AWS le temps du test) |
 | I. IP publique dédiée (scénario 03) | Une Elastic IP est associée à la VM | **Payant** | Non : partie hôte testée sans AWS, voir TP 07 |
 
 Préparation (commune à B–I) : enregistrer votre clé publique et créer une VM qui l'utilise.
@@ -324,20 +324,49 @@ Le port 2222 de votre poste mène au port 22 de la VM. Le même principe ouvre H
 n'importe quel service web d'une VM. Si vous changez de VM derrière le même port local, SSH signalera un
 changement d'empreinte : `ssh-keygen -R "[localhost]:2222"`.
 
-### G. `sshuttle` (non testé : droits root sur le poste)
+### G. `sshuttle`
 
 ```bash
-# [poste] : nécessite sshuttle installé et sudo sur le poste
+# [poste] : nécessite sshuttle installé et sudo sur le poste (sshuttle modifie son pare-feu)
 sshuttle -r ubuntu@<IP_PUBLIQUE> --ssh-cmd "ssh -i ec2_key" 10.0.2.0/24
 # dans un autre terminal :
 ssh -i ~/.ssh/id_ed25519 cirros@<FIP2>
 ```
 
-### H. Redirection de port sur l'instance (non testé : modification du Security Group AWS)
+Avant `sshuttle`, la floating IP est injoignable depuis le poste ; pendant, la VM répond ; `Ctrl+C`
+sur `sshuttle` retire ses règles et coupe l'accès.
 
-Principe : une règle DNAT sur l'instance envoie le port 2201 vers le port 22 de la VM. Cela exige
-d'ouvrir le port 2201 dans le Security Group AWS (gratuit, mais à valider avec le tuteur). Ne pas
-toucher au port 22 de l'instance. Ce montage n'a pas été testé sur le lab.
+### H. Redirection de port sur l'instance (DNAT)
+
+Une règle DNAT sur l'instance envoie son port 2201 vers le port 22 de la VM. Il faut aussi ouvrir le
+port 2201 dans le Security Group AWS de l'instance, **à votre seule adresse** (gratuit, mais à
+valider avec le tuteur), puis le refermer après l'exercice. Ne touchez pas au port 22 de l'instance.
+
+```bash
+# [instance] : <FIP2> est la floating IP de tp02-vm-poste
+IF=$(ip -o -4 route show default | awk '{print $5; exit}')      # l'interface de l'instance (enX0 sur EC2)
+sudo iptables -t nat -A PREROUTING -i $IF -p tcp --dport 2201 -j DNAT --to-destination <FIP2>:22 \
+  -m comment --comment tp02-h
+```
+
+```bash
+# [poste] : après l'ouverture du port 2201 dans le Security Group AWS
+ssh -p 2201 -i ~/.ssh/id_ed25519 cirros@<IP_PUBLIQUE> hostname     # tp02-vm-poste
+```
+
+Sans la règle du Security Group, la connexion n'aboutit pas (délai dépassé : AWS jette le paquet) ;
+avec elle mais sans la règle DNAT, l'instance la refuse (`Connection refused`). Retirez la règle DNAT,
+puis celle du Security Group :
+
+```bash
+# [instance]
+sudo iptables -t nat -D PREROUTING -i $IF -p tcp --dport 2201 -j DNAT --to-destination <FIP2>:22 \
+  -m comment --comment tp02-h
+sudo iptables -t nat -S PREROUTING | grep -c tp02-h     # 0
+```
+
+Chaque VM publiée ainsi demande son port, ouvert sur Internet et à surveiller : c'est pourquoi on
+préfère `ProxyJump`.
 
 ### I. IP publique dédiée (payant)
 

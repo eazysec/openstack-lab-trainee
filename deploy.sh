@@ -41,6 +41,9 @@ ENABLE_CINDER="${ENABLE_CINDER:-no}"
 ENABLE_BARBICAN="${ENABLE_BARBICAN:-no}"          # secrets ; requis pour chiffrer les volumes Cinder
 ENABLE_DESIGNATE="${ENABLE_DESIGNATE:-no}"        # DNS (backend bind9 sur l'hôte, port 53)
 ENABLE_LAB_BACKUP="${ENABLE_LAB_BACKUP:-no}"      # stockage objet S3 (Garage) + restic, hors Kolla (TP 10)
+ENABLE_OCTAVIA="${ENABLE_OCTAVIA:-no}"            # répartition de charge (pilote amphora : une VM par répartiteur)
+# Image des amphores : image de test du projet Octavia (reconstruite chaque nuit, sans empreinte publiée)
+OCTAVIA_AMP_IMAGE_URL="${OCTAVIA_AMP_IMAGE_URL:-https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-noble.qcow2}"
 NEUTRON_DNS_DOMAIN="${NEUTRON_DNS_DOMAIN:-lab.example.}"   # domaine DNS des ports Neutron (avec point final)
 DESIGNATE_NS_RECORD="${DESIGNATE_NS_RECORD:-ns1.lab.example}"   # serveur de noms des zones, SANS point final (Kolla l'ajoute)
 CINDER_DEVICE="${CINDER_DEVICE:-}"                  # ex. /dev/nvme1n1 (vide = fichier loop)
@@ -76,7 +79,7 @@ if [[ "$ENABLE_CINDER" == "yes" && -n "$CINDER_DEVICE" ]]; then
   fi
 fi
 echo "Interface mgmt : $MGMT_IF ($MGMT_IP) | virt_type : $VIRT_TYPE | release : $OPENSTACK_RELEASE"
-echo "Cinder : $ENABLE_CINDER ${CINDER_DEVICE:-(fichier loop $CINDER_LOOP_FILE)} | Heat : $ENABLE_HEAT | Barbican : $ENABLE_BARBICAN | Designate : $ENABLE_DESIGNATE | Sauvegarde (S3) : $ENABLE_LAB_BACKUP"
+echo "Cinder : $ENABLE_CINDER ${CINDER_DEVICE:-(fichier loop $CINDER_LOOP_FILE)} | Heat : $ENABLE_HEAT | Octavia : $ENABLE_OCTAVIA | Barbican : $ENABLE_BARBICAN | Designate : $ENABLE_DESIGNATE | Sauvegarde (S3) : $ENABLE_LAB_BACKUP"
 if [[ "$ENABLE_BARBICAN$ENABLE_DESIGNATE" == *yes* ]] && (( mem_gb < 15 )); then
   echo "ATTENTION: Barbican/Designate ajoutent ~1 à 2 Go de RAM ; 16 Go recommandés (détecté: ${mem_gb} Go)."
 fi
@@ -98,6 +101,8 @@ export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update -q
 sudo apt-get install -yq git python3-dev python3-venv libffi-dev gcc libssl-dev \
      libdbus-glib-1-dev libdbus-1-dev libglib2.0-dev pkg-config cmake lvm2 bind9-dnsutils
+# Octavia : l'interface o-hm0 de l'hôte prend son adresse par dhclient, absent d'Ubuntu 24.04
+if [[ "$ENABLE_OCTAVIA" == "yes" ]]; then sudo apt-get install -yq isc-dhcp-client; fi
 
 # Swap de 8 Go : évite l'OOM pendant le déploiement et le lancement de VM
 if ! swapon --show | grep -q /swapfile; then
@@ -211,6 +216,10 @@ pip install -q docker dbus-python python-openstackclient python-barbicanclient p
 if [[ "$ENABLE_HEAT" == "yes" ]]; then
   pip install -q python-heatclient -c "https://releases.openstack.org/constraints/upper/$OPENSTACK_RELEASE"
 fi
+# Client d'Octavia (commandes « openstack loadbalancer … ») : seulement si le service est activé
+if [[ "$ENABLE_OCTAVIA" == "yes" ]]; then
+  pip install -q python-octaviaclient -c "https://releases.openstack.org/constraints/upper/$OPENSTACK_RELEASE"
+fi
 
 sudo mkdir -p /etc/kolla/config/nova
 sudo chown -R "$USER:$USER" /etc/kolla
@@ -257,6 +266,12 @@ enable_horizon: "yes"
 # Le navigateur la joint par le tunnel SSH d'Horizon (-L 6080:<IP_PRIVEE>:6080), sans port ouvert.
 nova_novncproxy_fqdn: "localhost"
 enable_heat: "$ENABLE_HEAT"
+enable_octavia: "$ENABLE_OCTAVIA"
+# Réseau de gestion des amphores : réseau Neutron du projet service, relié à l'hôte par l'interface
+# o-hm0 branchée sur br-int (mode prévu pour les essais) ; ni VLAN, ni modification de l'interface d'admin.
+octavia_network_type: "tenant"
+# Reprise des opérations interrompues (jobboard) : demanderait Redis ou Valkey, inutile sur un seul nœud
+enable_octavia_jobboard: "no"
 enable_barbican: "$ENABLE_BARBICAN"
 enable_designate: "$ENABLE_DESIGNATE"
 designate_backend: "bind9"
@@ -304,6 +319,12 @@ log "bootstrap-servers (Docker, utilisateurs, paquets)"
 kolla-ansible bootstrap-servers -i "$INVENTORY"
 sudo usermod -aG docker "$USER"
 
+# Octavia : autorité de certification et certificats entre les services et les amphores (une seule fois)
+if [[ "$ENABLE_OCTAVIA" == "yes" && ! -f /etc/kolla/config/octavia/server_ca.cert.pem ]]; then
+  log "Certificats d'Octavia"
+  kolla-ansible octavia-certificates -i "$INVENTORY"
+fi
+
 log "prechecks"
 kolla-ansible prechecks -i "$INVENTORY"
 
@@ -338,6 +359,24 @@ if [[ "$ENABLE_LAB_BACKUP" == "yes" ]]; then
   log "Stockage objet du lab (Garage S3) et restic"
   sudo "$SCRIPT_DIR/tools/lab-s3.sh" install "$MGMT_IP"
 fi
+# Octavia : image des amphores, dans le projet service, étiquetée « amphora » (Octavia la choisit par
+# cette étiquette). Une seule fois : une image déjà présente est conservée.
+if [[ "$ENABLE_OCTAVIA" == "yes" ]]; then
+  log "Image des amphores d'Octavia"
+  # shellcheck disable=SC1091
+  source /etc/kolla/octavia-openrc.sh
+  if [[ -z "$(openstack image list --tag amphora -f value -c ID)" ]]; then
+    curl -fL --retry 3 -o "$WORKDIR/amphora.qcow2" "$OCTAVIA_AMP_IMAGE_URL"
+    echo "SHA-256 de l'image téléchargée : $(sha256sum "$WORKDIR/amphora.qcow2" | cut -d' ' -f1)"
+    openstack image create amphora-x64-haproxy --container-format bare --disk-format qcow2 --private \
+      --tag amphora --property hw_architecture=x86_64 --property hw_rng_model=virtio \
+      --file "$WORKDIR/amphora.qcow2" -f value -c id
+    rm -f "$WORKDIR/amphora.qcow2"
+  else
+    echo "Déjà présente, étape ignorée."
+  fi
+fi
+
 # ------------------------------------------------- RESSOURCES DE DÉMO --------
 log "Ressources de démo (réseau externe, image, flavors, keypair)"
 # shellcheck disable=SC1091

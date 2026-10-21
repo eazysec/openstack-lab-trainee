@@ -56,7 +56,9 @@ zero "réseaux tp14-*" "$(nb '^tp14-' openstack network list -f value -c Name)" 
 
 echo; echo "== Heat"
 fichier=$(grep -E '^ENABLE_HEAT=' "$DEPOT/scenarios/04-aio-complet.env" | cut -d= -f2)
-if openstack service show orchestration >/dev/null 2>&1; then
+if ! TYPES=$(openstack service list -f value -c Type 2>/dev/null); then
+  ecart "liste des services : commande en échec" "vérifier que la plateforme répond (./openstack-lab-trainee/verify.sh)"
+elif grep -qx orchestration <<< "$TYPES"; then
   info "Heat est déjà déployé (TP rejoué) : à l'étape 1, passez directement à la vérification"
   zero "piles tp14-*" "$(nb '^tp14-' openstack stack list -f value -c 'Stack Name')" "faire l'étape de nettoyage du TP 14"
   [ "$fichier" = yes ] || info "le scénario 04 indique ENABLE_HEAT=$fichier alors que Heat est déployé"

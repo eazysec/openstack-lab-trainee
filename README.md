@@ -172,6 +172,8 @@ Les paramètres se règlent dans le fichier de scénario, ou en variable d'envir
 | `CINDER_DEVICE` | vide | Disque vide dédié à Cinder ; vide = fichier loop |
 | `CINDER_LOOP_SIZE_GB` | `20` | Taille du fichier loop |
 | `ENABLE_HEAT` | `no` | Orchestration Heat (environ 1 Go de mémoire en plus, mesuré) ; le TP 14 l'active |
+| `ENABLE_OCTAVIA` | `no` | Répartition de charge Octavia (0,7 à 1,2 Go de mémoire en plus, mesuré ; plus une VM d'1 Go, l'amphore, par répartiteur) ; le TP 15 l'active |
+| `OCTAVIA_AMP_IMAGE_URL` | image de test du projet Octavia (Ubuntu 24.04) | Image des amphores, téléchargée et enregistrée une fois |
 | `ENABLE_BARBICAN` | `no` | Gestion des secrets ; nécessaire pour chiffrer les volumes Cinder |
 | `ENABLE_DESIGNATE` | `no` | DNS (backend bind9 sur l'hôte, port 53) |
 | `ENABLE_LAB_BACKUP` | `no` | Stockage objet S3 (Garage, hors Kolla), restic et s3cmd, pour le TP 10 |
@@ -196,15 +198,17 @@ Pour tout supprimer :
 
 1. **Pré-checks** : pas root, sudo OK, OS, RAM, CPU, détection interface/IP et KVM, garde-fou sur `CINDER_DEVICE` ;
    avec Barbican/Designate : alerte si moins de 16 Go de RAM, refus si le port 53 est déjà pris.
-2. **Paquets système** (non interactif, dont `lvm2` et `dig`), swap de 8 Go, hostname dans `/etc/hosts` (requis par RabbitMQ).
+2. **Paquets système** (non interactif, dont `lvm2` et `dig` ; `isc-dhcp-client` avec Octavia), swap de 8 Go, hostname dans `/etc/hosts` (requis par RabbitMQ).
 3. **Réseau de l'hôte** : `tools/openstack-lab-net.sh`, installé comme service systemd `openstack-lab-net`.
 4. **(Cinder)** fichier loop (service `openstack-lab-cinder-loop`) ou disque, puis groupe LVM `cinder-volumes`.
 5. **Kolla-Ansible** dans un venv + `python-openstackclient`, `python-barbicanclient`, `python-designateclient`,
    versions figées par les *upper-constraints*.
 6. `install-deps`, puis `kolla-genpwd`, qui complète les mots de passe manquants sans modifier les existants.
 7. **Configuration** : `/etc/kolla/globals.yml` réécrit entièrement + fichiers dans `/etc/kolla/config/`.
-8. `bootstrap-servers` → `prechecks` → `pull` → `deploy` → `post-deploy`.
-9. **Ressources de démo** (`init-runonce`), seulement au premier déploiement.
+8. `bootstrap-servers` → `prechecks` → `pull` → `deploy` → `post-deploy` ; avec Octavia, avant les
+   prechecks, `octavia-certificates` (autorité et certificats des amphores, une seule fois).
+9. **(Octavia)** image des amphores téléchargée et enregistrée dans le projet `service` (une seule fois).
+10. **Ressources de démo** (`init-runonce`), seulement au premier déploiement.
 
 ---
 
@@ -295,6 +299,8 @@ Pas de VIP non plus : HAProxy/keepalived/ProxySQL sont désactivés et `kolla_in
 Non déployés :
 - Heat (orchestration) : désactivé pour économiser la mémoire ; le TP 14 l'ajoute (`ENABLE_HEAT=yes`
   dans le scénario 04), puis le retire ;
+- Octavia (répartition de charge) : désactivé, pour la même raison ; le TP 15 l'ajoute
+  (`ENABLE_OCTAVIA=yes` dans le scénario 04), puis le retire ;
 - Barbican et Designate : seulement dans le scénario 04 ;
 - **Swift (stockage objet) : n'existe plus dans Kolla-Ansible 2025.1** (aucun rôle ni variable `enable_swift`).
   L'alternative Kolla, `ceph-rgw` (API compatible Swift), exige un cluster Ceph externe. Pour le TP 10,
