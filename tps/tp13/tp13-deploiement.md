@@ -898,6 +898,9 @@ Conservez l'image `debian13` et le gabarit `m1.1g`.
    erreur dans un script en `set -o pipefail` ?
 10. Un security group AWS filtre l'interface entière. Quel risque cela pose-t-il à l'étape 15, et
     qu'avez-vous vérifié avant d'allouer l'Elastic IP ?
+11. À l'étape 7, une VM qui ne peut pas joindre le service de métadonnées démarre-t-elle ? Que lui
+    manque-t-il ? La règle ajoutée vise une seule adresse et un seul port : pourquoi pas toute la plage
+    `169.254.0.0/16`, ni le port 443 ? Comment appelle-t-on les adresses de cette plage ?
 
 ## Validation
 
