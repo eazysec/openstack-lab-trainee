@@ -289,9 +289,24 @@ ssh cirros@<FIP2>
 
 Sans `-A`, `ssh-add -l` sur l'instance répond qu'il n'y a pas d'agent : la clé n'est pas transmise.
 
-> Sécurité : pendant la session, toute personne root sur l'instance peut utiliser votre agent pour
-> se connecter en votre nom partout où votre clé est acceptée. À réserver aux machines de
-> confiance ; préférer `ProxyJump` (C, D), où l'instance ne voit jamais votre clé.
+**Le risque, par l'expérience.** Gardez la session ouverte avec `-A`. Dans un deuxième terminal du
+poste, ouvrez une autre session sur l'instance, **sans** `-A` : elle joue le rôle d'un attaquant qui
+a obtenu root sur l'instance.
+
+```bash
+# [instance] : deuxième session, ouverte sans -A
+ssh-add -l                                              # pas d'agent dans cette session
+sudo find /tmp -type s -path '/tmp/ssh-*/agent.*'       # la prise de l'agent de la première session
+S=$(sudo find /tmp -type s -path '/tmp/ssh-*/agent.*' | head -1)
+sudo SSH_AUTH_SOCK=$S ssh-add -l                        # root voit votre clé du poste
+sudo SSH_AUTH_SOCK=$S ssh cirros@<FIP2> hostname        # et s'en sert pour joindre la VM
+```
+
+La clé n'a pas quitté votre poste, mais root a pu s'en servir : l'agent signe pour qui sait joindre
+sa prise. Fermez la première session, puis relancez la dernière commande dans la deuxième : refus,
+la prise a disparu. Le risque dure le temps de la session, et vaut pour toutes les machines où votre
+clé est acceptée. Réservez `-A` aux machines de confiance ; préférez `ProxyJump` (C, D), où
+l'instance ne voit jamais votre clé.
 
 ### F. Tunnel de port (`-L`)
 
@@ -360,7 +375,8 @@ openstack server list
   tunnel.
 - [ ] Captures faites : `password=` absent du trafic SSH, présent à la sortie du tunnel.
 - [ ] Connexion à `tp02-vm-poste` depuis votre poste par au moins trois méthodes parmi B à F.
-- [ ] Le risque du transfert d'agent (E) expliqué.
+- [ ] Le risque du transfert d'agent (E) démontré : root joint la VM avec votre agent, puis plus
+  après la fermeture de la session.
 - [ ] Nettoyage fait (`openstack server list` ne montre plus de `tp02-…`).
 
 ## Sources
