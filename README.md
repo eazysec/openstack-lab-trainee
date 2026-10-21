@@ -310,6 +310,7 @@ Non déployés :
 | `/etc/kolla/passwords.yml` | Tous les secrets (ne jamais committer) |
 | `/etc/kolla/config/galera.cnf` | `innodb_buffer_pool_size = 1G` |
 | `/etc/kolla/config/nova/nova-compute.conf` | `resume_guests_state_on_host_boot`, et en QEMU `virt_type`, `cpu_mode` |
+| `/etc/kolla/config/cinder.conf` (si Cinder) | `[keystone_authtoken] service_type = volumev3` : sans lui, Cinder refuse les identifiants d'application munis de règles d'accès (TP 04 bis) |
 | `/etc/kolla/<service>/` | Config rendue de chaque service (écrasée à chaque déploiement : ne pas éditer) |
 | `/etc/kolla/admin-openrc.sh`, `/etc/kolla/clouds.yaml` | Identifiants CLI admin |
 | `/etc/openstack-lab/network.env` | Paramètres du réseau hôte (lus au boot) |

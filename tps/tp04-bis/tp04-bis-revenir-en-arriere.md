@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Prérequis | TP 04 ; Cinder déployé (scénario 02) |
+| Prérequis | TP 04 et TP 06 bis (identifiants d'application, règles d'accès) ; Cinder déployé (scénario 02) |
 | À la fin du TP | Vous savez remettre un volume dans un état antérieur, reconstruire une VM qui démarre sur un volume sans perdre ses données, et vous connaissez les limites de chaque méthode |
 
 ## Objectifs
@@ -11,6 +11,8 @@
 - Comprendre qu'un snapshot n'est pas une image, et passer de l'un à l'autre.
 - Réécrire un volume à partir d'une image (*re-image*).
 - Reconstruire une VM qui démarre sur un volume en gardant son volume de données.
+- Limiter un automate à la seule prise de snapshots, et comprendre ce qui fait qu'une règle d'accès
+  s'applique à un service.
 
 ---
 
@@ -166,7 +168,61 @@ openstack server remove volume tp04b-vm-volume tp04b-vol-donnees; attendre tp04b
 openstack volume delete tp04b-vol-donnees       # refusé : le volume a des snapshots
 ```
 
-## Étape 5. Nettoyage
+## Étape 5. Un automate qui ne fait que des snapshots
+
+Un script de sauvegarde doit prendre des snapshots, rien d'autre (TP 06 bis : identifiants
+d'application et règles d'accès). Pour qu'une règle s'applique à Cinder, trois valeurs entrent en jeu :
+
+```bash
+# [instance]
+openstack service list -c Name -c Type | grep -iE 'name|cinder'       # 1. le catalogue de Keystone
+sudo docker exec cinder_api awk '/^\[keystone_authtoken\]/{s=1} s&&/^service_type/{print;exit}' /etc/cinder/cinder.conf
+                                                                       # 2. le type que Cinder se donne
+```
+
+| | Où | Valeur |
+|---|---|---|
+| 1 | Catalogue de Keystone : types sous lesquels Cinder est enregistré | `block-storage`, `volumev3` |
+| 2 | Configuration de Cinder (`[keystone_authtoken] service_type`), écrite par le déploiement | `volumev3` |
+| 3 | Le champ `"service"` de chaque règle d'accès | celui que vous écrivez |
+
+Cinder vérifie que la valeur 2 figure dans le catalogue, puis que la valeur 3 lui est **exactement
+égale**. Les appels nécessaires ont été relevés avec `--debug` (TP 06 bis, étape 5) : la recherche du
+volume, la création du snapshot et la liste.
+
+```bash
+# [instance]
+R='[{"service": "volumev3", "method": "GET", "path": "/v3/*/volumes/*"},
+    {"service": "volumev3", "method": "GET", "path": "/v3/*/volumes/detail"},
+    {"service": "volumev3", "method": "POST", "path": "/v3/*/snapshots"},
+    {"service": "volumev3", "method": "GET", "path": "/v3/*/snapshots/detail"}]'
+{ read -r ID; read -r SECRET; } < <(openstack application credential create tp04b-appcred-snapshots \
+  --role member --access-rules "$R" -f value -c id -c secret)
+appli() {  # appli <id> <secret> <commande…> : la commande, avec l'identifiant d'application seul
+  local id=$1 secret=$2; shift 2
+  env $(env | grep -o '^OS_[A-Z_]*' | sed 's/^/-u /') OS_AUTH_URL=$OS_AUTH_URL OS_IDENTITY_API_VERSION=3 \
+    OS_AUTH_TYPE=v3applicationcredential OS_APPLICATION_CREDENTIAL_ID=$id \
+    OS_APPLICATION_CREDENTIAL_SECRET=$secret "$@"
+}
+appli $ID $SECRET openstack volume snapshot create --volume tp04b-vol-donnees tp04b-snap-auto   # accepté
+appli $ID $SECRET openstack volume snapshot list -c Name                                       # accepté
+appli $ID $SECRET openstack volume snapshot delete tp04b-snap-auto                              # refusé
+appli $ID $SECRET openstack volume delete tp04b-vol-copie                                       # refusé
+```
+
+Contre-épreuve : les mêmes règles, écrites avec `block-storage`, un type pourtant présent dans le
+catalogue :
+
+```bash
+# [instance]
+{ read -r ID2; read -r SECRET2; } < <(openstack application credential create tp04b-appcred-mauvais-type \
+  --role member --access-rules "${R//volumev3/block-storage}" -f value -c id -c secret)
+appli $ID2 $SECRET2 openstack volume snapshot list -c Name                                     # refusé : 401
+openstack application credential delete tp04b-appcred-snapshots
+openstack application credential delete tp04b-appcred-mauvais-type
+```
+
+## Étape 6. Nettoyage
 
 Dans l'ordre des dépendances : les VM, l'image, les snapshots, puis les volumes.
 
@@ -178,10 +234,11 @@ openstack image delete tp04b-img-version-a
 openstack volume snapshot delete tp04b-snap-a
 openstack volume snapshot delete tp04b-snap-b
 openstack volume snapshot delete tp04b-snap-racine
+openstack volume snapshot delete tp04b-snap-auto
 until [ -z "$(openstack volume snapshot list -f value -c Name | grep '^tp04b-')" ]; do sleep 3; done
 openstack volume delete tp04b-vol-donnees tp04b-vol-copie tp04b-vol-racine
 until [ -z "$(openstack volume list -f value -c Name | grep '^tp04b-')" ]; do sleep 3; done
-unset -f attendre ecrire lire; unset FIP FIP2 SA IMG
+unset -f attendre ecrire lire appli; unset FIP FIP2 SA IMG R ID SECRET ID2 SECRET2
 ./openstack-lab-trainee/tps/tp04-bis/verifier-entree.sh | tail -1    # "Lab prêt pour le TP 04 bis."
 ```
 
@@ -197,6 +254,9 @@ unset -f attendre ecrire lire; unset FIP FIP2 SA IMG
 5. Un re-image avec une image plus grande que le volume : que se passe-t-il, à votre avis ?
 6. `openstack server image create` sur une VM qui démarre sur un volume produit une image de 0 octet.
    Que contient-elle vraiment ?
+7. À l'étape 5, pourquoi la règle écrite avec `block-storage` est-elle refusée, alors que ce type est
+   dans le catalogue ? Qu'arriverait-il si la configuration de Cinder portait un type absent du
+   catalogue ?
 
 ## Validation
 
@@ -204,6 +264,7 @@ unset -f attendre ecrire lire; unset FIP FIP2 SA IMG
 - [ ] Refus du re-image avec un snapshot ; chaîne snapshot → volume → image → re-image faite.
 - [ ] VM sur volume reconstruite : système remis à neuf, volume de données intact.
 - [ ] Limites de l'étape 4 relevées ; questions 2 et 3 argumentées.
+- [ ] Automate de snapshots : création et liste acceptées, suppressions refusées ; règle `block-storage` refusée ; les trois valeurs relevées.
 - [ ] Nettoyage fait.
 
 ## Sources

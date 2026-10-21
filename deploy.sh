@@ -290,6 +290,15 @@ cpu_mode = none
 EOF
 fi
 
+# Cinder : type de service vu par le middleware d'authentification. Kolla écrit « volume », absent du
+# catalogue ; avec lui, Cinder refuse tout identifiant d'application muni de règles d'accès.
+if [[ "$ENABLE_CINDER" == "yes" ]]; then
+  cat > /etc/kolla/config/cinder.conf <<EOF
+[keystone_authtoken]
+service_type = volumev3
+EOF
+fi
+
 # ---------------------------------------------------------------- DÉPLOIEMENT
 log "bootstrap-servers (Docker, utilisateurs, paquets)"
 kolla-ansible bootstrap-servers -i "$INVENTORY"

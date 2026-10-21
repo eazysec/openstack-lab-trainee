@@ -39,11 +39,12 @@ for c in "keypair:mykey" "network:demo-net" "network:public1" "router:demo-route
 done
 
 echo; echo "== Restes d'un essai précédent du TP 04 bis"
-R="faire le nettoyage du TP 04 bis (étape 5) : VM, image, snapshots, puis volumes"
+R="faire le nettoyage du TP 04 bis (étape 6) : VM, image, snapshots, puis volumes"
 zero "VM tp04b-* (tous projets)" "$(nb '^tp04b-' openstack server list --all-projects -f value -c Name)" "$R"
 zero "volumes tp04b-*" "$(nb '^tp04b-' openstack volume list --all-projects -f value -c Name)" "$R"
 zero "snapshots tp04b-*" "$(nb '^tp04b-' openstack volume snapshot list --all-projects -f value -c Name)" "$R"
 zero "images tp04b-*" "$(nb '^tp04b-' openstack image list -f value -c Name)" "$R"
+zero "identifiants d'application tp04b-* (admin)" "$(nb '^tp04b-' openstack application credential list -f value -c Name)" "openstack application credential delete <nom> (TP 04 bis, étape 5)"
 
 echo
 if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 04 bis."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi
