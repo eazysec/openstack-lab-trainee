@@ -1,9 +1,9 @@
-# TP 12 bis. Dépanner une VM : le mode rescue
+# TP 12 bis. Dépanner une VM : le mode rescue, puis cloud-init
 
 | | |
 |---|---|
-| Prérequis | TP 12 (image `debian13`, gabarit `m1.1g`) ; tunnel SSH du TP 02 (étape 5) pour la console d'Horizon ; scénario 02 ou 04 |
-| À la fin du TP | Vous savez reprendre la main sur une VM dont l'accès administrateur est perdu, par le mode rescue, et dire pourquoi la méthode « console et GRUB » ne s'applique pas ici |
+| Prérequis | TP 12 (image `debian13`, gabarit `m1.1g`) ; tunnel SSH du TP 02 (étape 5) pour la console d'Horizon ; scénario 02 ou 04 (Cinder, pour l'étape 5) |
+| À la fin du TP | Vous savez reprendre la main sur une VM dont l'accès administrateur est perdu, par le mode rescue, et dire pourquoi la méthode « console et GRUB » ne s'applique pas ici ; vous savez trouver pourquoi une personnalisation cloud-init a échoué, la reprendre sans recréer la VM, et dire ce que cette reprise change |
 
 ## Objectifs
 
@@ -12,6 +12,8 @@
 - Reconnaître un rescue qui démarre sur le mauvais disque.
 - Dire ce que la console d'une VM permet, ce qu'elle ne permet pas sur cette image, et ce qu'elle
   exposerait.
+- Trouver dans les journaux de cloud-init la cause d'une personnalisation en échec, la corriger, puis
+  relancer un module ou tout cloud-init, et relever ce que la relance change.
 
 ---
 
@@ -24,7 +26,7 @@
 
 Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du
 déploiement sont là, que l'image `debian13` et le gabarit `m1.1g` du TP 12 existent, et qu'il ne
-reste rien d'un essai précédent (`tp12b-`). Chaque écart est affiché avec ce qu'il faut faire.
+reste rien d'un essai précédent (`tp12b-`) ; il vérifie aussi que Cinder répond, pour l'étape 5. Chaque écart est affiché avec ce qu'il faut faire.
 
 ## Étape 1. Une VM, puis une panne
 
@@ -172,14 +174,123 @@ ssh debian@"$FIP" 'sudo -n true && echo "sudo : OK"; sudo visudo -c | tail -1'
 La VM a retrouvé son disque, réparé, et ses droits d'administration. Rien d'autre n'a changé : même
 identifiant, même adresse, même FIP.
 
-## Étape 5. Nettoyage
+## Étape 5. Une personnalisation qui échoue
+
+Jusqu'ici, le système était cassé. Voici le cas inverse : la VM démarre, SSH répond, mais sa
+personnalisation par cloud-init (TP 12) a échoué en partie. Le user-data ci-dessous formate et monte
+un volume de données, puis vérifie le montage. Le volume est créé, mais on oublie de l'attacher à la
+création de la VM (l'option `--block-device` du TP 12, étape 9) :
 
 ```bash
 # [instance]
-openstack server delete --wait tp12b-vm-demo
-openstack floating ip delete "$FIP"
+openstack volume create --size 1 tp12b-vol-donnees-demo -f value -c status
+VOL=$(openstack volume show tp12b-vol-donnees-demo -f value -c id)
+mkdir -p ~/tp12b
+cat > ~/tp12b/user-data-donnees.yaml <<EOF
+#cloud-config
+fs_setup:
+  - label: donnees
+    filesystem: ext4
+    device: /dev/disk/by-id/virtio-${VOL:0:20}
+    overwrite: false
+mounts:
+  - [ LABEL=donnees, /srv/donnees, ext4, "defaults,nofail", "0", "2" ]
+runcmd:
+  - echo "runcmd \$(date +%T)" >> /var/log/tp12b-runcmd.log
+  - findmnt /srv/donnees
+EOF
+cloud-init schema -c ~/tp12b/user-data-donnees.yaml 2>/dev/null | tail -1   # Valid schema …
+openstack server create --image debian13 --flavor m1.1g --key-name mykey --network demo-net \
+  --security-group tp12b-sg-admin-demo --user-data ~/tp12b/user-data-donnees.yaml \
+  --wait tp12b-vm-donnees-demo -f value -c status                         # ACTIVE
+FIP2=$(openstack floating ip create public1 -f value -c floating_ip_address)
+openstack server add floating ip tp12b-vm-donnees-demo "$FIP2"
+ssh-keygen -R "$FIP2"
+until ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new debian@"$FIP2" true 2>/dev/null; do sleep 5; done
+ssh debian@"$FIP2" 'cloud-init status --wait --long'                     # status: error
+```
+
+**Trouver la cause.** Le statut donne deux listes : `errors`, ce qui a échoué, et
+`recoverable_errors`, les avertissements. Les journaux de cloud-init sont lisibles par le groupe
+`adm`, dont `debian` fait partie :
+
+```bash
+# [instance]
+ssh debian@"$FIP2" 'grep -A1 "Failed during filesystem" /var/log/cloud-init.log | head -2'
+ssh debian@"$FIP2" 'cat /var/log/tp12b-runcmd.log; grep donnees /etc/fstab'
+ssh debian@"$FIP2" 'ls /dev/disk/by-id/; lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINTS'
+```
+
+L'erreur porte sur `scripts-user`, c'est-à-dire le `runcmd` : `findmnt` n'a rien trouvé. Ce n'est
+que le dernier symptôme. La cause est dans les avertissements : le disque attendu n'existait pas.
+Entre les deux, `fs_setup` n'a rien formaté, mais `mounts` a quand même écrit sa ligne dans
+`/etc/fstab` ; l'option `nofail` laisse la VM démarrer sans le disque.
+
+**Corriger, puis relancer les seuls modules en cause.** On attache le volume, puis on relance les
+deux modules qui en dépendent :
+
+```bash
+# [instance]
+openstack server add volume tp12b-vm-donnees-demo tp12b-vol-donnees-demo
+until ssh debian@"$FIP2" "test -e /dev/disk/by-id/virtio-${VOL:0:20}"; do sleep 3; done
+ssh debian@"$FIP2" 'sudo cloud-init single --name disk_setup --frequency always; lsblk -o NAME,FSTYPE,LABEL,MOUNTPOINTS /dev/vdb'
+ssh debian@"$FIP2" 'sudo cloud-init single --name mounts --frequency always; findmnt /srv/donnees'
+ssh debian@"$FIP2" 'cloud-init status | head -1'
+ssh debian@"$FIP2" 'echo "écrit avant la relance" | sudo tee /srv/donnees/temoin.txt'
+```
+
+Le volume est formaté, puis monté : la VM est réparée sans redémarrer. Le statut, lui, reste
+`error` : il décrit le dernier démarrage, et `single` ne le refait pas.
+
+**Relancer tout cloud-init.** `cloud-init clean` efface ce que cloud-init a retenu de la VM
+(fichiers témoins, `/var/lib/cloud/instance`), et `--reboot` redémarre : au démarrage suivant,
+cloud-init croit voir une nouvelle VM et rejoue toute la configuration. Relevez l'empreinte de la clé
+d'hôte avant et après :
+
+```bash
+# [instance]
+ssh-keyscan -t ed25519 "$FIP2" 2>/dev/null | ssh-keygen -lf -
+ssh debian@"$FIP2" 'sudo cloud-init clean --logs --reboot'
+sleep 30
+until ssh-keyscan -T 5 -t ed25519 "$FIP2" 2>/dev/null | grep -q ed25519; do sleep 5; done
+ssh-keyscan -t ed25519 "$FIP2" 2>/dev/null | ssh-keygen -lf -
+ssh -o BatchMode=yes debian@"$FIP2" true                                 # refusé : la clé d'hôte a changé
+```
+
+La clé d'hôte a changé. Avant d'accepter la nouvelle, comparez-la à celle que cloud-init a affichée
+dans la console, comme au TP 13 (étape 8) : la dernière empreinte affichée est celle du démarrage
+qui vient d'avoir lieu.
+
+```bash
+# [instance]
+openstack console log show tp12b-vm-donnees-demo | sed -n '/BEGIN SSH HOST KEY FINGERPRINTS/,/END/p' | grep ED25519 | tail -1
+ssh-keyscan -t ed25519 "$FIP2" 2>/dev/null | ssh-keygen -lf -
+```
+
+Si les deux empreintes `SHA256:…` sont identiques, retirez l'ancienne clé et reconnectez-vous :
+
+```bash
+# [instance]
+ssh-keygen -R "$FIP2"
+until ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new debian@"$FIP2" true 2>/dev/null; do sleep 5; done
+ssh debian@"$FIP2" 'cloud-init status --wait --long | head -1; cat /var/log/tp12b-runcmd.log; cat /srv/donnees/temoin.txt'
+```
+
+Le statut est `done`. Le `runcmd` a été rejoué : deux lignes dans son journal. Le fichier témoin est
+toujours là : `overwrite: false` a empêché de reformater un disque qui avait déjà un système de
+fichiers. Le user-data, lui, n'a pas changé : la relance rejoue la même configuration. Elle répare une
+cause extérieure à la VM (un disque oublié, un réseau coupé), pas une erreur du user-data.
+
+## Étape 6. Nettoyage
+
+```bash
+# [instance]
+openstack server delete --wait tp12b-vm-demo tp12b-vm-donnees-demo
+openstack floating ip delete "$FIP" "$FIP2"
+openstack volume delete tp12b-vol-donnees-demo
 openstack security group delete tp12b-sg-admin-demo
-ssh-keygen -R "$FIP"
+ssh-keygen -R "$FIP"; ssh-keygen -R "$FIP2"
+rm -r ~/tp12b
 ```
 
 ## Questions
@@ -195,6 +306,12 @@ ssh-keygen -R "$FIP"
    console d'une VM, et quelles protections faudrait-il ?
 5. Le TP 12 conseille de reconstruire plutôt que de modifier une VM (immutabilité). Quand réparer
    par le rescue, et quand reconstruire ? Que perd-on dans chaque cas ?
+6. À l'étape 5, le statut signale une erreur dans le `runcmd`, alors que la cause est ailleurs.
+   Pourquoi ? Dans quel ordre lire le statut et les journaux pour remonter à la cause ?
+7. Trois façons de reprendre une personnalisation : relancer un module (`cloud-init single`), relancer
+   tout cloud-init (`cloud-init clean --reboot`), reconstruire la VM (`server rebuild`, TP 12,
+   étape 6). Que rejoue chacune, et que change-t-elle : statut, `runcmd`, clés d'hôte, données,
+   user-data ? Pourquoi faut-il vérifier la nouvelle clé d'hôte avant de l'accepter ?
 
 ## Validation
 
@@ -203,7 +320,10 @@ ssh-keygen -R "$FIP"
   relevé dans la définition de la VM ; délai de GRUB relevé.
 - [ ] Rescue avec la même image : disque monté en racine relevé, échec expliqué.
 - [ ] Rescue avec CirrOS : règle réparée depuis le disque de la VM, `sudo` de nouveau accepté.
-- [ ] Questions 2 à 4 argumentées.
+- [ ] Personnalisation en échec : cause trouvée dans les avertissements ; volume monté par
+  `cloud-init single` ; après `clean --reboot` : statut `done`, `runcmd` rejoué, nouvelle clé d'hôte
+  comparée à la console, fichier témoin conservé.
+- [ ] Questions 2 à 4 et 7 argumentées.
 - [ ] Nettoyage fait.
 
 ## Sources
@@ -211,4 +331,7 @@ ssh-keygen -R "$FIP"
 - Nova, mode rescue : <https://docs.openstack.org/nova/2025.1/user/rescue.html>
 - sudoers, format des règles et traitement des erreurs : <https://www.sudo.ws/docs/man/sudoers.man/>
 - GRUB, configuration et édition au démarrage : <https://www.gnu.org/software/grub/manual/grub/grub.html>
+- cloud-init, commandes `status`, `single`, `clean` : <https://cloudinit.readthedocs.io/en/latest/reference/cli.html>
+- cloud-init, relancer : <https://cloudinit.readthedocs.io/en/latest/howto/rerun_cloud_init.html>
+- cloud-init, déboguer : <https://cloudinit.readthedocs.io/en/latest/howto/debugging.html>
 - Toutes les sources du parcours : [sources.md](../sources.md)

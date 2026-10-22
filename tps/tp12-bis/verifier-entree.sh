@@ -43,9 +43,14 @@ else ecart "image debian13 : ${I:-absente}" "faire l'étape 0 du TP 12 (créatio
 G=$(openstack flavor show m1.1g -f value -c ram 2>/dev/null) || G=""
 [ -n "$G" ] && ok "gabarit m1.1g : $G Mo" || ecart "gabarit m1.1g absent" "faire l'étape 0 du TP 12 (création du gabarit m1.1g)"
 
+echo; echo "== Cinder (étape 5)"
+openstack service show volumev3 >/dev/null 2>&1 && ok "service volumev3 (Cinder) présent" \
+  || ecart "Cinder absent : l'étape 5 crée un volume" "déployer le scénario 02 ou 04 (TP 04, étape 0)"
+
 echo; echo "== Restes d'un essai précédent du TP 12 bis"
-R="faire le nettoyage du TP 12 bis (étape 5) : la VM d'abord, puis la FIP et le security group"
+R="faire le nettoyage du TP 12 bis (étape 6) : les VM d'abord, puis les FIP, le volume et le security group"
 zero "VM tp12b-*" "$(nb '^tp12b-' openstack server list -f value -c Name)" "$R"
+zero "volumes tp12b-*" "$(nb '^tp12b-' openstack volume list --all-projects -f value -c Name)" "$R"
 zero "security groups tp12b-*" "$(nb '^tp12b-' openstack security group list -f value -c Name)" "$R"
 
 echo

@@ -37,7 +37,7 @@ and extend the platform.
 | [10](tp10/tp10-sauvegardes-restic.md) | Back up a VM: local repository, object storage, copy outside the host | Extension | 04 | Ready (no cost) |
 | [11](tp11/tp11-dns-designate.md) | DNS as a Service with Designate | Extension | 04 | Ready |
 | [12](tp12/tp12-cloud-init.md) | Configure VMs at boot with cloud-init | Extension | 02 or 04 | Ready |
-| [12 bis](tp12-bis/tp12-bis-depanner-vm.md) | Troubleshoot a VM: regain control with rescue mode | Extension | 02 or 04 | Ready |
+| [12 bis](tp12-bis/tp12-bis-depanner-vm.md) | Troubleshoot a VM: regain control with rescue mode, resume a failed cloud-init configuration | Extension | 02 or 04 | Ready |
 | [13](tp13/tp13-deploiement.md) | Final lab: deploy a secure architecture on OpenStack ([architecture](tp13/tp13-architecture.md)) | Synthesis | 04 | Ready (step 15 optional and charged) |
 | [13 bis](tp13-bis/tp13-bis-administrer-base.md) | Administer the database without opening a port: dedicated role, least privilege, tunnel, audit trail | Synthesis (after step 14 of TP 13) | 04 | Ready |
 | [14](tp14/tp14-heat.md) | Bonus lab: redeploy the same architecture with Heat, infrastructure described as code | Bonus | 04, Heat added by the lab | Ready |
@@ -169,6 +169,7 @@ Ticked by the trainee, validated by the tutor.
 | 12 | say why a secret never goes into a user-data, and apply immutability |  |  |
 | 12 bis | repair a VM's disk through rescue mode, and recognise a rescue that boots on the wrong disk |  |  |
 | 12 bis | say what a VM's console allows and exposes, and why the "GRUB, `init=/bin/bash`" method does not apply to a cloud image |  |  |
+| 12 bis | find why a cloud-init configuration failed, resume it without recreating the VM, and say what resuming changes |  |  |
 | 13 | segment a network and write least-privilege security groups, for ingress and egress |  |  |
 | 13 | administer VMs through a bastion, and control their outbound traffic through a proxy |  |  |
 | 13 | diagnose asymmetric routing with `tcpdump`, and prove each refusal with a test |  |  |

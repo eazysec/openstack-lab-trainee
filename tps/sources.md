@@ -145,6 +145,9 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | Nova : mode rescue | <https://docs.openstack.org/nova/2025.1/user/rescue.html> |
 | sudoers : format des règles et traitement des erreurs | <https://www.sudo.ws/docs/man/sudoers.man/> |
 | GRUB : configuration et édition au démarrage | <https://www.gnu.org/software/grub/manual/grub/grub.html> |
+| cloud-init : commandes `status`, `single`, `clean` | <https://cloudinit.readthedocs.io/en/latest/reference/cli.html> |
+| cloud-init : relancer | <https://cloudinit.readthedocs.io/en/latest/howto/rerun_cloud_init.html> |
+| cloud-init : déboguer | <https://cloudinit.readthedocs.io/en/latest/howto/debugging.html> |
 
 ## Architecture de déploiement (TP 13)
 
