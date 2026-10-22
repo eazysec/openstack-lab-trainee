@@ -42,8 +42,8 @@ tmux new -s deploy
 ./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/01-aio-base.env
 ```
 
-Pendant le déploiement, lisez [../../README.md §4](../../README.md) (ce que fait le script) et
-[../../README.md §6](../../README.md) (les services).
+Pendant le déploiement, lisez [../../README.fr.md §4](../../README.fr.md) (ce que fait le script) et
+[../../README.fr.md §6](../../README.fr.md) (les services).
 
 À la fin, le script affiche `Déploiement terminé` et un résumé des accès.
 

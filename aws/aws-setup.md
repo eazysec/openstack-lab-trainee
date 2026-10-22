@@ -2,7 +2,7 @@
 
 > Ce document traite uniquement de ce qui est propre à AWS : le réseau virtuel (VPC), les types
 > d'instance, le stockage, les coûts. Le fonctionnement d'OpenStack lui-même est décrit dans le
-> [README principal](../README.md).
+> [README principal](../README.fr.md).
 
 **Règle du lab : aucune ressource payante ne doit être créée dans AWS sans l'accord explicite du
 responsable du compte.** Les scripts qui touchent à AWS (`aws-public-fip.sh`) fonctionnent en mode

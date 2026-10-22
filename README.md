@@ -1,453 +1,470 @@
-# Pratiquez la sécurité dès la conception, sur un cloud sur mesure
+**English** · [Français](README.fr.md)
 
-Dans beaucoup d'organisations, un projet franchit plusieurs étapes avant sa mise en production :
+# Practise security by design, on a cloud you build yourself
 
-- **Conception** : le dossier d'architecture est présenté aux instances d'architecture et de sécurité.
-- **Validation** : les décisions sont prises, les écarts identifiés, les mesures correctives définies.
-- **Implémentation et intégration** : les équipes construisent la solution en respectant les exigences validées.
-- **Vérification** : on contrôle que ce qui a été construit respecte bien ce qui était attendue.
-- **Déploiement** : on contrôle que ce qui a été déployé respecte bien ce qui avait été décidé.
+> The hands-on labs (TP, *travaux pratiques*) and the other documents of this repository are written
+> in French. This README and the [lab index](tps/README.md) are available in English.
 
-Une question demeure : à quel point êtes-vous sûr de vous à chacune de ces étapes ? Comprenez-vous
-les exigences qu'on vous impose, qu'elles viennent de standards internes ou de textes comme NIS 2,
-DORA ou le RGPD ? Savez-vous repérer les risques en amont ? Pouvez-vous prouver que l'implémentation, l'intégration et le déploiement correspondent à l'architecture validée ?
+In many organisations, a project goes through several stages before it reaches production:
 
-## Ce que proposent ces travaux pratiques
+- **Design**: the architecture file is presented to the architecture and security boards.
+- **Approval**: decisions are made, gaps identified, corrective measures defined.
+- **Implementation and integration**: teams build the solution according to the approved requirements.
+- **Verification**: you check that what was built matches what was expected.
+- **Deployment**: you check that what was deployed matches what was decided.
 
-20+ TP vous font parcourir ces étapes sur un cloud OpenStack sur mesure que vous déployez
-vous-même : de l'instance vide à une architecture segmentée, protégée et publiée, puis décrite en
-code.
+One question remains: how confident are you at each of these stages? Do you understand the
+requirements you are given, whether they come from internal standards or from regulations such as
+NIS 2, DORA or the GDPR? Can you spot risks early? Can you prove that the implementation, the
+integration and the deployment match the approved architecture?
 
-- **Concevoir** : partir d'un dossier d'architecture et de ses objectifs de sécurité (TP 13).
-- **Justifier** : chaque choix a sa raison, et chaque TP se termine par des questions et une grille de
-  validation, à faire relire par un tuteur.
-- **Construire et intégrer** : réseaux, security groups, bastion, proxy, secrets, volumes chiffrés, service
-  durci (TP 01 à 13) ; répartition de charge avec Octavia, HTTPS avec un certificat rangé dans Barbican
-  (TP 15).
-- **Vérifier** : chaque objectif se prouve par un accès qui doit réussir et un accès qui doit
-  échouer ; la même architecture, reconstruite en code avec Heat, est comparée à la construction à
-  la main (TP 14).
-- **Déployer** : chaque mode de déploiement a des + et des - (TP 13 et TP 14)
+## What these labs offer
 
-Le but n'est pas de cocher des cases, mais d'apprendre à anticiper les risques, à justifier ses choix
-d'architecture et à vérifier la sécurité de ce qui est réellement construit. C'est pourquoi définir un cadre de référence dans les projets et s'en tenir est nécessaire. On ne subit plus la vague, on l'oriente et l'anticipe. 
+20+ labs take you through these stages on an OpenStack cloud that you deploy yourself: from an empty
+instance to a segmented, protected and published architecture, then described as code.
 
-Ces TP ne remplacent pas une analyse de conformité : ils entraînent aux mesures techniques que ces
-textes attendent, comme le chiffrement, le contrôle des accès, les sauvegardes restaurables ou la
-vérification régulière des mesures de sécurité.
+- **Design**: start from an architecture file and its security objectives (TP 13).
+- **Justify**: every choice has a reason, and every lab ends with questions and a validation grid,
+  to be reviewed by a tutor.
+- **Build and integrate**: networks, security groups, bastion, proxy, secrets, encrypted volumes,
+  hardened service (TP 01 to 13); load balancing with Octavia, HTTPS with a certificate stored in
+  Barbican (TP 15).
+- **Verify**: every objective is proven by an access that must succeed and an access that must fail;
+  the same architecture, rebuilt as code with Heat, is compared with the manual build (TP 14).
+- **Deploy**: each deployment method has its pros and cons (TP 13 and TP 14).
 
-## Ce qu'il faut savoir avant de commencer
+The goal is not to tick boxes, but to learn to anticipate risks, to justify architecture choices and
+to verify the security of what is actually built. That is why projects need a reference framework,
+and need to stick to it. You no longer endure the wave: you steer it and see it coming.
 
-- Les énoncés, le lab et ses scripts sont libres : contenus sous licence CC BY-SA 4.0, scripts sous
-  licence MIT. Vous pouvez suivre les TP en autonomie, à votre rythme.
-- Le lab tourne sur une instance AWS (4 vCPU, 16 Go), **payante** tant qu'elle est allumée. Lisez
-  [aws/finops.md](aws/finops.md) avant de la créer, et arrêtez-la après chaque séance.
-- Niveau attendu : à l'aise avec un terminal Linux et SSH. Aucune connaissance d'OpenStack n'est
-  supposée.
+These labs do not replace a compliance analysis: they train you in the technical measures that these
+regulations expect, such as encryption, access control, restorable backups or regular verification
+of security measures.
 
-## Pourquoi ce projet
+## Before you start
 
-Au fil de mon expérience, j'ai rencontré des pratiques qui m'ont interpellé, y compris chez des
-personnes expérimentées, voire très expérimentées. Pas forcément par manque de compétences
-techniques, mais souvent par manque d'expérience et de culture de la sécurité.
+- The labs, the platform and its scripts are free: content under the CC BY-SA 4.0 licence, scripts
+  under the MIT licence. You can follow the labs on your own, at your own pace.
+- The platform runs on an AWS instance (4 vCPU, 16 GB), **charged** while it is running. Read
+  [aws/finops.md](aws/finops.md) (in French) before creating it, and stop it after each session.
+- Expected level: comfortable with a Linux terminal and SSH. No prior knowledge of OpenStack is
+  assumed.
 
-C'est ce constat qui m'a donné envie de créer ces travaux pratiques et de les partager. Je remercie au
-passage mon « assistant invisible », qui m'a fait gagner beaucoup de temps pour les construire.
+## Why this project
 
-## Contribuer
+Throughout my career, I have come across practices that puzzled me, including from experienced, even
+very experienced, people. Not necessarily for lack of technical skills, but often for lack of
+experience and of a security culture.
 
-Une erreur, une explication à améliorer, un exercice à proposer ? Ouvrez une *issue* ou proposez une
-*pull request* : les contributions et les retours d'expérience sont les bienvenus. Si ces ressources
-vous sont utiles, une étoile au dépôt sur GitHub m'encourage à continuer à les enrichir.
+That observation is what made me want to create these labs and share them. I also thank my
+"invisible assistant", who saved me a lot of time in building them.
 
-La sécurité se conçoit dès le départ, se vérifie à la construction et se cultive collectivement.
+## Contributing
 
-Merlin Tchoffo, expert en cybersécurité et cloud
+A mistake, an explanation to improve, an exercise to suggest? Open an *issue* or submit a *pull
+request*: contributions and feedback are welcome. If these resources are useful to you, a star on
+GitHub encourages me to keep improving them.
+
+Security is designed from the start, verified during the build and grown collectively.
+
+Merlin Tchoffo, cybersecurity and cloud expert
 
 ---
 
-## Le lab : OpenStack All-in-One sur une instance cloud (Kolla-Ansible)
+## The platform: OpenStack All-in-One on a cloud instance (Kolla-Ansible)
 
-Ce dépôt déploie un lab OpenStack mono-nœud sur une instance qui n'a qu'une interface réseau (cas
-typique : AWS EC2), et fournit un parcours de TP.
+This repository deploys a single-node OpenStack platform on an instance with a single network
+interface (typical case: AWS EC2), and provides a series of labs.
 
-| Vous êtes | Commencez par |
+| You are | Start with |
 |---|---|
-| Stagiaire ou alternant | [tps/README.md](tps/README.md) : parcours de TP |
-| Administrateur du lab | Ce document : déploiement, architecture, exploitation |
+| Trainee or work-study student | [tps/README.md](tps/README.md): the labs |
+| Platform administrator | This document: deployment, architecture, operations |
 
-Ce document décrit OpenStack et le déploiement. Ce qui est propre à AWS (réseau VPC, types d'instance,
-alternatives) est dans [aws/aws-setup.md](aws/aws-setup.md), les coûts dans [aws/finops.md](aws/finops.md).
+This document describes OpenStack and the deployment. What is specific to AWS (VPC network, instance
+types, alternatives) is in [aws/aws-setup.md](aws/aws-setup.md), costs in [aws/finops.md](aws/finops.md)
+(both in French).
 
 ---
 
-## 1. Contenu du dépôt
+## 1. Repository contents
 
 ```
 openstack-lab-trainee/
-├── README.md                  ce document
-├── deploy.sh                  déploiement (prend un fichier de scénario en paramètre)
-├── verify.sh                  test de bout en bout du déploiement (critère d'acceptation)
-├── destroy.sh                 suppression du déploiement (--purge : remise à zéro de l'hôte)
+├── README.md                  this document
+├── README.fr.md               French version of this document
+├── deploy.sh                  deployment (takes a scenario file as argument)
+├── verify.sh                  end-to-end test of the deployment (acceptance criterion)
+├── destroy.sh                 removes the deployment (--purge: resets the host)
 ├── scenarios/
-│   ├── 01-aio-base.env        All-in-One de base
-│   ├── 02-aio-cinder.env      + stockage bloc Cinder (LVM)
-│   ├── 03-aio-public-fip.env  + floating IP joignables depuis Internet
-│   └── 04-aio-complet.env     02 + Barbican + Designate + stockage objet S3 (Garage) et restic
+│   ├── 01-aio-base.env        basic All-in-One
+│   ├── 02-aio-cinder.env      + Cinder block storage (LVM)
+│   ├── 03-aio-public-fip.env  + floating IPs reachable from the Internet
+│   └── 04-aio-complet.env     02 + Barbican + Designate + S3 object storage (Garage) and restic
 ├── tools/
-│   ├── openstack-lab-net.sh   réseau de l'hôte (veth, NAT, IP publiées), lancé au boot par systemd
-│   ├── openstack-lab-cinder-loop.sh   rattache le stockage Cinder (fichier loop) au boot
-│   ├── lab-s3.sh              stockage objet S3 du lab (Garage) et restic statique (TP 10)
-│   └── public-fip.sh          publication d'une floating IP via une IP secondaire (scénario 03)
+│   ├── openstack-lab-net.sh   host network (veth, NAT, published IPs), started at boot by systemd
+│   ├── openstack-lab-cinder-loop.sh   attaches the Cinder storage (loop file) at boot
+│   ├── lab-s3.sh              S3 object storage of the platform (Garage) and static restic (TP 10)
+│   └── public-fip.sh          publishes a floating IP through a secondary IP (scenario 03)
 ├── tests/
-│   └── test-public-fip.sh     test du scénario 03 côté hôte, sans ressource AWS (TP 07)
-├── tps/                       parcours de TP : énoncés, conventions, grille de suivi, sources ;
-│                              un dossier tpNN/ par TP : énoncé, verifier-entree.sh, fichiers fournis
-├── VERSION                    version du dépôt
-├── LICENSE                    licence des scripts (MIT)
-├── LICENSE-CONTENU.md         licence des contenus pédagogiques (CC BY-SA 4.0)
-├── NOTICE.md                  logiciels tiers utilisés
+│   └── test-public-fip.sh     host-side test of scenario 03, without AWS resources (TP 07)
+├── tps/                       the labs: instructions, conventions, progress grid, sources;
+│                              one tpNN/ folder per lab: instructions, verifier-entree.sh, provided files
+├── VERSION                    repository version
+├── LICENSE                    licence of the scripts (MIT)
+├── LICENSE-CONTENU.md         licence of the educational content (CC BY-SA 4.0)
+├── NOTICE.md                  third-party software used
 └── aws/
-    ├── aws-setup.md           contraintes AWS et alternatives
-    ├── finops.md              coûts, crédits CPU, bonnes pratiques
-    ├── check-cpu-credits.sh   garantit le mode de crédits "standard" (aucun surcoût)
-    ├── aws-public-fip.sh      partie AWS du scénario 03 (simulation par défaut)
-    └── recover-network.sh     récupère une instance devenue injoignable (voir aws-setup.md §6)
+    ├── aws-setup.md           AWS constraints and alternatives
+    ├── finops.md              costs, CPU credits, good practices
+    ├── check-cpu-credits.sh   enforces the "standard" CPU credit mode (no extra charge)
+    ├── aws-public-fip.sh      AWS part of scenario 03 (simulation by default)
+    └── recover-network.sh     recovers an instance that became unreachable (see aws-setup.md §6)
 ```
 
 ---
 
-## 2. Les scénarios
+## 2. Scenarios
 
-| Scénario | Contenu | Ressources AWS en plus |
+| Scenario | Contents | Extra AWS resources |
 |---|---|---|
-| **01 (base)** | Keystone, Glance, Nova, Neutron, Placement, Horizon. Disques des VM éphémères. | Aucune |
-| **02 (Cinder)** | 01 + volumes persistants (Cinder, LVM sur fichier loop) | Aucune (option : volume EBS dédié, payant) |
-| **03 (floating IP publiques)** | 01 + accès à des VM depuis Internet | IP secondaires (gratuites) + Elastic IP (**payantes**, accord requis) |
-| **04 (complet)** | 02 + Barbican (secrets, volumes chiffrés) + Designate (DNS, intégration Neutron) + stockage objet S3 (Garage) | Aucune (16 Go de RAM recommandés) |
+| **01 (base)** | Keystone, Glance, Nova, Neutron, Placement, Horizon. Ephemeral VM disks. | None |
+| **02 (Cinder)** | 01 + persistent volumes (Cinder, LVM on a loop file) | None (option: dedicated EBS volume, charged) |
+| **03 (public floating IPs)** | 01 + access to VMs from the Internet | Secondary IPs (free) + Elastic IPs (**charged**, approval required) |
+| **04 (complete)** | 02 + Barbican (secrets, encrypted volumes) + Designate (DNS, Neutron integration) + S3 object storage (Garage) | None (16 GB of RAM recommended) |
 
-Les scénarios sont cumulables : on peut déployer 01, puis relancer `deploy.sh` avec 02 (ou 04) pour
-ajouter des services sans perdre les VM existantes.
+Scenarios can be combined: you can deploy 01, then run `deploy.sh` again with 02 (or 04) to add
+services without losing existing VMs.
 
 ---
 
-## 3. Démarrage rapide
+## 3. Quick start
 
-Prérequis : instance Ubuntu 24.04 neuve, ≥ 8 Go RAM (16 recommandés), ≥ 2 vCPU (4 recommandés),
-≥ 40 Go de disque (60 recommandés : ~30 Go occupés en scénario 04), utilisateur avec `sudo` sans mot
-de passe (`ubuntu` sur EC2), accès Internet.
+Prerequisites: fresh Ubuntu 24.04 instance, ≥ 8 GB RAM (16 recommended), ≥ 2 vCPU (4 recommended),
+≥ 40 GB of disk (60 recommended: ~30 GB used with scenario 04), a user with passwordless `sudo`
+(`ubuntu` on EC2), Internet access.
 
 ```bash
-# Depuis votre poste : vérifier qu'aucun frais de crédits CPU n'est possible (voir aws/finops.md)
+# From your workstation: check that no CPU credit charge is possible (see aws/finops.md)
 ./openstack-lab-trainee/aws/check-cpu-credits.sh <INSTANCE_ID>
 
-# Copier le dépôt sur l'instance
+# Copy the repository to the instance
 scp -r -i ec2_key openstack-lab-trainee ubuntu@<IP_PUBLIQUE>:
 ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
 
-# Sur l'instance (tmux conseillé : le déploiement est long)
+# On the instance (tmux recommended: the deployment takes a long time)
 tmux new -s deploy
 ./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/01-aio-base.env
 ./openstack-lab-trainee/verify.sh
 ```
 
-Pour suivre tous les TP ([tps/README.md](tps/README.md)), déployez plutôt le scénario 04 :
+`<IP_PUBLIQUE>` is the public IP address of the instance.
+
+To follow all the labs ([tps/README.md](tps/README.md)), deploy scenario 04 instead:
 `./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/04-aio-complet.env`.
 
-`verify.sh` crée une VM de test, vérifie le réseau, et selon les services présents Cinder, Barbican,
-le chiffrement des volumes, Designate et Heat, puis nettoie. Il ne contrôle pas Octavia : son ajout
-se vérifie à l'étape 1 du TP 15.
-Il se termine par `Résultat : N réussis, 0 échoués` et renvoie un code d'erreur si un test échoue.
+`verify.sh` creates a test VM, checks the network and, depending on the services present, Cinder,
+Barbican, volume encryption, Designate and Heat, then cleans up. It does not check Octavia: adding it
+is verified in step 1 of TP 15.
+It ends with `Résultat : N réussis, 0 échoués` (N passed, 0 failed) and returns an error code if a
+test fails.
 
-### Paramètres
+### Parameters
 
-Les paramètres se règlent dans le fichier de scénario, ou en variable d'environnement :
+Parameters are set in the scenario file, or as environment variables:
 
-| Variable | Défaut | Rôle |
+| Variable | Default | Purpose |
 |---|---|---|
-| `OPENSTACK_RELEASE` | `2025.1` | Branche Kolla-Ansible / version des images |
-| `WORKDIR` | `~/kolla` | venv, inventaire, logs |
-| `MGMT_IF` / `MGMT_IP` | détectés via la route par défaut | Interface/IP des API |
-| `EXT_CIDR` / `EXT_GW` | `10.0.2.0/24` / `10.0.2.1` | Réseau externe Neutron |
-| `EXT_POOL_START` / `EXT_POOL_END` | `10.0.2.100` / `10.0.2.200` | Plage de floating IP |
-| `ENABLE_CINDER` | `no` | Active Cinder (backend LVM) |
-| `CINDER_DEVICE` | vide | Disque vide dédié à Cinder ; vide = fichier loop |
-| `CINDER_LOOP_SIZE_GB` | `20` | Taille du fichier loop |
-| `ENABLE_HEAT` | `no` | Orchestration Heat (environ 1 Go de mémoire en plus, mesuré) ; le TP 14 l'active |
-| `ENABLE_OCTAVIA` | `no` | Répartition de charge Octavia (0,7 à 1,2 Go de mémoire en plus, mesuré ; plus une VM d'1 Go, l'amphore, par répartiteur) ; le TP 15 l'active |
-| `OCTAVIA_AMP_IMAGE_URL` | image de test du projet Octavia (Ubuntu 24.04) | Image des amphores, téléchargée et enregistrée une fois |
-| `ENABLE_BARBICAN` | `no` | Gestion des secrets ; nécessaire pour chiffrer les volumes Cinder |
-| `ENABLE_DESIGNATE` | `no` | DNS (backend bind9 sur l'hôte, port 53) |
-| `ENABLE_LAB_BACKUP` | `no` | Stockage objet S3 (Garage, hors Kolla), restic et s3cmd, pour le TP 10 |
-| `DESIGNATE_NS_RECORD` | `ns1.lab.example` | Serveur de noms des zones, sans point final (Kolla l'ajoute) |
-| `NEUTRON_DNS_DOMAIN` | `lab.example.` | Domaine DNS des ports Neutron, avec point final ; jamais `openstacklocal.` (Neutron ignorerait alors le nom des ports) |
+| `OPENSTACK_RELEASE` | `2025.1` | Kolla-Ansible branch / image version |
+| `WORKDIR` | `~/kolla` | venv, inventory, logs |
+| `MGMT_IF` / `MGMT_IP` | detected from the default route | Interface/IP of the APIs |
+| `EXT_CIDR` / `EXT_GW` | `10.0.2.0/24` / `10.0.2.1` | Neutron external network |
+| `EXT_POOL_START` / `EXT_POOL_END` | `10.0.2.100` / `10.0.2.200` | Floating IP range |
+| `ENABLE_CINDER` | `no` | Enables Cinder (LVM backend) |
+| `CINDER_DEVICE` | empty | Empty disk dedicated to Cinder; empty = loop file |
+| `CINDER_LOOP_SIZE_GB` | `20` | Size of the loop file |
+| `ENABLE_HEAT` | `no` | Heat orchestration (about 1 GB of extra memory, measured); TP 14 enables it |
+| `ENABLE_OCTAVIA` | `no` | Octavia load balancing (0.7 to 1.2 GB of extra memory, measured; plus a 1 GB VM, the amphora, per load balancer); TP 15 enables it |
+| `OCTAVIA_AMP_IMAGE_URL` | test image of the Octavia project (Ubuntu 24.04) | Amphora image, downloaded and registered once |
+| `ENABLE_BARBICAN` | `no` | Secret management; required to encrypt Cinder volumes |
+| `ENABLE_DESIGNATE` | `no` | DNS (bind9 backend on the host, port 53) |
+| `ENABLE_LAB_BACKUP` | `no` | S3 object storage (Garage, outside Kolla), restic and s3cmd, for TP 10 |
+| `DESIGNATE_NS_RECORD` | `ns1.lab.example` | Name server of the zones, without the trailing dot (Kolla adds it) |
+| `NEUTRON_DNS_DOMAIN` | `lab.example.` | DNS domain of Neutron ports, with the trailing dot; never `openstacklocal.` (Neutron would then ignore port names) |
 
-### En cas d'échec
+### If it fails
 
-Lire le log indiqué (`~/kolla/deploy-*.log`), corriger, puis relancer `deploy.sh` : il est idempotent.
-Une relance sur un déploiement existant revérifie tous les services et prend plus longtemps que le premier
-déploiement : ce n'est pas un blocage (suivre le log avec `tail -f ~/kolla/deploy-*.log`).
+Read the log shown (`~/kolla/deploy-*.log`), fix the cause, then run `deploy.sh` again: it is
+idempotent. Running it again on an existing deployment re-checks every service and takes longer than
+the first deployment: it is not stuck (follow the log with `tail -f ~/kolla/deploy-*.log`).
 
-Pour tout supprimer :
+To remove everything:
 ```bash
-./openstack-lab-trainee/destroy.sh            # conteneurs et données OpenStack
-./openstack-lab-trainee/destroy.sh --purge    # + config, venv, réseau hôte, stockage Cinder ; puis sudo reboot
+./openstack-lab-trainee/destroy.sh            # OpenStack containers and data
+./openstack-lab-trainee/destroy.sh --purge    # + config, venv, host network, Cinder storage; then sudo reboot
 ```
 
 ---
 
-## 4. Ce que fait `deploy.sh`
+## 4. What `deploy.sh` does
 
-1. **Pré-checks** : pas root, sudo OK, OS, RAM, CPU, détection interface/IP et KVM, garde-fou sur `CINDER_DEVICE` ;
-   avec Barbican/Designate : alerte si moins de 16 Go de RAM, refus si le port 53 est déjà pris.
-2. **Paquets système** (non interactif, dont `lvm2` et `dig` ; `isc-dhcp-client` avec Octavia), swap de 8 Go, hostname dans `/etc/hosts` (requis par RabbitMQ).
-3. **Réseau de l'hôte** : `tools/openstack-lab-net.sh`, installé comme service systemd `openstack-lab-net`.
-4. **(Cinder)** fichier loop (service `openstack-lab-cinder-loop`) ou disque, puis groupe LVM `cinder-volumes`.
-5. **Kolla-Ansible** dans un venv + `python-openstackclient`, `python-barbicanclient`, `python-designateclient`,
-   versions figées par les *upper-constraints*.
-6. `install-deps`, puis `kolla-genpwd`, qui complète les mots de passe manquants sans modifier les existants.
-7. **Configuration** : `/etc/kolla/globals.yml` réécrit entièrement + fichiers dans `/etc/kolla/config/`.
-8. `bootstrap-servers` → `prechecks` → `pull` → `deploy` → `post-deploy` ; avec Octavia, avant les
-   prechecks, `octavia-certificates` (autorité et certificats des amphores, une seule fois).
-9. **(Octavia)** image des amphores téléchargée et enregistrée dans le projet `service` (une seule fois).
-10. **Ressources de démo** (`init-runonce`), seulement au premier déploiement.
+1. **Pre-checks**: not root, sudo OK, OS, RAM, CPU, interface/IP and KVM detection, safeguard on
+   `CINDER_DEVICE`; with Barbican/Designate: warning below 16 GB of RAM, refusal if port 53 is
+   already in use.
+2. **System packages** (non-interactive, including `lvm2` and `dig`; `isc-dhcp-client` with Octavia),
+   8 GB swap, hostname in `/etc/hosts` (required by RabbitMQ).
+3. **Host network**: `tools/openstack-lab-net.sh`, installed as the systemd service `openstack-lab-net`.
+4. **(Cinder)** loop file (service `openstack-lab-cinder-loop`) or disk, then the LVM volume group
+   `cinder-volumes`.
+5. **Kolla-Ansible** in a venv + `python-openstackclient`, `python-barbicanclient`,
+   `python-designateclient`, versions pinned by the *upper-constraints*.
+6. `install-deps`, then `kolla-genpwd`, which fills in missing passwords without changing existing ones.
+7. **Configuration**: `/etc/kolla/globals.yml` fully rewritten + files in `/etc/kolla/config/`.
+8. `bootstrap-servers` → `prechecks` → `pull` → `deploy` → `post-deploy`; with Octavia, before the
+   prechecks, `octavia-certificates` (amphora certificate authority and certificates, only once).
+9. **(Octavia)** amphora image downloaded and registered in the `service` project (only once).
+10. **Demo resources** (`init-runonce`), only on the first deployment.
 
 ---
 
-## 5. Architecture réseau
+## 5. Network architecture
 
-### 5.1 Le fonctionnement standard d'OpenStack (Neutron)
+### 5.1 How OpenStack networking (Neutron) normally works
 
-Ce qui suit est vrai pour n'importe quel déploiement OpenStack avec ML2/Open vSwitch :
+The following holds for any OpenStack deployment with ML2/Open vSwitch:
 
-| Élément Neutron | Rôle |
+| Neutron element | Role |
 |---|---|
-| **Réseau tenant** (`demo-net`, 10.0.0.0/24, VXLAN) | Réseau privé des VM d'un projet, isolé des autres projets |
-| **`br-int`** (pont OVS d'intégration) | Les VM y sont branchées ; OVS y applique l'isolation |
-| **Routeur Neutron** (`demo-router`, namespace `qrouter-…`) | Relie le réseau tenant au réseau externe ; fait le NAT (SNAT en sortie, DNAT pour les floating IP) |
-| **Réseau externe** (`public1`, flat, `physnet1`) | Réseau d'où viennent les floating IP ; Neutron suppose qu'il est raccordé à un vrai réseau |
-| **`br-ex`** (pont OVS externe) | Relie le routeur au réseau externe, via l'interface `neutron_external_interface` |
-| **Floating IP** | Adresse du réseau externe que le routeur traduit vers l'IP privée d'une VM |
+| **Tenant network** (`demo-net`, 10.0.0.0/24, VXLAN) | Private network of a project's VMs, isolated from other projects |
+| **`br-int`** (OVS integration bridge) | VMs are plugged into it; OVS enforces isolation there |
+| **Neutron router** (`demo-router`, namespace `qrouter-…`) | Connects the tenant network to the external network; performs NAT (SNAT outbound, DNAT for floating IPs) |
+| **External network** (`public1`, flat, `physnet1`) | Network floating IPs come from; Neutron assumes it is connected to a real network |
+| **`br-ex`** (OVS external bridge) | Connects the router to the external network, through the `neutron_external_interface` interface |
+| **Floating IP** | Address of the external network that the router translates to a VM's private IP |
 
-Sur un serveur physique classique, une 2ᵉ carte réseau branchée sur un switch est donnée à `br-ex`, et les
-floating IP sont de vraies adresses du LAN : Neutron répond lui-même aux requêtes ARP pour ces adresses.
+On a typical physical server, a second network card plugged into a switch is given to `br-ex`, and
+floating IPs are real LAN addresses: Neutron itself answers ARP requests for these addresses.
 
-### 5.2 L'adaptation pour une instance cloud à une seule interface
+### 5.2 The adaptation for a cloud instance with a single interface
 
-Le réseau d'un cloud comme AWS n'est pas un switch : il n'accepte que les adresses qu'il a lui-même
-attribuées à l'interface de l'instance (détails dans [aws/aws-setup.md §2.3](aws/aws-setup.md)).
-On crée donc un réseau externe interne à l'hôte, et l'hôte fait le pont par NAT :
+The network of a cloud such as AWS is not a switch: it only accepts the addresses it assigned to the
+instance's interface itself (details in [aws/aws-setup.md §2.3](aws/aws-setup.md), in French).
+So an external network internal to the host is created, and the host bridges it by NAT:
 
 ```
                      Internet
                         │
-              ┌─────────┴──────────┐  pare-feu du cloud (Security Group AWS)
-              │  enX0 172.31.x.x   │  IP publique traduite par le cloud
+              ┌─────────┴──────────┐  cloud firewall (AWS Security Group)
+              │  enX0 172.31.x.x   │  public IP translated by the cloud
               │                    │
-   API OpenStack, Horizon :80      │  iptables MASQUERADE 10.0.2.0/24 -> enX0
+   OpenStack APIs, Horizon :80     │  iptables MASQUERADE 10.0.2.0/24 -> enX0
               │                    │
-              │  veth-ext 10.0.2.1/24   passerelle du réseau externe
-              │      ║ paire veth (câble virtuel)
-              │  veth-neutron ── br-ex (OVS) ── routeur Neutron ── br-int ── VM
+              │  veth-ext 10.0.2.1/24   gateway of the external network
+              │      ║ veth pair (virtual cable)
+              │  veth-neutron ── br-ex (OVS) ── Neutron router ── br-int ── VM
               └────────────────────┘
-   public1  : 10.0.2.0/24 (flat), floating IP de 10.0.2.100 à 10.0.2.200
-   demo-net : 10.0.0.0/24 (VXLAN), routeur demo-router
+   public1  : 10.0.2.0/24 (flat), floating IPs from 10.0.2.100 to 10.0.2.200
+   demo-net : 10.0.0.0/24 (VXLAN), router demo-router
 ```
 
-| Réseau | Plage | Usage des adresses |
+| Network | Range | Use of addresses |
 |---|---|---|
-| `public1` (externe) | 10.0.2.0/24 | 10.0.2.1 : `veth-ext`, la passerelle sur l'hôte ; 10.0.2.100 à 10.0.2.200 : la réserve où Neutron puise les floating IP (101 adresses, `EXT_POOL_START` et `EXT_POOL_END`, §3) et les passerelles des routeurs ; le reste est inutilisé |
-| `demo-net` (projet) | 10.0.0.0/24 | Adresses privées des VM, attribuées par DHCP |
+| `public1` (external) | 10.0.2.0/24 | 10.0.2.1: `veth-ext`, the gateway on the host; 10.0.2.100 to 10.0.2.200: the pool Neutron draws floating IPs (101 addresses, `EXT_POOL_START` and `EXT_POOL_END`, §3) and router gateways from; the rest is unused |
+| `demo-net` (project) | 10.0.0.0/24 | Private addresses of the VMs, assigned by DHCP |
 
-Le chemin d'un paquet sortant d'une VM :
+The path of a packet leaving a VM:
 
-| Étape | Couche | Ce qui se passe |
+| Step | Layer | What happens |
 |---|---|---|
-| VM → `br-int` → routeur Neutron | OpenStack | Le routeur traduit 10.0.0.x en floating IP 10.0.2.x |
-| Routeur → `br-ex` → `veth-neutron` | OpenStack | Fonctionnement standard ; `veth-neutron` joue le rôle de la « 2ᵉ carte réseau » |
-| `veth-ext` → `enX0` | Hôte Linux | `veth-ext` (10.0.2.1) est la passerelle ; iptables remplace la source par l'IP de l'interface |
-| `enX0` → Internet | Cloud (AWS) | Le paquet porte l'IP et la MAC de l'interface : le cloud l'accepte et le traduit vers l'IP publique |
+| VM → `br-int` → Neutron router | OpenStack | The router translates 10.0.0.x into floating IP 10.0.2.x |
+| Router → `br-ex` → `veth-neutron` | OpenStack | Standard behaviour; `veth-neutron` plays the role of the "second network card" |
+| `veth-ext` → `enX0` | Linux host | `veth-ext` (10.0.2.1) is the gateway; iptables replaces the source with the interface's IP |
+| `enX0` → Internet | Cloud (AWS) | The packet carries the interface's IP and MAC: the cloud accepts it and translates it to the public IP |
 
-Conséquences :
-- **côté OpenStack, rien n'est modifié** : Neutron, `br-ex` et les floating IP fonctionnent comme d'habitude ;
-- **l'adaptation est sur l'hôte** (veth + NAT, service `openstack-lab-net`) ;
-- les floating IP ne sont joignables que depuis l'hôte (ou via tunnel SSH). Pour les rendre publiques :
-  scénario 03, détaillé dans [aws/aws-setup.md §4](aws/aws-setup.md).
+Consequences:
+- **nothing is changed on the OpenStack side**: Neutron, `br-ex` and floating IPs work as usual;
+- **the adaptation is on the host** (veth + NAT, service `openstack-lab-net`);
+- floating IPs are only reachable from the host (or through an SSH tunnel). To make them public:
+  scenario 03, described in [aws/aws-setup.md §4](aws/aws-setup.md).
 
-Pas de VIP non plus : HAProxy/keepalived/ProxySQL sont désactivés et `kolla_internal_vip_address` = IP de l'hôte.
+No VIP either: HAProxy/keepalived/ProxySQL are disabled and `kolla_internal_vip_address` = the host IP.
 
 ---
 
-## 6. Services déployés
+## 6. Deployed services
 
-| Service | Rôle | Conteneur(s) | Port(s) sur l'IP de l'hôte |
+| Service | Role | Container(s) | Port(s) on the host IP |
 |---|---|---|---|
-| Keystone | Identité | `keystone`, `keystone_fernet`, `keystone_ssh` | 5000 |
+| Keystone | Identity | `keystone`, `keystone_fernet`, `keystone_ssh` | 5000 |
 | Glance | Images | `glance_api` | 9292 |
-| Nova | Calcul (libvirt) | `nova_api`, `nova_scheduler`, `nova_conductor`, `nova_novncproxy`, `nova_compute`, `nova_libvirt`, `nova_ssh` | 8774, 6080 (console VNC) |
-| Placement | Inventaire des ressources | `placement_api` | 8780 |
-| Neutron (ML2/OVS) | Réseau | `neutron_server`, `neutron_openvswitch_agent`, `neutron_l3_agent`, `neutron_dhcp_agent`, `neutron_metadata_agent` | 9696 |
-| Open vSwitch | Commutateur virtuel | `openvswitch_db`, `openvswitch_vswitchd` | aucun |
-| Horizon | Dashboard web | `horizon` | 80 |
-| Cinder *(scénarios 02, 04)* | Stockage bloc | `cinder_api`, `cinder_scheduler`, `cinder_volume`, `tgtd`, `iscsid` | 8776 |
-| Barbican *(scénario 04)* | Secrets, clés des volumes chiffrés | `barbican_api`, `barbican_worker`, `barbican_keystone_listener` | 9311 |
-| Designate *(scénario 04)* | DNS as a Service | `designate_api`, `designate_central`, `designate_worker`, `designate_producer`, `designate_mdns`, `designate_backend_bind9` | 9001 (API), 53 (DNS, bind9), 5354 (mdns), 953 (rndc) |
-| Stockage objet du lab *(scénario 04, hors Kolla)* | S3 pour les sauvegardes (TP 10) | `lab-s3` (Garage v2.4.1), données dans `/srv/lab-s3` | 3900 (S3), 3901 et 3903 sur 127.0.0.1 |
-| MariaDB (Galera mono-nœud) | Base de données | `mariadb` | 3306 |
-| RabbitMQ | Bus de messages | `rabbitmq` | 5672 |
+| Nova | Compute (libvirt) | `nova_api`, `nova_scheduler`, `nova_conductor`, `nova_novncproxy`, `nova_compute`, `nova_libvirt`, `nova_ssh` | 8774, 6080 (VNC console) |
+| Placement | Resource inventory | `placement_api` | 8780 |
+| Neutron (ML2/OVS) | Networking | `neutron_server`, `neutron_openvswitch_agent`, `neutron_l3_agent`, `neutron_dhcp_agent`, `neutron_metadata_agent` | 9696 |
+| Open vSwitch | Virtual switch | `openvswitch_db`, `openvswitch_vswitchd` | none |
+| Horizon | Web dashboard | `horizon` | 80 |
+| Cinder *(scenarios 02, 04)* | Block storage | `cinder_api`, `cinder_scheduler`, `cinder_volume`, `tgtd`, `iscsid` | 8776 |
+| Barbican *(scenario 04)* | Secrets, keys of encrypted volumes | `barbican_api`, `barbican_worker`, `barbican_keystone_listener` | 9311 |
+| Designate *(scenario 04)* | DNS as a Service | `designate_api`, `designate_central`, `designate_worker`, `designate_producer`, `designate_mdns`, `designate_backend_bind9` | 9001 (API), 53 (DNS, bind9), 5354 (mdns), 953 (rndc) |
+| Platform object storage *(scenario 04, outside Kolla)* | S3 for backups (TP 10) | `lab-s3` (Garage v2.4.1), data in `/srv/lab-s3` | 3900 (S3), 3901 and 3903 on 127.0.0.1 |
+| MariaDB (single-node Galera) | Database | `mariadb` | 3306 |
+| RabbitMQ | Message bus | `rabbitmq` | 5672 |
 | Memcached | Cache | `memcached` | 11211 |
-| Fluentd, cron, kolla_toolbox | Logs, rotation, outils | `fluentd`, `cron`, `kolla_toolbox` | aucun |
+| Fluentd, cron, kolla_toolbox | Logs, rotation, tools | `fluentd`, `cron`, `kolla_toolbox` | none |
 
-Non déployés :
-- Heat (orchestration) : désactivé pour économiser la mémoire ; le TP 14 l'ajoute (`ENABLE_HEAT=yes`
-  dans le scénario 04), puis le retire ;
-- Octavia (répartition de charge) : désactivé, pour la même raison ; le TP 15 l'ajoute
-  (`ENABLE_OCTAVIA=yes` dans le scénario 04), puis le retire ;
-- Barbican et Designate : seulement dans le scénario 04 ;
-- **Swift (stockage objet) : n'existe plus dans Kolla-Ansible 2025.1** (aucun rôle ni variable `enable_swift`).
-  L'alternative Kolla, `ceph-rgw` (API compatible Swift), exige un cluster Ceph externe. Pour le TP 10,
-  le lab fournit à la place un serveur S3 léger (Garage), hors Kolla ;
-- Cinder backup : nécessiterait Swift, Ceph ou NFS ;
-- HAProxy, keepalived, ProxySQL : inutiles sur un seul nœud (voir §5.2).
+Not deployed:
+- Heat (orchestration): disabled to save memory; TP 14 adds it (`ENABLE_HEAT=yes` in scenario 04),
+  then removes it;
+- Octavia (load balancing): disabled for the same reason; TP 15 adds it (`ENABLE_OCTAVIA=yes` in
+  scenario 04), then removes it;
+- Barbican and Designate: only in scenario 04;
+- **Swift (object storage): no longer exists in Kolla-Ansible 2025.1** (no role, no `enable_swift`
+  variable). The Kolla alternative, `ceph-rgw` (Swift-compatible API), requires an external Ceph
+  cluster. For TP 10, the platform provides a lightweight S3 server (Garage) instead, outside Kolla;
+- Cinder backup: would require Swift, Ceph or NFS;
+- HAProxy, keepalived, ProxySQL: useless on a single node (see §5.2).
 
-### Fichiers de configuration
+### Configuration files
 
-| Fichier | Contenu |
+| File | Contents |
 |---|---|
-| `/etc/kolla/globals.yml` | Configuration principale (généré par `deploy.sh`) |
-| `/etc/kolla/passwords.yml` | Tous les secrets (ne jamais committer) |
+| `/etc/kolla/globals.yml` | Main configuration (generated by `deploy.sh`) |
+| `/etc/kolla/passwords.yml` | All the secrets (never commit it) |
 | `/etc/kolla/config/galera.cnf` | `innodb_buffer_pool_size = 1G` |
-| `/etc/kolla/config/nova/nova-compute.conf` | `resume_guests_state_on_host_boot`, et en QEMU `virt_type`, `cpu_mode` |
-| `/etc/kolla/config/cinder.conf` (si Cinder) | `[keystone_authtoken] service_type = volumev3` : sans lui, Cinder refuse les identifiants d'application munis de règles d'accès (TP 04 bis) |
-| `/etc/kolla/<service>/` | Config rendue de chaque service (écrasée à chaque déploiement : ne pas éditer) |
-| `/etc/kolla/admin-openrc.sh`, `/etc/kolla/clouds.yaml` | Identifiants CLI admin |
-| `/etc/openstack-lab/network.env` | Paramètres du réseau hôte (lus au boot) |
-| `/etc/openstack-lab/public-fip.map` | Floating IP publiées (scénario 03) |
-| `~/kolla/all-in-one` | Inventaire Ansible |
-| `/var/log/kolla/<service>/` | Logs des services |
+| `/etc/kolla/config/nova/nova-compute.conf` | `resume_guests_state_on_host_boot`, and with QEMU `virt_type`, `cpu_mode` |
+| `/etc/kolla/config/cinder.conf` (with Cinder) | `[keystone_authtoken] service_type = volumev3`: without it, Cinder rejects application credentials with access rules (TP 04 bis) |
+| `/etc/kolla/<service>/` | Rendered configuration of each service (overwritten on every deployment: do not edit) |
+| `/etc/kolla/admin-openrc.sh`, `/etc/kolla/clouds.yaml` | Admin CLI credentials |
+| `/etc/openstack-lab/network.env` | Host network parameters (read at boot) |
+| `/etc/openstack-lab/public-fip.map` | Published floating IPs (scenario 03) |
+| `~/kolla/all-in-one` | Ansible inventory |
+| `/var/log/kolla/<service>/` | Service logs |
 
-Pour modifier une option : éditer `globals.yml` ou ajouter un fichier dans `/etc/kolla/config/<service>/`, puis
+To change an option: edit `globals.yml` or add a file in `/etc/kolla/config/<service>/`, then
 `kolla-ansible reconfigure -i ~/kolla/all-in-one --tags <service>`.
-Attention : `deploy.sh` réécrit `globals.yml` ; une modification durable se fait dans le script ou le scénario.
+Note: `deploy.sh` rewrites `globals.yml`; a lasting change belongs in the script or the scenario.
 
 ---
 
-## 7. Accès
+## 7. Access
 
-| Accès | Comment |
+| Access | How |
 |---|---|
-| SSH hôte | `ssh -i ec2_key ubuntu@<IP_PUBLIQUE>` |
-| Horizon | `http://<IP_PUBLIQUE>/` si le Security Group ouvre le port 80 à votre IP, sinon par tunnel SSH (§9). La console des VM passe toujours par le tunnel (port 6080, §9). Formulaire : utilisateur `admin` et son mot de passe (ni domaine ni région à choisir) |
-| Mot de passe admin | `grep keystone_admin_password /etc/kolla/passwords.yml` |
-| CLI | `source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh`, puis `openstack ...` (à refaire dans chaque nouvelle session SSH) |
-| VM depuis l'instance | Clé `mykey` (= `~/.ssh/id_ecdsa` de l'instance) : `ssh cirros@<FLOATING_IP>` |
-| VM depuis votre poste | Créer la VM avec votre keypair, puis rebondir par l'instance (gratuit) : voir « Se connecter à une VM depuis son poste » ci-dessous |
+| SSH to the host | `ssh -i ec2_key ubuntu@<IP_PUBLIQUE>` |
+| Horizon | `http://<IP_PUBLIQUE>/` if the Security Group opens port 80 to your IP, otherwise through an SSH tunnel (§9). The VM console always goes through the tunnel (port 6080, §9). Login form: user `admin` and its password (no domain or region to choose) |
+| Admin password | `grep keystone_admin_password /etc/kolla/passwords.yml` |
+| CLI | `source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh`, then `openstack ...` (repeat in every new SSH session) |
+| VMs from the instance | Key `mykey` (= `~/.ssh/id_ecdsa` on the instance): `ssh cirros@<FLOATING_IP>` |
+| VMs from your workstation | Create the VM with your own keypair, then jump through the instance (free): see "Connecting to a VM from your workstation" below |
 
-Ressources créées au premier déploiement : image `cirros`, flavors `m1.tiny` → `m1.xlarge`, réseaux `public1`
-et `demo-net`, routeur `demo-router`, keypair `mykey`, règles ICMP + SSH dans le groupe `default`.
+Resources created on the first deployment: image `cirros`, flavors `m1.tiny` → `m1.xlarge`, networks
+`public1` and `demo-net`, router `demo-router`, keypair `mykey`, ICMP + SSH rules in the `default`
+group.
 
-### Exemples
+### Examples
 ```bash
-# Sur l'instance. Charger le client OpenStack et les identifiants admin
-# (à refaire dans chaque nouvelle session SSH, sinon : "Command 'openstack' not found")
+# On the instance. Load the OpenStack client and the admin credentials
+# (repeat in every new SSH session, otherwise: "Command 'openstack' not found")
 source ~/kolla/venv/bin/activate
 source /etc/kolla/admin-openrc.sh
 
-# Lancer une VM et la rendre joignable depuis l'hôte
+# Start a VM and make it reachable from the host
 openstack server create --image cirros --flavor m1.tiny --key-name mykey --network demo-net --wait vm1
 FIP=$(openstack floating ip create public1 -f value -c floating_ip_address)
 openstack server add floating ip vm1 $FIP
 ssh cirros@$FIP
 
-# Scénario 02 : ajouter un disque persistant
+# Scenario 02: add a persistent disk
 openstack volume create --size 1 vol1
-openstack server add volume vm1 vol1        # visible dans la VM en /dev/vdb
+openstack server add volume vm1 vol1        # visible in the VM as /dev/vdb
 ```
 
-### Se connecter à une VM depuis son poste
+### Connecting to a VM from your workstation
 
-La clé privée de `mykey` est sur l'instance et la floating IP n'existe que dans l'instance. Il faut
-donc créer la VM avec sa propre keypair et rebondir par l'instance. Les méthodes possibles (ProxyJump,
-ProxyCommand, `~/.ssh/config`, transfert d'agent, tunnel de port…) sont décrites et testées dans le
-[TP 02, étape 6](tps/tp02/tp02-instances-ssh.md). La connexion directe depuis Internet passe par le
-scénario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
+The private key of `mykey` is on the instance, and the floating IP only exists inside the instance.
+So you need to create the VM with your own keypair and jump through the instance. The possible
+methods (ProxyJump, ProxyCommand, `~/.ssh/config`, agent forwarding, port tunnel…) are described and
+tested in [TP 02, step 6](tps/tp02/tp02-instances-ssh.md) (in French). Direct connection from the
+Internet goes through scenario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
 
 ---
 
-## 8. Choix techniques
+## 8. Technical choices
 
-| Choix | Pourquoi |
+| Choice | Why |
 |---|---|
-| Kolla-Ansible `stable/2025.1` + upper-constraints | Versions figées : déploiement reproductible |
-| `set -Eeuo pipefail` + trap affichant la ligne en erreur | Arrêt à la première erreur, avec le log |
-| Un script + des fichiers de scénario | Une seule logique à maintenir ; les variantes ne diffèrent que par leurs paramètres |
-| `enable_loadbalancer: "no"` (+ haproxy/keepalived/proxysql à `no`) | Depuis 2024.2 c'est cette variable qui désactive le load balancer. Sinon ProxySQL prend le port 3306 et MariaDB ne démarre pas |
-| Paire veth persistante + NAT | Une seule interface réseau (voir §5) |
-| Interface et IP détectées via `ip route` | Fonctionne quel que soit le nom de l'interface |
-| `globals.yml` réécrit à chaque exécution | Pas de doublons ; le scénario fait foi |
-| Détection de `/dev/kvm`, sinon `qemu` + `cpu_mode=none` | Instances sans virtualisation matérielle |
-| InnoDB limité à 1 Go | Par défaut MariaDB réserve ~40 % de la RAM |
-| `resume_guests_state_on_host_boot = true` | Les VM redémarrent après un reboot de l'hôte |
-| Cinder sur fichier loop par défaut | Aucun disque supplémentaire à acheter |
-| Refus d'utiliser un `CINDER_DEVICE` contenant des données | Évite d'effacer un disque par erreur |
-| `destroy.sh` supprime les volumes Docker oubliés par `kolla-ansible destroy` | Un redéploiement repart réellement de zéro |
-| `destroy.sh` arrête les VM avant `kolla-ansible destroy` | `destroy` refuse de s'exécuter tant que des processus qemu tournent |
-| `kolla-genpwd` à chaque exécution | Il ne remplit que les mots de passe vides : les services ajoutés ont leurs secrets, les existants ne changent pas |
+| Kolla-Ansible `stable/2025.1` + upper-constraints | Pinned versions: reproducible deployment |
+| `set -Eeuo pipefail` + trap showing the failing line | Stops at the first error, with the log |
+| One script + scenario files | A single logic to maintain; variants differ only by their parameters |
+| `enable_loadbalancer: "no"` (+ haproxy/keepalived/proxysql set to `no`) | Since 2024.2 this variable disables the load balancer. Otherwise ProxySQL takes port 3306 and MariaDB does not start |
+| Persistent veth pair + NAT | A single network interface (see §5) |
+| Interface and IP detected with `ip route` | Works whatever the interface name |
+| `globals.yml` rewritten on every run | No duplicates; the scenario is authoritative |
+| `/dev/kvm` detection, otherwise `qemu` + `cpu_mode=none` | Instances without hardware virtualisation |
+| InnoDB limited to 1 GB | By default MariaDB reserves ~40 % of the RAM |
+| `resume_guests_state_on_host_boot = true` | VMs restart after a host reboot |
+| Cinder on a loop file by default | No extra disk to buy |
+| Refuses a `CINDER_DEVICE` that contains data | Avoids erasing a disk by mistake |
+| `destroy.sh` removes the Docker volumes left by `kolla-ansible destroy` | A redeployment really starts from scratch |
+| `destroy.sh` stops the VMs before `kolla-ansible destroy` | `destroy` refuses to run while qemu processes are running |
+| `kolla-genpwd` on every run | It only fills empty passwords: added services get their secrets, existing ones do not change |
 
 ---
 
-## 9. Sécurité
+## 9. Security
 
-1. **Horizon est en HTTP clair** : si le pare-feu du cloud ouvre le port 80 à tous (`0.0.0.0/0`), le mot de
-   passe admin circule en clair sur Internet. Deux options :
-   - **limiter le port 80 du Security Group à votre IP** (source `<VOTRE_IP>/32`) ;
-   - **ou fermer le port 80 et passer par un tunnel SSH** :
+1. **Horizon uses plain HTTP**: if the cloud firewall opens port 80 to everyone (`0.0.0.0/0`), the
+   admin password travels in clear text over the Internet. Two options:
+   - **restrict port 80 of the Security Group to your IP** (source `<VOTRE_IP>/32`, your IP);
+   - **or close port 80 and use an SSH tunnel**:
      ```bash
      ssh -i ec2_key -N -L 8080:<IP_PRIVEE>:80 -L 6080:<IP_PRIVEE>:6080 ubuntu@<IP_PUBLIQUE>
      ```
-     dans un terminal dédié (`-N` : pas de shell ; `Ctrl+C` ferme le tunnel), puis ouvrir
-     `http://localhost:8080`. La redirection du port 6080 sert à la console des VM dans
-     Horizon : elle n'est jamais ouverte dans le Security Group, même quand le port 80 l'est.
-   → À terme, activer TLS : `kolla_enable_tls_external: "yes"` + certificat (`kolla-ansible certificates` pour un lab).
-2. Les API (5000, 8774, 9696…) ne doivent pas être ouvertes dans le pare-feu du cloud.
-3. `passwords.yml` contient tous les secrets : sauvegarder hors de l'instance, ne pas committer.
-4. Clés SSH et identifiants AWS : jamais en clair dans un chat, un mail ou un dépôt Git
-   (le `.gitignore` du dépôt exclut les clés et les secrets générés).
+     in a dedicated terminal (`-N`: no shell; `Ctrl+C` closes the tunnel), then open
+     `http://localhost:8080`. `<IP_PRIVEE>` is the private IP of the instance. Forwarding port 6080
+     is used by the VM console in Horizon: it is never opened in the Security Group, even when port
+     80 is.
+   → Eventually, enable TLS: `kolla_enable_tls_external: "yes"` + a certificate
+   (`kolla-ansible certificates` for a lab).
+2. The APIs (5000, 8774, 9696…) must not be opened in the cloud firewall.
+3. `passwords.yml` contains all the secrets: back it up outside the instance, do not commit it.
+4. SSH keys and AWS credentials: never in clear text in a chat, an e-mail or a Git repository
+   (the repository's `.gitignore` excludes keys and generated secrets).
 
 ---
 
-## 10. Limites et améliorations possibles
+## 10. Limits and possible improvements
 
-Limites liées à l'infrastructure (performances QEMU, floating IP publiques, stockage) :
-voir [aws/aws-setup.md](aws/aws-setup.md). Coûts : [aws/finops.md](aws/finops.md).
+Limits related to the infrastructure (QEMU performance, public floating IPs, storage):
+see [aws/aws-setup.md](aws/aws-setup.md). Costs: [aws/finops.md](aws/finops.md).
 
-Limites et pistes côté OpenStack :
-- **Mono-nœud, sans haute disponibilité** : tout s'arrête avec l'instance. Étape suivante : un inventaire
-  `multinode` (contrôleur + compute) sur plusieurs instances.
-- **RAM** : ~7 Go utilisés à vide sur 16 ; peu de marge pour les VM.
-- Supervision (`enable_prometheus`, `enable_grafana`) et logs centralisés (`enable_central_logging`) si ≥ 32 Go.
-- Sauvegarde de MariaDB : `enable_mariabackup: "yes"`, puis `kolla-ansible mariadb_backup`.
-- Images plus utiles (image cloud Ubuntu) et quotas adaptés.
-- Mise à jour : changer `OPENSTACK_RELEASE` et suivre `kolla-ansible upgrade` (une version à la fois).
-- Déploiement automatisé à la création de l'instance (*user-data* cloud-init, Terraform).
+Limits and ideas on the OpenStack side:
+- **Single node, no high availability**: everything stops with the instance. Next step: a
+  `multinode` inventory (controller + compute) on several instances.
+- **RAM**: ~7 GB used when idle out of 16; little room for VMs.
+- Monitoring (`enable_prometheus`, `enable_grafana`) and centralised logs (`enable_central_logging`)
+  with ≥ 32 GB.
+- MariaDB backup: `enable_mariabackup: "yes"`, then `kolla-ansible mariadb_backup`.
+- More useful images (Ubuntu cloud image) and suitable quotas.
+- Upgrade: change `OPENSTACK_RELEASE` and follow `kolla-ansible upgrade` (one release at a time).
+- Automated deployment when the instance is created (cloud-init *user-data*, Terraform).
 
 ---
 
-## 11. Dépannage
+## 11. Troubleshooting
 
-| Symptôme | Piste |
+| Symptom | Lead |
 |---|---|
-| `Timeout when waiting for search string MariaDB` | `sudo ss -ltnp \| grep 3306` : ProxySQL occupe le port ? Vérifier `enable_loadbalancer: "no"` |
-| Un `fatal:` dans le log mais le déploiement continue | Normal : certaines sondes Kolla sont en `ignore_errors` ; seul le `PLAY RECAP` (`failed=0`) compte |
-| Conteneur en redémarrage | `sudo docker ps -a`, `sudo docker logs <nom>`, `sudo ls /var/log/kolla/<service>/` (dossier réservé à root) |
-| Arrêter / relancer un service | Chaque conteneur est piloté par l'unité systemd `kolla-<conteneur>-container.service` (`Restart=always`) : `sudo systemctl stop\|start\|restart kolla-<conteneur>-container.service`. Un `docker stop` est annulé par systemd |
-| `Command 'openstack' not found` | Charger l'environnement dans la session : `source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh`. Ne pas installer le client `snap`/`apt` d'Ubuntu (version trop ancienne) |
-| `WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!` en SSH vers une VM | La floating IP a été réutilisée par une nouvelle VM : `ssh-keygen -R <FLOATING_IP>` |
-| `Permission denied (publickey)` en SSH vers une VM | La VM a été créée avec `mykey`, dont la clé privée est sur l'instance : se connecter depuis l'instance, ou recréer la VM avec votre keypair (§7, « Se connecter à une VM depuis son poste ») |
-| SSH vers une VM qui ne répond pas juste après sa création | Le système démarre en ~1 min (émulation QEMU) : suivre `openstack console log show <vm>` jusqu'à `login:` |
-| VM en ERROR | `openstack server show <vm> -c fault`, `/var/log/kolla/nova/nova-compute.log` |
-| Floating IP injoignable | `ip a show veth-ext`, `systemctl status openstack-lab-net`, `sudo iptables -t nat -S POSTROUTING`, security group OpenStack de la VM (`openstack security group rule list default`) |
-| Volume Cinder en `error` | `sudo vgs cinder-volumes`, `systemctl status openstack-lab-cinder-loop`, `/var/log/kolla/cinder/cinder-volume.log` |
-| `kolla-ansible destroy` échoue : « Some qemu processes were detected » | Des VM tournent encore : `destroy.sh` les arrête (`virsh destroy`) avant de lancer `destroy`. En manuel : `sudo docker exec nova_libvirt virsh list`, puis `virsh destroy <nom>` |
-| Horizon : erreur 500 sur la page de connexion | `sudo grep OfflineGenerationError /var/log/kolla/horizon/horizon-error.log` : compression des fichiers statiques périmée (vu après l'ajout du scénario 04 sur un déploiement existant ; `deploy.sh` la répare désormais). À la main : `sudo docker exec horizon rm -f /var/lib/kolla/.settings.md5sum.txt && sudo systemctl restart kolla-horizon-container.service` |
-| Plus d'espace disque | `sudo docker system df`, `df -h` |
+| `Timeout when waiting for search string MariaDB` | `sudo ss -ltnp \| grep 3306`: is ProxySQL using the port? Check `enable_loadbalancer: "no"` |
+| A `fatal:` in the log but the deployment goes on | Normal: some Kolla probes are `ignore_errors`; only the `PLAY RECAP` (`failed=0`) counts |
+| Container restarting | `sudo docker ps -a`, `sudo docker logs <name>`, `sudo ls /var/log/kolla/<service>/` (folder reserved to root) |
+| Stop / restart a service | Each container is driven by the systemd unit `kolla-<container>-container.service` (`Restart=always`): `sudo systemctl stop\|start\|restart kolla-<container>-container.service`. A `docker stop` is undone by systemd |
+| `Command 'openstack' not found` | Load the environment in the session: `source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh`. Do not install Ubuntu's `snap`/`apt` client (too old) |
+| `WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!` when connecting to a VM over SSH | The floating IP was reused by a new VM: `ssh-keygen -R <FLOATING_IP>` |
+| `Permission denied (publickey)` when connecting to a VM over SSH | The VM was created with `mykey`, whose private key is on the instance: connect from the instance, or recreate the VM with your keypair (§7, "Connecting to a VM from your workstation") |
+| SSH to a VM does not answer right after its creation | The system boots in ~1 min (QEMU emulation): follow `openstack console log show <vm>` until `login:` |
+| VM in ERROR | `openstack server show <vm> -c fault`, `/var/log/kolla/nova/nova-compute.log` |
+| Floating IP unreachable | `ip a show veth-ext`, `systemctl status openstack-lab-net`, `sudo iptables -t nat -S POSTROUTING`, OpenStack security group of the VM (`openstack security group rule list default`) |
+| Cinder volume in `error` | `sudo vgs cinder-volumes`, `systemctl status openstack-lab-cinder-loop`, `/var/log/kolla/cinder/cinder-volume.log` |
+| `kolla-ansible destroy` fails: "Some qemu processes were detected" | VMs are still running: `destroy.sh` stops them (`virsh destroy`) before running `destroy`. Manually: `sudo docker exec nova_libvirt virsh list`, then `virsh destroy <name>` |
+| Horizon: error 500 on the login page | `sudo grep OfflineGenerationError /var/log/kolla/horizon/horizon-error.log`: stale compression of static files (seen after adding scenario 04 to an existing deployment; `deploy.sh` now fixes it). Manually: `sudo docker exec horizon rm -f /var/lib/kolla/.settings.md5sum.txt && sudo systemctl restart kolla-horizon-container.service` |
+| Out of disk space | `sudo docker system df`, `df -h` |

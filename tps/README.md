@@ -1,177 +1,181 @@
-# Parcours de TP : OpenStack sur AWS
+**English** · [Français](README.fr.md)
 
-> Public : stagiaires et alternants. Aucune connaissance d'OpenStack n'est supposée ; il faut savoir
-> se servir d'un terminal Linux et de SSH.
+# Lab path: OpenStack on AWS
+
+> Audience: trainees and work-study students. No prior knowledge of OpenStack is assumed; you need to
+> be comfortable with a Linux terminal and SSH.
 >
-> Chaque TP indique ses objectifs, ses prérequis, les étapes guidées, des questions de compréhension
-> et des critères de validation. Les sources et références
-> sont dans [sources.md](sources.md).
+> Each lab (TP, *travaux pratiques*) states its objectives, its prerequisites, the guided steps,
+> comprehension questions and validation criteria. Sources and references are in
+> [sources.md](sources.md).
+>
+> **The labs are written in French.** This page is their English index.
 
 ---
 
 ## 1. Progression
 
-Les TP suivent l'avancement du projet : on découvre l'infrastructure, on déploie, on utilise, puis on
-exploite et on étend la plateforme.
+The labs follow the life of the project: you discover the infrastructure, deploy, use, then operate
+and extend the platform.
 
-| TP | Titre | Phase du projet | Scénario | État |
+| TP | Title | Project phase | Scenario | Status |
 |---|---|---|---|---|
-| [00](tp00/tp00-preparer-instance.md) | Préparer et découvrir l'instance AWS | Avant le déploiement | aucun | Prêt |
-| [01](tp01/tp01-deployer.md) | Déployer OpenStack et vérifier le déploiement | Déploiement | 01 | Prêt |
-| [02](tp02/tp02-instances-ssh.md) | Lancer des instances depuis l'hôte et s'y connecter en SSH | Utilisation | 01 | Prêt |
-| [03](tp03/tp03-reseau-neutron.md) | Comprendre le réseau Neutron | Utilisation | 01 | Prêt |
-| [04](tp04/tp04-volumes-cinder.md) | Stockage persistant : volumes, montage, snapshots | Utilisation | 02 | Prêt |
-| [04 bis](tp04-bis/tp04-bis-revenir-en-arriere.md) | Revenir en arrière : snapshots, revert, re-image | Utilisation | 02 | Prêt |
-| [05](tp05/tp05-exploitation.md) | Exploiter la plateforme : logs, pannes, reconfiguration | Exploitation | 01 ou 02 | Prêt |
-| [05 bis](tp05-bis/tp05-bis-qui-a-fait-quoi.md) | Qui a fait quoi ? Tracer les appels aux API (après le TP 06 bis) | Exploitation | 01 ou 02 | Prêt |
-| [06](tp06/tp06-projets-quotas.md) | Projets, utilisateurs, rôles et quotas | Exploitation | 01 ou 02 | Prêt |
-| [06 bis](tp06-bis/tp06-bis-identites-automates.md) | Identités pour les automates : jetons, identifiants d'application, règles d'accès | Exploitation | 01 ou 02 | Prêt |
-| [07](tp07/tp07-reseau-aws.md) | Floating IP publiques et réseau AWS | Extension | 03 | Prêt (sans coût) |
-| [08](tp08/tp08-secrets-barbican.md) | Gérer des secrets avec Barbican | Extension | 04 | Prêt |
-| [08 bis](tp08-bis/tp08-bis-faire-vivre-secrets.md) | Faire vivre un secret : renouveler, partager, regrouper | Extension | 04 | Prêt |
-| [09](tp09/tp09-volumes-chiffres.md) | Chiffrer les volumes Cinder | Extension | 04 | Prêt |
-| [10](tp10/tp10-sauvegardes-restic.md) | Sauvegarder une VM : dépôt local, stockage objet, copie hors de l'hôte | Extension | 04 | Prêt (sans coût) |
-| [11](tp11/tp11-dns-designate.md) | DNS as a Service avec Designate | Extension | 04 | Prêt |
-| [12](tp12/tp12-cloud-init.md) | Configurer les VM au démarrage avec cloud-init | Extension | 02 ou 04 | Prêt |
-| [12 bis](tp12-bis/tp12-bis-depanner-vm.md) | Dépanner une VM : reprendre la main par le mode rescue | Extension | 02 ou 04 | Prêt |
-| [13](tp13/tp13-deploiement.md) | TP final : déployer une architecture sécurisée sur OpenStack ([architecture](tp13/tp13-architecture.md)) | Synthèse | 04 | Prêt (étape 15 optionnelle et payante) |
-| [13 bis](tp13-bis/tp13-bis-administrer-base.md) | Administrer la base sans ouvrir de port : rôle dédié, droits au plus juste, tunnel, traces | Synthèse (après l'étape 14 du TP 13) | 04 | Prêt |
-| [14](tp14/tp14-heat.md) | TP bonus : redéployer la même architecture avec Heat, l'infrastructure décrite en code | Bonus | 04, Heat ajouté par le TP | Prêt |
-| [15](tp15/tp15-octavia.md) | TP bonus : répartir la charge avec Octavia, HTTPS avec un certificat rangé dans Barbican, bascule, accès au plus juste | Bonus | 04, Octavia ajouté par le TP | Prêt |
+| [00](tp00/tp00-preparer-instance.md) | Prepare and discover the AWS instance | Before deployment | none | Ready |
+| [01](tp01/tp01-deployer.md) | Deploy OpenStack and verify the deployment | Deployment | 01 | Ready |
+| [02](tp02/tp02-instances-ssh.md) | Launch instances from the host and connect to them over SSH | Use | 01 | Ready |
+| [03](tp03/tp03-reseau-neutron.md) | Understand Neutron networking | Use | 01 | Ready |
+| [04](tp04/tp04-volumes-cinder.md) | Persistent storage: volumes, mounting, snapshots | Use | 02 | Ready |
+| [04 bis](tp04-bis/tp04-bis-revenir-en-arriere.md) | Going back: snapshots, revert, re-image | Use | 02 | Ready |
+| [05](tp05/tp05-exploitation.md) | Operate the platform: logs, failures, reconfiguration | Operations | 01 or 02 | Ready |
+| [05 bis](tp05-bis/tp05-bis-qui-a-fait-quoi.md) | Who did what? Tracing API calls (after TP 06 bis) | Operations | 01 or 02 | Ready |
+| [06](tp06/tp06-projets-quotas.md) | Projects, users, roles and quotas | Operations | 01 or 02 | Ready |
+| [06 bis](tp06-bis/tp06-bis-identites-automates.md) | Identities for automation: tokens, application credentials, access rules | Operations | 01 or 02 | Ready |
+| [07](tp07/tp07-reseau-aws.md) | Public floating IPs and AWS networking | Extension | 03 | Ready (no cost) |
+| [08](tp08/tp08-secrets-barbican.md) | Manage secrets with Barbican | Extension | 04 | Ready |
+| [08 bis](tp08-bis/tp08-bis-faire-vivre-secrets.md) | The life of a secret: renew, share, group | Extension | 04 | Ready |
+| [09](tp09/tp09-volumes-chiffres.md) | Encrypt Cinder volumes | Extension | 04 | Ready |
+| [10](tp10/tp10-sauvegardes-restic.md) | Back up a VM: local repository, object storage, copy outside the host | Extension | 04 | Ready (no cost) |
+| [11](tp11/tp11-dns-designate.md) | DNS as a Service with Designate | Extension | 04 | Ready |
+| [12](tp12/tp12-cloud-init.md) | Configure VMs at boot with cloud-init | Extension | 02 or 04 | Ready |
+| [12 bis](tp12-bis/tp12-bis-depanner-vm.md) | Troubleshoot a VM: regain control with rescue mode | Extension | 02 or 04 | Ready |
+| [13](tp13/tp13-deploiement.md) | Final lab: deploy a secure architecture on OpenStack ([architecture](tp13/tp13-architecture.md)) | Synthesis | 04 | Ready (step 15 optional and charged) |
+| [13 bis](tp13-bis/tp13-bis-administrer-base.md) | Administer the database without opening a port: dedicated role, least privilege, tunnel, audit trail | Synthesis (after step 14 of TP 13) | 04 | Ready |
+| [14](tp14/tp14-heat.md) | Bonus lab: redeploy the same architecture with Heat, infrastructure described as code | Bonus | 04, Heat added by the lab | Ready |
+| [15](tp15/tp15-octavia.md) | Bonus lab: load balancing with Octavia, HTTPS with a certificate stored in Barbican, failover, least-privilege access | Bonus | 04, Octavia added by the lab | Ready |
 
-Non testés sur le lab, et signalés comme tels dans les énoncés : la partie AWS du scénario 03 et le
-niveau 3 « cloud » du TP 10 (payants).
+Not tested on the platform, and flagged as such in the instructions: the AWS part of scenario 03 and
+the "cloud" level 3 of TP 10 (charged).
 
-### TP 13 puis TP 14 (bonus) : la même architecture, deux méthodes
+### TP 13 then TP 14 (bonus): the same architecture, two methods
 
-Le TP 13, TP final du parcours, construit l'architecture ressource par ressource, en ligne de commande. Le TP 14, en
-bonus, la reconstruit avec Heat, à partir d'un modèle qui la décrit. Les deux constructions passent les mêmes
-contrôles : c'est ce qui permet de les comparer.
+TP 13, the final lab of the path, builds the architecture resource by resource, on the command line.
+TP 14, as a bonus, rebuilds it with Heat, from a template that describes it. Both builds pass the
+same checks: that is what makes them comparable.
 
-| | TP 13 : commande par commande | TP 14 : modèle Heat |
+| | TP 13: command by command | TP 14: Heat template |
 |---|---|---|
-| Ce qu'on écrit | Une commande par ressource, dans le bon ordre | Un fichier qui décrit l'état voulu ; Heat déduit l'ordre des dépendances |
-| Construire, détruire | Toutes les étapes ; nettoyage en ordre inverse, étape par étape | Une commande : `openstack stack create`, `openstack stack delete` |
-| Modifier | Une commande ciblée ; rien ne garde l'état voulu | `openstack stack update` : Heat ne change que ce qui diffère (constaté : une règle modifiée sur place, la VM conservée) |
-| Reproduire à l'identique | Rejouer toutes les commandes sans erreur | Rejouer le même modèle ; le fichier se range dans git |
-| Ce qu'on apprend | Le rôle de chaque brique, le diagnostic couche par couche | Décrire, paramétrer, versionner une infrastructure |
-| Ce qui reste à faire à la main | Tout | La route, le pare-feu, le proxy et l'heure de l'hôte ; le secret de la base, qu'un modèle ne doit jamais contenir |
-| Limites constatées | Oublis et erreurs de saisie ; durée | Heat ne pose pas d'étiquette sur les security groups ni sur la FIP, ni la description de la FIP ; un groupe sans aucune sortie demande une règle de plus ; le service consomme environ 1 Go de mémoire (mesuré) |
+| What you write | One command per resource, in the right order | A file that describes the desired state; Heat works out the order from the dependencies |
+| Build, destroy | Every step; cleanup in reverse order, step by step | One command: `openstack stack create`, `openstack stack delete` |
+| Change | A targeted command; nothing keeps the desired state | `openstack stack update`: Heat only changes what differs (observed: a rule changed in place, the VM kept) |
+| Reproduce identically | Replay every command without error | Replay the same template; the file goes into git |
+| What you learn | The role of each building block, layer-by-layer diagnosis | Describe, parameterise, version an infrastructure |
+| What remains manual | Everything | The route, the firewall, the proxy and the host clock; the database secret, which a template must never contain |
+| Observed limits | Omissions and typing errors; duration | Heat puts no tag on security groups or on the FIP, nor the FIP description; a group with no egress at all needs one more rule; the service uses about 1 GB of memory (measured) |
 
-Ressources créées par Heat : leur nom commence par `ht-` (par exemple `ht-tp13-vm-web-haproxy-demo`),
-pour les distinguer au premier coup d'œil de celles créées à la main.
+Resources created by Heat: their name starts with `ht-` (for example `ht-tp13-vm-web-haproxy-demo`),
+to tell them apart at a glance from those created by hand.
 
 ---
 
 ## 2. Conventions
 
-**Conditions d'entrée.** Un TP part de l'état laissé par le précédent. Chaque TP fournit le script
-`tps/tpNN/verifier-entree.sh`, que son étape 0 lance : il vérifie, sans
-rien modifier, que le lab est prêt, et indique pour chaque écart ce qu'il faut faire. Ne commencez
-pas tant que sa dernière ligne n'est pas `Lab prêt pour le TP NN.`
+**Entry conditions.** A lab starts from the state left by the previous one. Each lab provides the
+script `tps/tpNN/verifier-entree.sh`, which its step 0 runs: it checks, without changing anything,
+that the platform is ready, and says what to do for each gap. Do not start until its last line is
+`Lab prêt pour le TP NN.` (platform ready for TP NN).
 
-Chaque bloc de commandes indique où l'exécuter :
+Each command block states where to run it:
 
-| Marqueur | Où | Comment y aller |
+| Marker | Where | How to get there |
 |---|---|---|
-| `# [poste]` | Votre ordinateur | vous y êtes |
-| `# [instance]` | L'instance EC2 (l'hôte OpenStack) | `ssh -i ec2_key ubuntu@<IP_PUBLIQUE>` |
-| `# [VM]` | Une VM OpenStack (CirrOS ; Debian aux TP 12 et 13) | `ssh cirros@<FLOATING_IP>` depuis l'instance (au TP 12 : `ssh -i ~/.ssh/tp12-key stack@<FLOATING_IP>` ; au TP 13 : `ssh -F ~/.ssh/tp13_config <VM>` depuis le poste, par le bastion) |
+| `# [poste]` | Your computer (workstation) | you are there |
+| `# [instance]` | The EC2 instance (the OpenStack host) | `ssh -i ec2_key ubuntu@<IP_PUBLIQUE>` |
+| `# [VM]` | An OpenStack VM (CirrOS; Debian in TP 12 and 13) | `ssh cirros@<FLOATING_IP>` from the instance (in TP 12: `ssh -i ~/.ssh/tp12-key stack@<FLOATING_IP>`; in TP 13: `ssh -F ~/.ssh/tp13_config <VM>` from the workstation, through the bastion) |
 
 ```
-Votre poste
+Your workstation
    │  ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
    ▼
 ┌─────────────────────────────────────────────────────────┐
-│ L'« instance » : une machine virtuelle louée chez AWS   │
-│ (t2.xlarge). OpenStack est installé dessus.             │
+│ The "instance": a virtual machine rented from AWS       │
+│ (t2.xlarge). OpenStack is installed on it.              │
 │                                                         │
 │   ┌──────────────┐  ┌──────────────┐                    │
-│   │ VM tp02-vm-1 │  │ VM tp02-vm-2 │  ← les « VM » :    │
-│   │ (CirrOS)     │  │ (CirrOS)     │    créées PAR      │
+│   │ VM tp02-vm-1 │  │ VM tp02-vm-2 │  ← the "VMs":      │
+│   │ (CirrOS)     │  │ (CirrOS)     │    created BY      │
 │   └──────────────┘  └──────────────┘    OpenStack       │
 └─────────────────────────────────────────────────────────┘
 ```
 
-AWS comme OpenStack appellent « instance » leurs machines virtuelles. Dans ce parcours, *instance*
-désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
+AWS and OpenStack both call their virtual machines "instances". In this path, *instance* always
+means the AWS machine, and *VM* the machines created by OpenStack.
 
-- Les valeurs entre chevrons sont à remplacer : `<IP_PUBLIQUE>` (IP publique de l'instance, visible
-  dans la console AWS), `<FLOATING_IP>`, `<INSTANCE_ID>`…
-- Avant toute commande `openstack`, dans chaque nouvelle session SSH sur l'instance :
+- Values between angle brackets are to be replaced: `<IP_PUBLIQUE>` (public IP of the instance,
+  shown in the AWS console), `<FLOATING_IP>`, `<INSTANCE_ID>`…
+- Before any `openstack` command, in every new SSH session on the instance:
   ```bash
   # [instance]
   source ~/kolla/venv/bin/activate
   source /etc/kolla/admin-openrc.sh
   ```
-  Sans cela : `Command 'openstack' not found`. N'installez pas le client proposé par Ubuntu
-  (`snap`/`apt`) : sa version est trop ancienne.
-- Les ressources créées dans un TP portent son préfixe (`tp02-…`, `tp03-…`) : on sait ce qu'on peut
-  supprimer sans toucher au reste. Chaque TP se termine par un nettoyage.
-- Les floating IP sont réutilisées : une nouvelle VM peut recevoir l'adresse d'une VM supprimée.
-  SSH refuse alors la connexion (`WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!`), car l'empreinte
-  de la VM a changé. C'est normal dans le lab : oubliez l'ancienne empreinte avec
-  `ssh-keygen -R <FLOATING_IP>`, puis reconnectez-vous.
-- CirrOS, l'image des VM de test, est une distribution minimale : ses commandes sont celles de BusyBox
-  (par exemple `ip addr` fonctionne, `ip -br addr` non).
+  Without it: `Command 'openstack' not found`. Do not install the client offered by Ubuntu
+  (`snap`/`apt`): its version is too old.
+- Resources created in a lab carry its prefix (`tp02-…`, `tp03-…`): you know what you can delete
+  without touching anything else. Every lab ends with a cleanup.
+- Floating IPs are reused: a new VM can receive the address of a deleted VM. SSH then refuses the
+  connection (`WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!`), because the VM's fingerprint has
+  changed. This is expected on the platform: forget the old fingerprint with
+  `ssh-keygen -R <FLOATING_IP>`, then reconnect.
+- CirrOS, the image of the test VMs, is a minimal distribution: its commands are those of BusyBox
+  (for example `ip addr` works, `ip -br addr` does not).
 
 ---
 
-## 3. Règles du lab
+## 3. Platform rules
 
-1. **Aucune ressource AWS payante sans l'accord du tuteur** (Elastic IP, volume EBS, instance
-   supplémentaire…). Voir [../aws/finops.md](../aws/finops.md).
-2. **Ne jamais modifier le réseau de l'interface `enX0`** de l'instance (adresses, netplan, networkd) :
-   c'est par elle qu'on administre l'instance, et une erreur la rend injoignable
-   (voir [../aws/aws-setup.md §6](../aws/aws-setup.md)).
-3. **Arrêter l'instance en fin de journée** (console AWS, *Arrêter*, jamais *Résilier*). OpenStack redémarre
-   tout seul ; l'IP publique change.
-4. Pas de secret (clé SSH, mot de passe, clé AWS) dans un chat, un mail ou un dépôt Git.
+1. **No charged AWS resource without the tutor's approval** (Elastic IP, EBS volume, extra
+   instance…). See [../aws/finops.md](../aws/finops.md) (in French).
+2. **Never change the network of the `enX0` interface** of the instance (addresses, netplan,
+   networkd): it is how the instance is administered, and a mistake makes it unreachable
+   (see [../aws/aws-setup.md §6](../aws/aws-setup.md)).
+3. **Stop the instance at the end of the day** (AWS console, *Stop*, never *Terminate*). OpenStack
+   restarts on its own; the public IP changes.
+4. No secret (SSH key, password, AWS key) in a chat, an e-mail or a Git repository.
 
 ---
 
-## 4. Grille de suivi
+## 4. Progress grid
 
-À cocher par le stagiaire, à valider par le tuteur.
+Ticked by the trainee, validated by the tutor.
 
-| TP | Je sais… | Stagiaire | Tuteur |
+| TP | I can… | Trainee | Tutor |
 |---|---|---|---|
-| 00 | expliquer pourquoi les VM OpenStack tournent en émulation sur cette instance |  |  |
-| 00 | distinguer IP publique, IP privée et Security Group AWS |  |  |
-| 01 | déployer OpenStack, lire le log et interpréter `verify.sh` |  |  |
-| 01 | citer le rôle de Keystone, Nova, Neutron, Glance, Placement, Horizon |  |  |
-| 02 | lancer une VM, lui donner une floating IP et m'y connecter en SSH |  |  |
-| 02 | expliquer ce qu'est une keypair et où se trouve la clé privée |  |  |
-| 02 | accéder à une VM depuis mon poste par plusieurs méthodes, et choisir la plus sûre |  |  |
-| 03 | créer réseau, sous-réseau, routeur et security group |  |  |
-| 03 | suivre le chemin d'un paquet de la VM jusqu'à Internet |  |  |
-| 04 | créer, attacher, formater, monter et détacher un volume |  |  |
-| 04 | expliquer la différence entre disque éphémère et volume |  |  |
-| 04 bis | remettre un volume dans un état antérieur et reconstruire une VM sur volume sans perdre ses données |  |  |
-| 05 | trouver le log d'un service et diagnostiquer une panne simple |  |  |
-| 05 | modifier une option de configuration de façon durable |  |  |
-| 05 bis | retrouver qui a fait une action et suivre une requête dans les journaux, et dire ce qu'ils ne prouvent pas |  |  |
-| 06 | créer un projet et un utilisateur, lui donner un rôle et des quotas |  |  |
-| 06 bis | dire ce que vaut un jeton révoqué, et donner à un automate un identifiant limité par rôle, règles d'accès et expiration |  |  |
-| 07 | expliquer pourquoi une floating IP n'est pas joignable depuis Internet sur AWS |  |  |
-| 08 | stocker, générer et protéger un secret ; expliquer les rôles Barbican |  |  |
-| 08 bis | renouveler un secret, le partager par une ACL, regrouper les secrets d'une application ; dire contre qui un secret privé protège |  |  |
-| 09 | chiffrer un volume et dire contre quoi ce chiffrement protège |  |  |
-| 09 | protéger la clé d'un volume chiffré contre sa suppression |  |  |
-| 10 | sauvegarder et restaurer une VM, et expliquer la règle 3-2-1 et le séquestre du mot de passe |  |  |
-| 11 | publier des noms DNS, à la main et automatiquement par Neutron |  |  |
-| 11 | limiter un automate aux seuls enregistrements d'une zone DNS |  |  |
-| 12 | décrire la configuration d'une VM dans un user-data cloud-init, la valider et la vérifier |  |  |
-| 12 | dire pourquoi un secret ne va jamais dans un user-data, et appliquer l'immutabilité |  |  |
-| 12 bis | réparer le disque d'une VM par le mode rescue, et reconnaître un rescue qui démarre sur le mauvais disque |  |  |
-| 12 bis | dire ce que la console d'une VM permet et expose, et pourquoi la méthode « GRUB, `init=/bin/bash` » ne s'applique pas à une image de cloud |  |  |
-| 13 | segmenter un réseau et écrire des security groups au plus juste, en entrée et en sortie |  |  |
-| 13 | administrer des VM par un bastion, et contrôler leurs sorties par un proxy |  |  |
-| 13 | diagnostiquer un routage asymétrique avec `tcpdump`, et prouver chaque refus par un test |  |  |
-| 13 bis | administrer une base par un tunnel SSH sans port ouvert, sous un rôle dédié, et relire la trace de chaque action |  |  |
-| 14 | ajouter un service à un cloud en fonctionnement, puis le retirer proprement |  |  |
-| 14 | décrire une infrastructure dans un modèle Heat, la créer, la modifier et la détruire |  |  |
-| 14 | comparer une construction à la main et une construction par modèle, et dire ce qui reste hors du modèle |  |  |
-| 15 | placer des serveurs derrière un répartiteur et observer la bascule quand l'un tombe |  |  |
-| 15 | terminer le HTTPS avec un certificat rangé dans Barbican, le renouveler et retirer les accès qui ne servent plus |  |  |
-| 15 | limiter les clients d'un service publié, et dire ce que le projet voit de l'infrastructure de l'exploitant |  |  |
+| 00 | explain why OpenStack VMs run in emulation on this instance |  |  |
+| 00 | tell apart public IP, private IP and AWS Security Group |  |  |
+| 01 | deploy OpenStack, read the log and interpret `verify.sh` |  |  |
+| 01 | state the role of Keystone, Nova, Neutron, Glance, Placement, Horizon |  |  |
+| 02 | launch a VM, give it a floating IP and connect to it over SSH |  |  |
+| 02 | explain what a keypair is and where the private key is |  |  |
+| 02 | reach a VM from my workstation in several ways, and choose the safest |  |  |
+| 03 | create a network, subnet, router and security group |  |  |
+| 03 | follow the path of a packet from the VM to the Internet |  |  |
+| 04 | create, attach, format, mount and detach a volume |  |  |
+| 04 | explain the difference between an ephemeral disk and a volume |  |  |
+| 04 bis | bring a volume back to an earlier state and rebuild a volume-backed VM without losing its data |  |  |
+| 05 | find a service's log and diagnose a simple failure |  |  |
+| 05 | change a configuration option durably |  |  |
+| 05 bis | find who performed an action and follow a request through the logs, and say what they do not prove |  |  |
+| 06 | create a project and a user, give them a role and quotas |  |  |
+| 06 bis | say what a revoked token is worth, and give an automated process a credential limited by role, access rules and expiry |  |  |
+| 07 | explain why a floating IP cannot be reached from the Internet on AWS |  |  |
+| 08 | store, generate and protect a secret; explain the Barbican roles |  |  |
+| 08 bis | renew a secret, share it through an ACL, group an application's secrets; say who a private secret protects against |  |  |
+| 09 | encrypt a volume and say what this encryption protects against |  |  |
+| 09 | protect the key of an encrypted volume against deletion |  |  |
+| 10 | back up and restore a VM, and explain the 3-2-1 rule and the escrow of the password |  |  |
+| 11 | publish DNS names, by hand and automatically through Neutron |  |  |
+| 11 | restrict an automated process to the records of a single DNS zone |  |  |
+| 12 | describe a VM's configuration in a cloud-init user-data, validate it and check it |  |  |
+| 12 | say why a secret never goes into a user-data, and apply immutability |  |  |
+| 12 bis | repair a VM's disk through rescue mode, and recognise a rescue that boots on the wrong disk |  |  |
+| 12 bis | say what a VM's console allows and exposes, and why the "GRUB, `init=/bin/bash`" method does not apply to a cloud image |  |  |
+| 13 | segment a network and write least-privilege security groups, for ingress and egress |  |  |
+| 13 | administer VMs through a bastion, and control their outbound traffic through a proxy |  |  |
+| 13 | diagnose asymmetric routing with `tcpdump`, and prove each refusal with a test |  |  |
+| 13 bis | administer a database through an SSH tunnel without an open port, under a dedicated role, and review the trail of each action |  |  |
+| 14 | add a service to a running cloud, then remove it cleanly |  |  |
+| 14 | describe an infrastructure in a Heat template, create it, change it and destroy it |  |  |
+| 14 | compare a manual build with a template build, and say what stays outside the template |  |  |
+| 15 | put servers behind a load balancer and observe the failover when one goes down |  |  |
+| 15 | terminate HTTPS with a certificate stored in Barbican, renew it and remove the accesses no longer needed |  |  |
+| 15 | restrict the clients of a published service, and say what the project sees of the operator's infrastructure |  |  |
