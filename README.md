@@ -2,6 +2,8 @@
 
 # Practise security by design, on a cloud you build yourself
 
+By [Merlin Tchoffo](https://www.linkedin.com/in/merlin-t-08316915), cybersecurity and cloud expert.
+
 > The hands-on labs (TP, *travaux pratiques*) and the other documents of this repository are written
 > in French. This README and the [lab index](tps/README.md) are available in English.
 

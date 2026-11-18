@@ -2,6 +2,8 @@
 
 # Pratiquez la sécurité dès la conception, sur un cloud sur mesure
 
+Par [Merlin Tchoffo](https://www.linkedin.com/in/merlin-t-08316915), expert en cybersécurité et cloud.
+
 ⭐ Si ce travail vous est utile, pensez à mettre une étoile au dépôt ! Une erreur, une explication à
 améliorer, un exercice à proposer ? Ouvrez une *issue* ou proposez une *pull request* : les
 contributions et les retours d'expérience sont les bienvenus.
