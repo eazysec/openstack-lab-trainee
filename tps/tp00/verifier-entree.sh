@@ -24,7 +24,7 @@ command -v aws >/dev/null && ok "AWS CLI présente (étape 1 : contrôle des cr�
 [ -f ec2_key ] && ok "clé ec2_key présente dans le dossier courant" \
   || ecart "clé ec2_key absente du dossier courant" "se placer dans le dossier qui contient ec2_key (téléchargée à la création de l'instance)"
 [ -d openstack-lab-trainee ] && ok "dépôt openstack-lab-trainee présent" \
-  || ecart "dépôt openstack-lab-trainee absent du dossier courant" "se placer dans le dossier qui contient le dépôt"
+  || ecart "dépôt openstack-lab-trainee absent du dossier courant" "se placer dans le dossier qui contient le dépôt, ou le cloner (TP 00, étape 0)"
 
 echo; echo "== Instance"
 if [ -z "$IP" ]; then

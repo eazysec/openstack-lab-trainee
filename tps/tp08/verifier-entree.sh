@@ -27,8 +27,9 @@ zero() {  # $1 libellé, $2 nombre, $3 remède
 echo "== Plateforme"
 openstack token issue >/dev/null 2>&1 && ok "OpenStack répond" \
   || ecart "OpenStack ne répond pas" "lancer ./openstack-lab-trainee/verify.sh et lire la FAQ du lab"
-openstack service show key-manager >/dev/null 2>&1 && ok "Barbican présent" \
-  || info "Barbican absent : l'étape 0 l'ajoute (scénario 04)"
+BARBICAN=0
+openstack service show key-manager >/dev/null 2>&1 && { ok "Barbican présent"; BARBICAN=1; } \
+  || info "Barbican absent : l'étape 0 l'ajoute (scénario 04), puis relancez ce script"
 
 echo; echo "== Ressources communes du déploiement (à ne jamais supprimer)"
 for c in "keypair:mykey" "network:demo-net" "network:public1" "router:demo-router" "image:cirros" "flavor:m1.tiny"; do
@@ -38,7 +39,11 @@ for c in "keypair:mykey" "network:demo-net" "network:public1" "router:demo-route
 done
 
 echo; echo "== Secrets et fichiers"
-zero "secrets tp08-*" "$(nb '"Name": "tp08-' openstack secret list -f json)" "faire le nettoyage du TP 08 (dernière étape de l'énoncé)"
+if [ "$BARBICAN" = 1 ]; then
+  zero "secrets tp08-*" "$(nb '"Name": "tp08-' openstack secret list -f json)" "faire le nettoyage du TP 08 (dernière étape de l'énoncé)"
+else
+  info "secrets tp08-* : non vérifiés tant que Barbican est absent"
+fi
 [ -e ~/tp08-openrc.sh ] && ecart "~/tp08-openrc.sh présent (essai précédent)" "rm -f ~/tp08-openrc.sh (TP 08, nettoyage)" || ok "~/tp08-openrc.sh : absent"
 
 echo; echo "== Restes d'un essai précédent du TP 08"

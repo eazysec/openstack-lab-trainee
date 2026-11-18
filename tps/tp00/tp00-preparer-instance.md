@@ -16,6 +16,13 @@
 
 ## Étape 0. Vérifier les conditions d'entrée
 
+Récupérez le dépôt du lab sur votre poste, dans le dossier où vous rangerez aussi la clé `ec2_key` :
+
+```bash
+# [poste]
+git clone https://github.com/eazysec/openstack-lab-trainee.git
+```
+
 ```bash
 # [poste] : dans le dossier qui contient openstack-lab-trainee/ et ec2_key
 ./openstack-lab-trainee/tps/tp00/verifier-entree.sh <IP_PUBLIQUE>    # sans adresse si l'instance n'existe pas encore
@@ -32,14 +39,16 @@ Si vous créez vous-même l'instance, utilisez ces paramètres (déjà validés)
 
 | Paramètre | Valeur |
 |---|---|
-| Image (AMI) | Ubuntu Server 24.04 LTS |
+| Image (AMI) | Ubuntu Server 24.04 LTS, pas une version plus récente : le lab n'est validé que sur 24.04 |
 | Type | `t2.xlarge` (4 vCPU, 16 Go), ou équivalent ≥ 4 vCPU / 16 Go |
 | Disque | 60 Go |
 | Paire de clés | `ec2_key` |
 | Security Group (entrant) | SSH (22) depuis votre IP uniquement. Port 80 (Horizon) **fermé** : on y accède par un tunnel SSH (TP 02). L'ouvrir, même limité à votre IP, ferait circuler le mot de passe admin en clair |
 
 Avant toute chose, vérifier que l'instance ne peut pas générer de frais de crédits CPU (voir
-[../../aws/finops.md §2](../../aws/finops.md)). Il faut l'AWS CLI configurée sur votre poste :
+[../../aws/finops.md §2](../../aws/finops.md)). Il faut l'AWS CLI configurée sur votre poste, dans la
+région de l'instance. Si vos identifiants sont dans un profil nommé, indiquez-le d'abord :
+`export AWS_PROFILE=<profil> AWS_REGION=<région>`.
 
 ```bash
 # [poste] : dans le dossier qui contient openstack-lab-trainee/

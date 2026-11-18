@@ -23,7 +23,7 @@
 
 Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
 `demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`) et qu'il ne reste rien d'un essai précédent
-(`tp08-`, fichier `~/tp08-openrc.sh`). Si Barbican manque, il le signale : déployez-le ci-dessous.
+(`tp08-`, fichier `~/tp08-openrc.sh`). Si Barbican manque, il le signale : déployez-le ci-dessous, puis relancez le script.
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
 pas `Lab prêt pour le TP 08.`
 

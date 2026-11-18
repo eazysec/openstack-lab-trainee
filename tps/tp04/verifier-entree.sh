@@ -27,8 +27,9 @@ zero() {  # $1 libellé, $2 nombre, $3 remède
 echo "== Plateforme"
 openstack token issue >/dev/null 2>&1 && ok "OpenStack répond" \
   || ecart "OpenStack ne répond pas" "lancer ./openstack-lab-trainee/verify.sh et lire la FAQ du lab"
-openstack service show volumev3 >/dev/null 2>&1 && ok "Cinder présent" \
-  || info "Cinder absent : l'étape 0 l'ajoute (scénario 02)"
+CINDER=0
+openstack service show volumev3 >/dev/null 2>&1 && { ok "Cinder présent"; CINDER=1; } \
+  || info "Cinder absent : l'étape 0 l'ajoute (scénario 02), puis relancez ce script"
 
 echo; echo "== Ressources communes du déploiement (à ne jamais supprimer)"
 for c in "keypair:mykey" "network:demo-net" "network:public1" "router:demo-router" "image:cirros" "flavor:m1.tiny"; do
@@ -40,8 +41,12 @@ done
 echo; echo "== Restes d'un essai précédent du TP 04"
 R="faire le nettoyage du TP 04 (dernière étape de l'énoncé)"
 zero "VM tp04-*" "$(nb '^tp04-' openstack server list --all-projects -f value -c Name)" "$R"
-zero "volumes tp04-*" "$(nb '^tp04-' openstack volume list --all-projects -f value -c Name)" "$R"
-zero "snapshots de volume tp04-*" "$(nb '^tp04-' openstack volume snapshot list --all-projects -f value -c Name)" "$R"
+if [ "$CINDER" = 1 ]; then
+  zero "volumes tp04-*" "$(nb '^tp04-' openstack volume list --all-projects -f value -c Name)" "$R"
+  zero "snapshots de volume tp04-*" "$(nb '^tp04-' openstack volume snapshot list --all-projects -f value -c Name)" "$R"
+else
+  info "volumes et snapshots tp04-* : non vérifiés tant que Cinder est absent"
+fi
 
 echo
 if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 04."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi
