@@ -2,41 +2,63 @@
 
 # Pratiquez la sécurité dès la conception, sur un cloud sur mesure
 
+⭐ Si ce travail vous est utile, pensez à mettre une étoile au dépôt !
+
+## Objectif
+
+L'objectif de ces travaux pratiques est de comprendre comment une architecture se conçoit, se
+construit et se vérifie de façon sûre sur un cloud OpenStack, et d'apprendre à le prouver : chaque
+objectif de sécurité est contrôlé par un accès qui doit réussir et un accès qui doit échouer.
+
 Dans beaucoup d'organisations, un projet franchit plusieurs étapes avant sa mise en production :
-
-- **Conception** : le dossier d'architecture est présenté aux instances d'architecture et de sécurité.
-- **Validation** : les décisions sont prises, les écarts identifiés, les mesures correctives définies.
-- **Implémentation et intégration** : les équipes construisent la solution en respectant les exigences validées.
-- **Vérification** : on contrôle que ce qui a été construit respecte bien ce qui était attendu.
-- **Déploiement** : on contrôle que ce qui a été déployé respecte bien ce qui avait été décidé.
-
-Une question demeure : à quel point êtes-vous sûr de vous à chacune de ces étapes ? Comprenez-vous
-les exigences qu'on vous impose, qu'elles viennent de standards internes ou de textes comme NIS 2,
-DORA ou le RGPD ? Savez-vous repérer les risques en amont ? Pouvez-vous prouver que l'implémentation, l'intégration et le déploiement correspondent à l'architecture validée ?
-
-## Ce que proposent ces travaux pratiques
-
-20+ TP vous font parcourir ces étapes sur un cloud OpenStack sur mesure que vous déployez
-vous-même : de l'instance vide à une architecture segmentée, protégée et publiée, puis décrite en
-code.
-
-- **Concevoir** : partir d'un dossier d'architecture et de ses objectifs de sécurité (TP 13).
-- **Justifier** : chaque choix a sa raison, et chaque TP se termine par des questions et une grille de
-  validation, à faire relire par un tuteur.
-- **Construire et intégrer** : réseaux, security groups, bastion, proxy, secrets, volumes chiffrés, service
-  durci (TP 01 à 13) ; répartition de charge avec Octavia, HTTPS avec un certificat rangé dans Barbican
-  (TP 15).
-- **Vérifier** : chaque objectif se prouve par un accès qui doit réussir et un accès qui doit
-  échouer ; la même architecture, reconstruite en code avec Heat, est comparée à la construction à
-  la main (TP 14).
-- **Déployer** : chaque mode de déploiement a des + et des - (TP 13 et TP 14)
-
-Le but n'est pas de cocher des cases, mais d'apprendre à anticiper les risques, à justifier ses choix
-d'architecture et à vérifier la sécurité de ce qui est réellement construit. C'est pourquoi définir un cadre de référence dans les projets et s'y tenir est nécessaire. On ne subit plus la vague, on l'oriente et l'anticipe. 
+conception (le dossier d'architecture est présenté aux instances d'architecture et de sécurité),
+validation, implémentation et intégration, vérification, puis déploiement. Une question demeure : à
+quel point êtes-vous sûr de vous à chacune de ces étapes ? Comprenez-vous les exigences qu'on vous
+impose, qu'elles viennent de standards internes ou de textes comme NIS 2, DORA ou le RGPD ? Savez-vous
+repérer les risques en amont ? Pouvez-vous prouver que ce qui a été construit et déployé correspond à
+l'architecture validée ?
 
 Ces TP ne remplacent pas une analyse de conformité : ils entraînent aux mesures techniques que ces
 textes attendent, comme le chiffrement, le contrôle des accès, les sauvegardes restaurables ou la
 vérification régulière des mesures de sécurité.
+
+## Une feuille de route progressive
+
+Ce dépôt est construit comme une feuille de route d'apprentissage progressive : il part des bases
+d'OpenStack, sur un cloud que vous déployez vous-même, et avance vers des cas pratiques de sécurité
+dans tout l'écosystème OpenStack, ses services et les applications qu'il héberge. Chaque TP part de
+l'état laissé par le précédent, le vérifie d'abord (`verifier-entree.sh`), et se termine par des
+questions et une grille de validation, à faire relire par un tuteur.
+
+## Les phases de travail
+
+Les 22 TP sont organisés en quatre phases progressives, suivies d'un projet final et de deux TP bonus.
+La liste détaillée est dans [l'index des TP](tps/README.fr.md).
+
+| Phase | Ce que vous faites | TP |
+|---|---|---|
+| 1. Préparer et déployer | Découvrir l'instance AWS, déployer OpenStack et vérifier le déploiement | TP 00 · 01 |
+| 2. Utiliser | Lancer des VM et s'y connecter en SSH, comprendre le réseau Neutron, stocker sur des volumes, revenir en arrière par snapshot, revert ou re-image | TP 02 · 03 · 04 · 04 bis |
+| 3. Exploiter | Lire les journaux, réparer des pannes, gérer projets, rôles et quotas, donner aux automates des identités limitées, retrouver qui a fait quoi | TP 05 · 05 bis · 06 · 06 bis |
+| 4. Étendre | Floating IP publiques, secrets et leur cycle de vie, volumes chiffrés, sauvegardes restaurées, DNS, configuration des VM au démarrage, et leur dépannage | TP 07 à 12 · 08 bis · 12 bis |
+| **Projet final** | Déployer une architecture segmentée et protégée de bout en bout, de son dossier d'architecture à son application publiée, puis administrer sa base sans ouvrir de port | **TP 13 · 13 bis** |
+| Bonus | Reconstruire la même architecture en code avec Heat et la comparer à la construction à la main ; répartir la charge avec Octavia, bascule, HTTPS avec un certificat rangé dans Barbican | TP 14 · 15 |
+
+## La démarche
+
+- **Concevoir** : partir d'un dossier d'architecture et de ses objectifs de sécurité (TP 13).
+- **Justifier** : chaque choix a sa raison, écrite dans les réponses aux questions.
+- **Construire et intégrer** : réseaux, security groups, bastion, proxy, secrets, volumes chiffrés,
+  service durci.
+- **Vérifier** : chaque objectif se prouve par un test, et chaque refus se montre au lieu de se
+  supposer.
+- **Déployer** : chaque mode de déploiement, à la main ou en code, a ses avantages et ses limites
+  (TP 13 et TP 14).
+
+Le but n'est pas de cocher des cases, mais d'apprendre à anticiper les risques, à justifier ses choix
+d'architecture et à vérifier la sécurité de ce qui est réellement construit. C'est pourquoi définir un
+cadre de référence dans les projets et s'y tenir est nécessaire. On ne subit plus la vague, on
+l'oriente et l'anticipe.
 
 ## Ce qu'il faut savoir avant de commencer
 
@@ -59,8 +81,10 @@ passage mon « assistant invisible », qui m'a fait gagner beaucoup de temps pou
 ## Contribuer
 
 Une erreur, une explication à améliorer, un exercice à proposer ? Ouvrez une *issue* ou proposez une
-*pull request* : les contributions et les retours d'expérience sont les bienvenus. Si ces ressources
-vous sont utiles, une étoile au dépôt sur GitHub m'encourage à continuer à les enrichir.
+*pull request* : les contributions et les retours d'expérience sont les bienvenus.
+
+⭐ Si ces ressources vous sont utiles, une étoile au dépôt sur GitHub m'encourage à continuer à les
+enrichir.
 
 La sécurité se conçoit dès le départ, se vérifie à la construction et se cultive collectivement.
 

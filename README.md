@@ -5,41 +5,59 @@
 > The hands-on labs (TP, *travaux pratiques*) and the other documents of this repository are written
 > in French. This README and the [lab index](tps/README.md) are available in English.
 
-In many organisations, a project goes through several stages before it reaches production:
+⭐ If you find this work useful, consider starring the repository!
 
-- **Design**: the architecture file is presented to the architecture and security boards.
-- **Approval**: decisions are made, gaps identified, corrective measures defined.
-- **Implementation and integration**: teams build the solution according to the approved requirements.
-- **Verification**: you check that what was built matches what was expected.
-- **Deployment**: you check that what was deployed matches what was decided.
+## Objective
 
-One question remains: how confident are you at each of these stages? Do you understand the
-requirements you are given, whether they come from internal standards or from regulations such as
-NIS 2, DORA or the GDPR? Can you spot risks early? Can you prove that the implementation, the
-integration and the deployment match the approved architecture?
+The objective of these labs is to understand how an architecture is designed, built and verified
+securely on an OpenStack cloud, and to learn to prove it: every security objective is checked by an
+access that must succeed and an access that must fail.
 
-## What these labs offer
+In many organisations, a project goes through several stages before it reaches production: design
+(the architecture file is reviewed by the architecture and security boards), approval, implementation
+and integration, verification, then deployment. One question remains: how confident are you at each
+of these stages? Do you understand the requirements you are given, whether they come from internal
+standards or from regulations such as NIS 2, DORA or the GDPR? Can you spot risks early? Can you prove
+that what was built and deployed matches the approved architecture?
 
-20+ labs take you through these stages on an OpenStack cloud that you deploy yourself: from an empty
-instance to a segmented, protected and published architecture, then described as code.
+These labs do not replace a compliance analysis: they train you in the technical measures that these
+regulations expect, such as encryption, access control, restorable backups or regular verification of
+security measures.
+
+## A progressive learning roadmap
+
+This repository is structured as a progressive learning roadmap: it starts with OpenStack fundamentals
+on a cloud that you deploy yourself, and advances toward practical security use cases across the
+OpenStack ecosystem, its services and the applications it hosts. Each lab starts from the state left
+by the previous one, checks it first (`verifier-entree.sh`), and ends with questions and a validation
+grid, to be reviewed by a tutor.
+
+## Work phases
+
+The 22 labs are organised into four progressive phases, followed by a final capstone project and two
+bonus labs. The detailed list is in the [lab index](tps/README.md).
+
+| Phase | What you do | Labs |
+|---|---|---|
+| 1. Prepare and deploy | Discover the AWS instance, deploy OpenStack and verify the deployment | TP 00 · 01 |
+| 2. Use | Launch VMs and connect to them over SSH, understand Neutron networking, store data on volumes, go back with snapshots, revert or re-image | TP 02 · 03 · 04 · 04 bis |
+| 3. Operate | Read the logs, repair failures, manage projects, roles and quotas, give automated processes limited identities, find out who did what | TP 05 · 05 bis · 06 · 06 bis |
+| 4. Extend | Public floating IPs, secrets and their life cycle, encrypted volumes, restored backups, DNS, VM configuration at boot, and troubleshooting | TP 07 to 12 · 08 bis · 12 bis |
+| **Capstone project** | Deploy a segmented and protected architecture end to end, from its architecture file to its published application, then administer its database without opening a port | **TP 13 · 13 bis** |
+| Bonus | Rebuild the same architecture as code with Heat and compare it with the manual build; load balancing with Octavia, failover, HTTPS with a certificate stored in Barbican | TP 14 · 15 |
+
+## Approach
 
 - **Design**: start from an architecture file and its security objectives (TP 13).
-- **Justify**: every choice has a reason, and every lab ends with questions and a validation grid,
-  to be reviewed by a tutor.
+- **Justify**: every choice has a reason, written in the answers to the questions.
 - **Build and integrate**: networks, security groups, bastion, proxy, secrets, encrypted volumes,
-  hardened service (TP 01 to 13); load balancing with Octavia, HTTPS with a certificate stored in
-  Barbican (TP 15).
-- **Verify**: every objective is proven by an access that must succeed and an access that must fail;
-  the same architecture, rebuilt as code with Heat, is compared with the manual build (TP 14).
-- **Deploy**: each deployment method has its pros and cons (TP 13 and TP 14).
+  hardened service.
+- **Verify**: every objective is proven by a test, and each refusal is shown, not assumed.
+- **Deploy**: each deployment method, by hand or as code, has its pros and cons (TP 13 and TP 14).
 
 The goal is not to tick boxes, but to learn to anticipate risks, to justify architecture choices and
 to verify the security of what is actually built. That is why projects need a reference framework,
 and need to stick to it. You no longer endure the wave: you steer it and see it coming.
-
-These labs do not replace a compliance analysis: they train you in the technical measures that these
-regulations expect, such as encryption, access control, restorable backups or regular verification
-of security measures.
 
 ## Before you start
 
@@ -62,8 +80,9 @@ That observation is what made me want to create these labs and share them. I als
 ## Contributing
 
 A mistake, an explanation to improve, an exercise to suggest? Open an *issue* or submit a *pull
-request*: contributions and feedback are welcome. If these resources are useful to you, a star on
-GitHub encourages me to keep improving them.
+request*: contributions and feedback are welcome.
+
+⭐ If these resources are useful to you, a star on GitHub encourages me to keep improving them.
 
 Security is designed from the start, verified during the build and grown collectively.
 
