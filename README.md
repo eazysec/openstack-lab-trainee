@@ -5,7 +5,9 @@
 > The hands-on labs (TP, *travaux pratiques*) and the other documents of this repository are written
 > in French. This README and the [lab index](tps/README.md) are available in English.
 
-⭐ If you find this work useful, consider starring the repository!
+⭐ If you find this work useful, consider starring the repository! A mistake, an explanation to
+improve, an exercise to suggest? Open an *issue* or submit a *pull request*: contributions and feedback
+are welcome.
 
 ## Objective
 
@@ -76,13 +78,6 @@ experience and of a security culture.
 
 That observation is what made me want to create these labs and share them. I also thank my
 "invisible assistant", who saved me a lot of time in building them.
-
-## Contributing
-
-A mistake, an explanation to improve, an exercise to suggest? Open an *issue* or submit a *pull
-request*: contributions and feedback are welcome.
-
-⭐ If these resources are useful to you, a star on GitHub encourages me to keep improving them.
 
 Security is designed from the start, verified during the build and grown collectively.
 

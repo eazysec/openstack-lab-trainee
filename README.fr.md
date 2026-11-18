@@ -2,7 +2,9 @@
 
 # Pratiquez la sécurité dès la conception, sur un cloud sur mesure
 
-⭐ Si ce travail vous est utile, pensez à mettre une étoile au dépôt !
+⭐ Si ce travail vous est utile, pensez à mettre une étoile au dépôt ! Une erreur, une explication à
+améliorer, un exercice à proposer ? Ouvrez une *issue* ou proposez une *pull request* : les
+contributions et les retours d'expérience sont les bienvenus.
 
 ## Objectif
 
@@ -77,14 +79,6 @@ techniques, mais souvent par manque d'expérience et de culture de la sécurité
 
 C'est ce constat qui m'a donné envie de créer ces travaux pratiques et de les partager. Je remercie au
 passage mon « assistant invisible », qui m'a fait gagner beaucoup de temps pour les construire.
-
-## Contribuer
-
-Une erreur, une explication à améliorer, un exercice à proposer ? Ouvrez une *issue* ou proposez une
-*pull request* : les contributions et les retours d'expérience sont les bienvenus.
-
-⭐ Si ces ressources vous sont utiles, une étoile au dépôt sur GitHub m'encourage à continuer à les
-enrichir.
 
 La sécurité se conçoit dès le départ, se vérifie à la construction et se cultive collectivement.
 
