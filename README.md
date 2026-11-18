@@ -78,8 +78,7 @@ Throughout my career, I have come across practices that puzzled me, including fr
 very experienced, people. Not necessarily for lack of technical skills, but often for lack of
 experience and of a security culture.
 
-That observation is what made me want to create these labs and share them. I also thank my
-"invisible assistant", who saved me a lot of time in building them.
+That observation is what made me want to create these labs and share them.
 
 Security is designed from the start, verified during the build and grown collectively.
 

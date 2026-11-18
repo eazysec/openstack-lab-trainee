@@ -79,8 +79,7 @@ Au fil de mon expérience, j'ai rencontré des pratiques qui m'ont interpellé, 
 personnes expérimentées, voire très expérimentées. Pas forcément par manque de compétences
 techniques, mais souvent par manque d'expérience et de culture de la sécurité.
 
-C'est ce constat qui m'a donné envie de créer ces travaux pratiques et de les partager. Je remercie au
-passage mon « assistant invisible », qui m'a fait gagner beaucoup de temps pour les construire.
+C'est ce constat qui m'a donné envie de créer ces travaux pratiques et de les partager.
 
 La sécurité se conçoit dès le départ, se vérifie à la construction et se cultive collectivement.
 
