@@ -87,6 +87,7 @@ matériel », puis relevez-les de nouveau :
 # [instance]
 D=$(openstack server show tp12b-vm-demo -f value -c OS-EXT-SRV-ATTR:instance_name)
 sudo docker exec nova_libvirt virsh dumpxml "$D" | grep "<input"   # tablette USB, souris PS/2, clavier PS/2
+ssh debian@"$FIP" sync                                             # écrire sur le disque ce qui est encore en mémoire
 openstack server reboot --hard --wait tp12b-vm-demo
 sudo docker exec nova_libvirt virsh dumpxml "$D" | grep "<input"   # un clavier USB en plus
 until ssh -o BatchMode=yes debian@"$FIP" true 2>/dev/null; do sleep 5; done
@@ -96,6 +97,10 @@ until ssh -o BatchMode=yes debian@"$FIP" true 2>/dev/null; do sleep 5; done
 reconstruit sa définition, puis le relance ; l'instance AWS, elle, ne redémarre pas. Un redémarrage
 logiciel (`openstack server reboot` sans `--hard`) demande seulement au système de la VM de
 redémarrer, sans toucher à son matériel virtuel.
+
+Pour le système de la VM, un redémarrage matériel est une coupure de courant : ce qu'il n'a pas encore
+écrit sur le disque est perdu. Juste après le premier démarrage, ce sont par exemple les clés d'hôte SSH,
+créées par cloud-init : sans `sync`, elles peuvent se retrouver vides, et le serveur SSH ne démarre plus.
 
 Rechargez la page de la console, attendez l'invite, cliquez dans l'écran et tapez de nouveau quelques
 lettres : cette fois, rien ne s'affiche. Deux constats encore, lus dans la VM sans `sudo` :
