@@ -144,6 +144,12 @@ Prerequisites: fresh Ubuntu 24.04 instance, ≥ 8 GB RAM (16 recommended), ≥ 2
 ≥ 40 GB of disk (60 recommended: ~30 GB used with scenario 04), a user with passwordless `sudo`
 (`ubuntu` on EC2), Internet access.
 
+> **OpenStack version.** The platform deploys OpenStack 2025.1 (Epoxy). This series has no longer been
+> maintained by the OpenStack project since autumn 2026: no more official fixes, including security
+> fixes, and its container images are no longer rebuilt. The deployment works (checked on 18/11/2026),
+> but the series will be removed at its end of life, on a date not yet announced. The move to 2026.1
+> (Gazpacho) is being prepared.
+
 ```bash
 # From your workstation: check that no CPU credit charge is possible (see aws/finops.md)
 ./openstack-lab-trainee/aws/check-cpu-credits.sh <INSTANCE_ID>
@@ -175,7 +181,8 @@ Parameters are set in the scenario file, or as environment variables:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `OPENSTACK_RELEASE` | `2025.1` | Kolla-Ansible branch / image version |
+| `OPENSTACK_RELEASE` | `2025.1` | OpenStack series: image and version constraints |
+| `KOLLA_ANSIBLE_REF` | `unmaintained/2025.1` | Kolla-Ansible branch: `stable/<series>` while the series is maintained, `unmaintained/<series>` afterwards (the `stable/` branch is then deleted) |
 | `WORKDIR` | `~/kolla` | venv, inventory, logs |
 | `MGMT_IF` / `MGMT_IP` | detected from the default route | Interface/IP of the APIs |
 | `EXT_CIDR` / `EXT_GW` | `10.0.2.0/24` / `10.0.2.1` | Neutron external network |
@@ -392,7 +399,7 @@ Internet goes through scenario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
 
 | Choice | Why |
 |---|---|
-| Kolla-Ansible `stable/2025.1` + upper-constraints | Pinned versions: reproducible deployment |
+| Kolla-Ansible `unmaintained/2025.1` + upper-constraints | Versions pinned by the constraints: reproducible deployment. The 2025.1 series is no longer maintained: its `stable/2025.1` branch was deleted, hence `unmaintained/2025.1` |
 | `set -Eeuo pipefail` + trap showing the failing line | Stops at the first error, with the log |
 | One script + scenario files | A single logic to maintain; variants differ only by their parameters |
 | `enable_loadbalancer: "no"` (+ haproxy/keepalived/proxysql set to `no`) | Since 2024.2 this variable disables the load balancer. Otherwise ProxySQL takes port 3306 and MariaDB does not start |
@@ -445,7 +452,7 @@ Limits and ideas on the OpenStack side:
   with ≥ 32 GB.
 - MariaDB backup: `enable_mariabackup: "yes"`, then `kolla-ansible mariadb_backup`.
 - More useful images (Ubuntu cloud image) and suitable quotas.
-- Upgrade: change `OPENSTACK_RELEASE` and follow `kolla-ansible upgrade` (one release at a time).
+- Upgrade: change `OPENSTACK_RELEASE` and `KOLLA_ANSIBLE_REF`, and follow `kolla-ansible upgrade` (one release at a time).
 - Automated deployment when the instance is created (cloud-init *user-data*, Terraform).
 
 ---

@@ -17,7 +17,10 @@ source "$SCENARIO_FILE"
 
 # ----------------------------------------------------------------- CONFIG ----
 # Valeurs par défaut ; un fichier de scénario ou l'environnement peut les surcharger.
-OPENSTACK_RELEASE="${OPENSTACK_RELEASE:-2025.1}"   # branche stable Kolla-Ansible
+OPENSTACK_RELEASE="${OPENSTACK_RELEASE:-2025.1}"   # série OpenStack : images et contraintes de versions
+# Branche Kolla-Ansible : stable/<série> tant que la série est maintenue, puis unmaintained/<série>
+# (la branche stable/ est supprimée quand la série passe en « Unmaintained »)
+KOLLA_ANSIBLE_REF="${KOLLA_ANSIBLE_REF:-unmaintained/2025.1}"
 WORKDIR="${WORKDIR:-$HOME/kolla}"                   # venv + inventaire + logs
 VENV="$WORKDIR/venv"
 INVENTORY="$WORKDIR/all-in-one"
@@ -78,7 +81,7 @@ if [[ "$ENABLE_CINDER" == "yes" && -n "$CINDER_DEVICE" ]]; then
     die "$CINDER_DEVICE contient déjà des données (blkid) : refus de l'écraser."
   fi
 fi
-echo "Interface mgmt : $MGMT_IF ($MGMT_IP) | virt_type : $VIRT_TYPE | release : $OPENSTACK_RELEASE"
+echo "Interface mgmt : $MGMT_IF ($MGMT_IP) | virt_type : $VIRT_TYPE | release : $OPENSTACK_RELEASE ($KOLLA_ANSIBLE_REF)"
 echo "Cinder : $ENABLE_CINDER ${CINDER_DEVICE:-(fichier loop $CINDER_LOOP_FILE)} | Heat : $ENABLE_HEAT | Octavia : $ENABLE_OCTAVIA | Barbican : $ENABLE_BARBICAN | Designate : $ENABLE_DESIGNATE | Sauvegarde (S3) : $ENABLE_LAB_BACKUP"
 if [[ "$ENABLE_BARBICAN$ENABLE_DESIGNATE" == *yes* ]] && (( mem_gb < 15 )); then
   echo "ATTENTION: Barbican/Designate ajoutent ~1 à 2 Go de RAM ; 16 Go recommandés (détecté: ${mem_gb} Go)."
@@ -204,12 +207,12 @@ EOF
 fi
 
 # ------------------------------------------------------------ KOLLA-ANSIBLE --
-log "Installation de Kolla-Ansible stable/$OPENSTACK_RELEASE dans $VENV"
+log "Installation de Kolla-Ansible $KOLLA_ANSIBLE_REF dans $VENV"
 [[ -d "$VENV" ]] || python3 -m venv "$VENV"
 # shellcheck disable=SC1091
 source "$VENV/bin/activate"
 pip install -q -U pip
-pip install -q "git+https://opendev.org/openstack/kolla-ansible@stable/$OPENSTACK_RELEASE"
+pip install -q "git+https://opendev.org/openstack/kolla-ansible@$KOLLA_ANSIBLE_REF"
 pip install -q docker dbus-python python-openstackclient python-barbicanclient python-designateclient \
     -c "https://releases.openstack.org/constraints/upper/$OPENSTACK_RELEASE"
 # Client de Heat (commandes « openstack stack … ») : seulement si le service est activé

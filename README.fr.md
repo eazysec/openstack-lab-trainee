@@ -140,6 +140,12 @@ Prérequis : instance Ubuntu 24.04 neuve, ≥ 8 Go RAM (16 recommandés), ≥ 2 
 ≥ 40 Go de disque (60 recommandés : ~30 Go occupés en scénario 04), utilisateur avec `sudo` sans mot
 de passe (`ubuntu` sur EC2), accès Internet.
 
+> **Version d'OpenStack.** Le lab déploie OpenStack 2025.1 (Epoxy). Cette série n'est plus maintenue
+> par le projet OpenStack depuis l'automne 2026 : plus de correctifs officiels, ni de sécurité, et ses
+> images de conteneurs ne sont plus reconstruites. Le déploiement fonctionne (vérifié le 18/11/2026),
+> mais la série sera retirée à sa fin de vie, à une date non annoncée. Le passage à 2026.1 (Gazpacho)
+> est en préparation.
+
 ```bash
 # Depuis votre poste : vérifier qu'aucun frais de crédits CPU n'est possible (voir aws/finops.md)
 ./openstack-lab-trainee/aws/check-cpu-credits.sh <INSTANCE_ID>
@@ -168,7 +174,8 @@ Les paramètres se règlent dans le fichier de scénario, ou en variable d'envir
 
 | Variable | Défaut | Rôle |
 |---|---|---|
-| `OPENSTACK_RELEASE` | `2025.1` | Branche Kolla-Ansible / version des images |
+| `OPENSTACK_RELEASE` | `2025.1` | Série OpenStack : version des images et des contraintes de versions |
+| `KOLLA_ANSIBLE_REF` | `unmaintained/2025.1` | Branche Kolla-Ansible : `stable/<série>` tant que la série est maintenue, `unmaintained/<série>` ensuite (la branche `stable/` est alors supprimée) |
 | `WORKDIR` | `~/kolla` | venv, inventaire, logs |
 | `MGMT_IF` / `MGMT_IP` | détectés via la route par défaut | Interface/IP des API |
 | `EXT_CIDR` / `EXT_GW` | `10.0.2.0/24` / `10.0.2.1` | Réseau externe Neutron |
@@ -381,7 +388,7 @@ scénario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
 
 | Choix | Pourquoi |
 |---|---|
-| Kolla-Ansible `stable/2025.1` + upper-constraints | Versions figées : déploiement reproductible |
+| Kolla-Ansible `unmaintained/2025.1` + upper-constraints | Versions figées par les contraintes : déploiement reproductible. La série 2025.1 n'est plus maintenue : sa branche `stable/2025.1` a été supprimée, d'où `unmaintained/2025.1` |
 | `set -Eeuo pipefail` + trap affichant la ligne en erreur | Arrêt à la première erreur, avec le log |
 | Un script + des fichiers de scénario | Une seule logique à maintenir ; les variantes ne diffèrent que par leurs paramètres |
 | `enable_loadbalancer: "no"` (+ haproxy/keepalived/proxysql à `no`) | Depuis 2024.2 c'est cette variable qui désactive le load balancer. Sinon ProxySQL prend le port 3306 et MariaDB ne démarre pas |
@@ -431,7 +438,7 @@ Limites et pistes côté OpenStack :
 - Supervision (`enable_prometheus`, `enable_grafana`) et logs centralisés (`enable_central_logging`) si ≥ 32 Go.
 - Sauvegarde de MariaDB : `enable_mariabackup: "yes"`, puis `kolla-ansible mariadb_backup`.
 - Images plus utiles (image cloud Ubuntu) et quotas adaptés.
-- Mise à jour : changer `OPENSTACK_RELEASE` et suivre `kolla-ansible upgrade` (une version à la fois).
+- Mise à jour : changer `OPENSTACK_RELEASE` et `KOLLA_ANSIBLE_REF`, et suivre `kolla-ansible upgrade` (une version à la fois).
 - Déploiement automatisé à la création de l'instance (*user-data* cloud-init, Terraform).
 
 ---
