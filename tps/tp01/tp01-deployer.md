@@ -23,7 +23,7 @@ ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp01/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 01."
+./openstack-lab-trainee/tps/tp01/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 01."
 ```
 
 Ce script ne modifie rien. Il vérifie que l'instance convient au lab (Ubuntu 24.04, mémoire,
@@ -75,6 +75,8 @@ openstack service list                                     # les services enregi
 openstack endpoint list -c "Service Name" -c Interface -c URL
 openstack compute service list                             # les services de Nova
 openstack network agent list                               # les agents de Neutron
+grep '^openstack_release' /etc/kolla/globals.yml           # la série d'OpenStack déployée
+pip show kolla-ansible | grep '^Version'                   # la version de l'outil de déploiement
 ```
 
 ## Questions
@@ -84,17 +86,19 @@ openstack network agent list                               # les agents de Neutr
 3. Dans `globals.yml`, que valent `network_interface`, `neutron_external_interface` et
    `nova_compute_virt_type` ? Expliquez chacune de ces valeurs.
 4. `deploy.sh` est « idempotent ». Que signifie ce mot ? Pourquoi est-ce utile ?
+5. Quelle série d'OpenStack est déployée ? D'après <https://releases.openstack.org/>, est-elle encore
+   maintenue, et jusqu'à quand ? Pourquoi cette question compte-t-elle pour un cloud en production ?
 
 ## Validation
 
 - [ ] `verify.sh` : 0 échoué.
-- [ ] Les 4 questions ont une réponse argumentée.
+- [ ] Les 5 questions ont une réponse argumentée.
 
 ## Sources
 
-- Kolla-Ansible 2025.1 : <https://docs.openstack.org/kolla-ansible/2025.1/>
-- Installation rapide Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/user/quickstart.html>
+- Kolla-Ansible 2026.1 : <https://docs.openstack.org/kolla-ansible/2026.1/>
+- Installation rapide Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2026.1/user/quickstart.html>
 - Versions OpenStack : <https://releases.openstack.org/>
-- Keystone (identité et catalogue) : <https://docs.openstack.org/keystone/2025.1/>
-- Dépannage Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/user/troubleshooting.html>
+- Keystone (identité et catalogue) : <https://docs.openstack.org/keystone/2026.1/>
+- Dépannage Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2026.1/user/troubleshooting.html>
 - Toutes les sources du parcours : [sources.md](../sources.md)

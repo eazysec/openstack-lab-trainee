@@ -81,18 +81,20 @@ source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh
 ```bash
 # [instance]
 cd ~/openstack-lab-trainee && ./verify.sh | tail -1        # "Résultat : 42 réussis, 0 échoués"
-./tps/tp13/verifier-entree.sh                              # dernière ligne : "Lab prêt pour le TP 13."
+./tps/tp13/verify-entry.sh                              # dernière ligne : "Lab prêt pour le TP 13."
 ```
 
-`verifier-entree.sh` ne modifie rien. Il contrôle :
+`verify-entry.sh` ne modifie rien. Il contrôle :
 
 | Condition | Pourquoi | Si elle n'est pas remplie |
 |---|---|---|
 | OpenStack répond ; Cinder et Barbican présents | volume chiffré et secret de la base (étape 9) | déployer le scénario 04 (TP 08, étape 0) |
+| `virt_type = qemu` dans `nova.conf` (ou `kvm` si `/dev/kvm` existe) | sinon aucune VM ne démarre | TP 02, étape 7, partie C |
 | Image `debian13` et gabarit `m1.1g` présents | les deux VM les utilisent | étape 0 du TP 12 |
 | `jq` et `nc` présents sur l'hôte | commandes des étapes 3, 11 et 12 | les installer (`apt-get`) |
 | Aucune ressource `tp13` ni `ht-tp13`, FIP `10.0.2.150` libre | les noms, les adresses et la FIP sont fixes | étape 16 de l'essai précédent (ou étape 10 du TP 14) |
 | Hôte sans route `192.168.121.0/24`, règle FORWARD `tp13`, configuration chrony du TP ni Squid | les étapes 3 et 4 les mettent en place | étape 16 de l'essai précédent |
+| 5 Go libres au moins sur `/` | place prise par le TP, avec une marge | libérer de la place (`sudo docker image prune -f` supprime les images sans étiquette ; `sudo docker system df` montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00) |
 
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
 pas `Lab prêt pour le TP 13.`
@@ -397,7 +399,11 @@ openstack server create --image debian13 --flavor m1.1g --key-name tp13-keypair-
   --property role=db --tag tp13 tp13-vm-bdd-demo
 ```
 
-Attendez environ 5 minutes, puis lisez la fin de la console :
+Attendez que la VM ait fini de démarrer et de se configurer : elle a lu ses métadonnées et installé
+votre clé SSH. Sans KVM, cela prend environ 5 minutes (mesuré : 4 à 6). Ne lancez pas la VM web avant :
+deux VM qui démarrent ensemble mettent deux fois plus de temps, et l'une d'elles peut rester bloquée. Lisez la fin de la console ; tant que la ligne de
+fin de cloud-init n'y est pas (en 2026.1 : `Cloud-init v. … finished at …`), relancez la commande une
+minute plus tard :
 
 ```bash
 # [instance]
@@ -528,6 +534,8 @@ ip -4 route show 10.0.2.1                    # la route est revenue
 
 Attendu : en alternance, `ens3 In … 10.0.2.1.<port> > 192.168.121.11.22: Flags [S]` et
 `ens4 Out … ARP (0x0806) … Request who-has 192.168.120.1 tell 192.168.121.11`. Expliquez (question 5).
+Si vous refaites l'exercice après l'étape 11, vous verrez peut-être plutôt `ens4 Out … Flags [S.]`
+sans requête ARP : la VM connaît déjà sa passerelle. La réponse attendue est la même.
 
 ## Étape 9. La VM bdd : volume chiffré, secret, PostgreSQL
 
@@ -901,6 +909,10 @@ Conservez l'image `debian13` et le gabarit `m1.1g`.
 11. À l'étape 7, une VM qui ne peut pas joindre le service de métadonnées démarre-t-elle ? Que lui
     manque-t-il ? La règle ajoutée vise une seule adresse et un seul port : pourquoi pas toute la plage
     `169.254.0.0/16`, ni le port 443 ? Comment appelle-t-on les adresses de cette plage ?
+12. Depuis l'instance, regardez les en-têtes que renvoie le site : `curl -sI http://<FIP>/`. Lequel
+    annonce le logiciel du serveur ? Pourquoi la bonne pratique est-elle de ne publier ni ce logiciel,
+    ni sa version, ni celle d'OpenStack ? Pourquoi cela ne suffit-il pas à protéger le service ? Où
+    faudrait-il le retirer dans cette architecture ?
 
 ## Validation
 
@@ -919,10 +931,10 @@ Conservez l'image `debian13` et le gabarit `m1.1g`.
 
 ## Sources
 
-- Neutron, routeurs et SNAT : <https://docs.openstack.org/neutron/2025.1/admin/intro-os-networking.html>
+- Neutron, routeurs et SNAT : <https://docs.openstack.org/neutron/2026.1/admin/intro-os-networking.html>
 - Client `openstack`, règles de security group : <https://docs.openstack.org/python-openstackclient/latest/cli/command-objects/security-group-rule.html>
-- Nova, service de métadonnées : <https://docs.openstack.org/nova/2025.1/user/metadata.html>
-- Cinder, volumes chiffrés : <https://docs.openstack.org/cinder/2025.1/configuration/block-storage/volume-encryption.html>
+- Nova, service de métadonnées : <https://docs.openstack.org/nova/2026.1/user/metadata.html>
+- Cinder, volumes chiffrés : <https://docs.openstack.org/cinder/2026.1/configuration/block-storage/volume-encryption.html>
 - Barbican, secrets : <https://docs.openstack.org/python-barbicanclient/latest/cli/usage.html>
 - cloud-init, gabarits Jinja : <https://cloudinit.readthedocs.io/en/latest/explanation/instancedata.html>
 - Netplan, routage par source (`routing-policy`) : <https://netplan.readthedocs.io/en/stable/netplan-yaml/>

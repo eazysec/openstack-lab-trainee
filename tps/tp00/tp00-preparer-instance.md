@@ -25,7 +25,7 @@ git clone https://github.com/eazysec/openstack-lab-trainee.git
 
 ```bash
 # [poste] : dans le dossier qui contient openstack-lab-trainee/ et ec2_key
-./openstack-lab-trainee/tps/tp00/verifier-entree.sh <IP_PUBLIQUE>    # sans adresse si l'instance n'existe pas encore
+./openstack-lab-trainee/tps/tp00/verify-entry.sh <IP_PUBLIQUE>    # sans adresse si l'instance n'existe pas encore
 ```
 
 Ce script ne modifie rien. Il vérifie que votre poste a un client SSH et l'AWS CLI, que la clé

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  verifier-entree.sh : le lab est-il prêt pour le TP 05 bis ? [instance]
+#  verify-entry.sh : le lab est-il prêt pour le TP 02 ? [instance]
 #  Lecture seule : ne crée, ne modifie et ne supprime rien.
 #
-#  Usage : ./openstack-lab-trainee/tps/tp05-bis/verifier-entree.sh
+#  Usage : ./openstack-lab-trainee/tps/tp02/verify-entry.sh
 #  Code retour : 0 si toutes les conditions d'entrée sont remplies, 1 sinon.
 #  Chaque écart est suivi de ce qu'il faut faire. Une commande en échec (API injoignable,
 #  sudo refusé) est un écart, jamais un « rien à signaler ».
@@ -35,13 +35,23 @@ for c in "keypair:mykey" "network:demo-net" "network:public1" "router:demo-route
     || ecart "$t $n absent" "relancer deploy.sh avec le scénario en place : il recrée les ressources communes (TP 01)"
 done
 
-echo; echo "== Restes d'un essai précédent du TP 05 bis"
-R="faire le nettoyage du TP 05 bis (étape 7) : la VM et le réseau d'abord, puis l'utilisateur et le projet"
-zero "VM tp05b-* (tous projets)" "$(nb '^tp05b-' openstack server list --all-projects -f value -c Name)" "$R ; une VM d'un projet supprimé se supprime par son ID (openstack server list --all-projects)"
-zero "réseaux tp05b-*" "$(nb '^tp05b-' openstack network list -f value -c Name)" "$R"
-zero "projets tp05b-*" "$(nb '^tp05b-' openstack project list -f value -c Name)" "$R"
-zero "utilisateurs tp05b-*" "$(nb '^tp05b-' openstack user list -f value -c Name)" "$R"
+echo; echo "== Accès aux VM depuis l'instance"
+[ -f ~/.ssh/id_ecdsa ] && ok "clé privée ~/.ssh/id_ecdsa (celle de mykey) présente" \
+  || ecart "clé ~/.ssh/id_ecdsa absente : les VM CirrOS ne seront pas joignables en SSH" "relancer deploy.sh (TP 01) ou la restaurer"
+F=$(openstack floating ip list --status DOWN -f value -c "Floating IP Address" 2>/dev/null) || F=erreur
+[ -z "$F" ] && ok "aucune floating IP allouée sans être utilisée" || ecart "floating IP non utilisées : $(echo $F)" "les libérer (openstack floating ip delete <adresse>)"
+
+echo; echo "== Restes d'un essai précédent du TP 02"
+R="faire le nettoyage du TP 02 (dernière étape de l'énoncé)"
+zero "VM tp02-*" "$(nb '^tp02-' openstack server list --all-projects -f value -c Name)" "$R"
+zero "paires de clés tp02-*" "$(nb '^tp02-' openstack keypair list -f value -c Name)" "$R"
+
+echo; echo "== Disque"
+BESOIN=5   # Go libres demandés pour le TP 02
+LIBRE=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
+if [ "$LIBRE" -ge "$BESOIN" ]; then ok "place libre sur / : $LIBRE Go ($BESOIN Go demandés)"
+else ecart "place libre sur / : $LIBRE Go, $BESOIN Go demandés" "libérer de la place (sudo docker image prune -f supprime les images sans étiquette ; sudo docker system df montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00)"; fi
 
 echo
-if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 05 bis."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi
+if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 02."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi
 [ "$ECARTS" -eq 0 ]

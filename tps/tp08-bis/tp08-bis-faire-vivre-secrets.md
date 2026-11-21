@@ -21,10 +21,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp08-bis/verifier-entree.sh    # dernière ligne : "Lab prêt pour le TP 08 bis."
+./openstack-lab-trainee/tps/tp08-bis/verify-entry.sh    # dernière ligne : "Lab prêt pour le TP 08 bis."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que Barbican est déployé et qu'il ne
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que Barbican est déployé et qu'il ne
 reste rien d'un essai précédent (projets et utilisateurs `tp08b-`). Chaque écart est affiché avec ce
 qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est pas `Lab prêt pour le TP 08 bis.`
 
@@ -247,7 +248,7 @@ en app openstack secret delete $H
 openstack user delete tp08b-user-app tp08b-user-collegue tp08b-user-membre tp08b-user-externe
 openstack project delete tp08b-proj tp08b-proj-autre
 unset -f en; unset MDP H H2 HV HE HU K E M X C
-./openstack-lab-trainee/tps/tp08-bis/verifier-entree.sh | tail -1    # "Lab prêt pour le TP 08 bis."
+./openstack-lab-trainee/tps/tp08-bis/verify-entry.sh | tail -1    # "Lab prêt pour le TP 08 bis."
 ```
 
 ## Questions
@@ -278,7 +279,7 @@ unset -f en; unset MDP H H2 HV HE HU K E M X C
 
 ## Sources
 
-- Barbican : <https://docs.openstack.org/barbican/2025.1/>
+- Barbican : <https://docs.openstack.org/barbican/2026.1/>
 - Guide de l'API : secrets <https://docs.openstack.org/api-guide/key-manager/secrets.html>,
   ACL <https://docs.openstack.org/api-guide/key-manager/acls.html>,
   conteneurs <https://docs.openstack.org/api-guide/key-manager/containers.html>

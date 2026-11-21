@@ -29,7 +29,7 @@ if [[ -x "$WORKDIR/venv/bin/kolla-ansible" ]]; then
 fi
 # kolla-ansible destroy oublie les volumes des conteneurs d'initialisation :
 # on supprime ceux qui portent un nom Kolla et qu'aucun conteneur n'utilise.
-KOLLA_VOL_RE='^(bootstrap_|create_cell|nova_|neutron|horizon|keystone|glance|placement|cinder|heat|barbican|designate|mariadb|rabbitmq|kolla_)'
+KOLLA_VOL_RE='^(bootstrap_|create_cell|nova_|neutron|horizon|keystone|glance|placement|cinder|heat|barbican|designate|octavia|mariadb|rabbitmq|kolla_)'
 for v in $(sudo docker volume ls -q -f dangling=true 2>/dev/null | grep -E "$KOLLA_VOL_RE" || true); do
   sudo docker volume rm "$v" >/dev/null && echo "volume supprimé : $v"
 done
@@ -51,6 +51,10 @@ if [[ "${1:-}" == "--purge" ]]; then
   sudo /usr/local/sbin/openstack-lab-net.sh 2>/dev/null || true   # retire les IP secondaires
   sudo systemctl disable --now openstack-lab-net.service 2>/dev/null || true
   sudo ip link del veth-ext 2>/dev/null || true
+  # Octavia (TP 15, scénario 04 avec ENABLE_OCTAVIA=yes) : interface de gestion o-hm0 et son unité
+  sudo systemctl disable --now octavia-interface.service 2>/dev/null || true
+  sudo rm -f /etc/systemd/system/octavia-interface.service /etc/dhcp/octavia-dhclient.conf
+  sudo ip link del o-hm0 2>/dev/null || true
   if sudo docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qx lab-s3; then
     sudo docker rm -f lab-s3 >/dev/null && echo "stockage objet du lab supprimé"
   fi

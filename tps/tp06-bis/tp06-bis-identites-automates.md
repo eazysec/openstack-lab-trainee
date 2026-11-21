@@ -21,10 +21,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp06-bis/verifier-entree.sh    # dernière ligne : "Lab prêt pour le TP 06 bis."
+./openstack-lab-trainee/tps/tp06-bis/verify-entry.sh    # dernière ligne : "Lab prêt pour le TP 06 bis."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du
 déploiement sont là et qu'il ne reste rien d'un essai précédent (`tp06b-`, dossier `~/tp06b-auto`). Chaque écart est affiché
 avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est pas
 `Lab prêt pour le TP 06 bis.`
@@ -301,7 +302,7 @@ openstack user delete tp06b-user           # ses identifiants d'application avec
 openstack project delete tp06b-proj
 rm -r ~/tp06b-auto
 unset -f moi appli auto nova keystone; unset P MDP T T7 TEMOIN D ID SECRET ID1 S1 ID3 S3 ID7 S7 ID9 S9 E NOVA
-./openstack-lab-trainee/tps/tp06-bis/verifier-entree.sh | tail -1    # "Lab prêt pour le TP 06 bis."
+./openstack-lab-trainee/tps/tp06-bis/verify-entry.sh | tail -1    # "Lab prêt pour le TP 06 bis."
 ```
 
 ## Questions
@@ -333,8 +334,8 @@ unset -f moi appli auto nova keystone; unset P MDP T T7 TEMOIN D ID SECRET ID1 S
 ## Sources
 
 - Keystone : identifiants d'application et règles d'accès
-  <https://docs.openstack.org/keystone/2025.1/user/application_credentials.html>
-- Keystone : jetons Fernet <https://docs.openstack.org/keystone/2025.1/admin/fernet-token-faq.html>
+  <https://docs.openstack.org/keystone/2026.1/user/application_credentials.html>
+- Keystone : jetons Fernet <https://docs.openstack.org/keystone/2026.1/admin/fernet-token-faq.html>
 - keystonemiddleware : validation et cache des jetons dans les services
   <https://docs.openstack.org/keystonemiddleware/latest/middlewarearchitecture.html>
 - API d'identité v3 : <https://docs.openstack.org/api-ref/identity/v3/>

@@ -19,10 +19,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp13-bis/verifier-entree.sh   # dernière ligne : "Lab prêt pour le TP 13 bis."
+./openstack-lab-trainee/tps/tp13-bis/verify-entry.sh   # dernière ligne : "Lab prêt pour le TP 13 bis."
 ```
 
-Ce script ne modifie rien. Il vérifie que l'architecture du TP 13 est en place : les deux VM sont
+Ce script ne modifie rien. Il vérifie que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir TP 02, étape 7) et
+que l'architecture du TP 13 est en place : les deux VM sont
 actives et l'application, jointe par la FIP, est connectée à sa base. Il ne voit pas l'intérieur des
 VM : l'étape 1 fait ce constat.
 

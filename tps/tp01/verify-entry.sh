@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  verifier-entree.sh : le lab est-il prêt pour le TP 01 ? [instance]
+#  verify-entry.sh : le lab est-il prêt pour le TP 01 ? [instance]
 #  Lecture seule : ne crée, ne modifie et ne supprime rien.
 #
-#  Usage : ./openstack-lab-trainee/tps/tp01/verifier-entree.sh
+#  Usage : ./openstack-lab-trainee/tps/tp01/verify-entry.sh
 #  Code retour : 0 si toutes les conditions d'entrée sont remplies, 1 sinon.
 #  Chaque écart est suivi de ce qu'il faut faire. OpenStack n'est pas encore installé : seuls
 #  l'instance et son accès à Internet sont vérifiés.
@@ -26,10 +26,15 @@ command -v tmux >/dev/null && ok "tmux présent" || ecart "tmux absent" "sudo ap
 for u in https://opendev.org https://quay.io; do
   curl -s -o /dev/null -m 15 -I "$u" && ok "$u joignable" || ecart "$u injoignable : le déploiement y télécharge Kolla-Ansible et les images" "vérifier l'accès Internet de l'instance (Security Group AWS en sortie, route par défaut)"
 done
-info "place libre sur / : $(df -h --output=avail / | tail -1 | tr -d ' ')"
 if [ -d ~/kolla/venv ] || sudo docker ps -q 2>/dev/null | grep -q .; then
   info "un déploiement existe déjà : relancer deploy.sh est sans risque (il est idempotent)"
 fi
+
+echo; echo "== Disque"
+BESOIN=20   # Go libres demandés pour le TP 01
+LIBRE=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
+if [ "$LIBRE" -ge "$BESOIN" ]; then ok "place libre sur / : $LIBRE Go ($BESOIN Go demandés)"
+else ecart "place libre sur / : $LIBRE Go, $BESOIN Go demandés" "libérer de la place (sudo docker image prune -f supprime les images sans étiquette ; sudo docker system df montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00)"; fi
 
 echo
 if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 01."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi

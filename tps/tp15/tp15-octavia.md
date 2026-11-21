@@ -36,17 +36,19 @@ comparaison est l'objet de la dernière question.
 ```bash
 # [instance]
 ./openstack-lab-trainee/verify.sh | tail -1                  # "Résultat : 42 réussis, 0 échoués"
-./openstack-lab-trainee/tps/tp15/verifier-entree.sh          # dernière ligne : "Lab prêt pour le TP 15."
+./openstack-lab-trainee/tps/tp15/verify-entry.sh          # dernière ligne : "Lab prêt pour le TP 15."
 ```
 
-`verifier-entree.sh` ne modifie rien. Il contrôle :
+`verify-entry.sh` ne modifie rien. Il contrôle :
 
 | Condition | Pourquoi | Si elle n'est pas remplie |
 |---|---|---|
 | OpenStack répond ; `mykey`, `public1`, `cirros`, `m1.tiny` présents | les VM du TP les utilisent | relancer `deploy.sh` (TP 01) |
+| `virt_type = qemu` dans `nova.conf` (ou `kvm` si `/dev/kvm` existe) | sinon aucune VM ne démarre | TP 02, étape 7, partie C |
 | Barbican présent | partie B (HTTPS) | scénario 04 (TP 08, étape 0) |
 | Aucun reste `tp15-`, ni FIP étiquetée `tp15`, ni dossier `~/tp15` | essai précédent | étape 8 |
 | Octavia absent et `ENABLE_OCTAVIA=no` dans le scénario 04 ; ni conteneur `octavia`, ni interface `o-hm0`, ni unité `octavia-interface` | l'étape 1 l'ajoute ; un retrait inachevé laisse ces traces | si Octavia est déjà là (TP rejoué), passer à la fin de l'étape 1 ; sinon étape 9 |
+| 12 Go libres au moins sur `/` | place prise par le TP, avec une marge | libérer de la place (`sudo docker image prune -f` supprime les images sans étiquette ; `sudo docker system df` montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00) |
 
 La mémoire disponible est affichée : notez-la. Chaque écart est affiché avec ce qu'il faut faire. Ne
 commencez pas tant que la dernière ligne n'est pas `Lab prêt pour le TP 15.`
@@ -75,6 +77,16 @@ En plus de `enable_octavia: "yes"`, `deploy.sh` :
   dialogue entre les services d'Octavia et les amphores (`/etc/kolla/config/octavia`) ;
 - télécharge l'image des amphores et l'enregistre dans le projet `service`, avec l'étiquette
   `amphora` par laquelle Octavia la choisit.
+
+Comme au TP 14, `deploy.sh` télécharge aussi de nouveau les images de tous les services
+(`kolla-ansible pull`) : si des images plus récentes ont été publiées, les services concernés
+redémarrent sur elles, et les anciennes images restent sur le disque :
+
+```bash
+# [instance] : les anciennes images, sans étiquette, restent sur le disque
+sudo docker image prune -f                                   # Total reclaimed space : la place rendue
+df -h /                                                      # place libre
+```
 
 Vérifiez, et regardez ce qui a été créé :
 
@@ -184,13 +196,13 @@ for i in $(seq 10); do curl -s http://$FIP/; done | sort | uniq -c     # 5 et 5 
 ```bash
 # [instance]
 openstack server pause tp15-vm-web1-demo
-until [ "$(openstack loadbalancer member show tp15-pool-web-demo tp15-member-web1-demo \
-  -f value -c operating_status)" = ERROR ]; do sleep 2; done
+until openstack loadbalancer member show tp15-pool-web-demo tp15-member-web1-demo \
+  -f value -c operating_status | grep -qx ERROR; do sleep 2; done
 openstack loadbalancer show tp15-lb-web-demo -f value -c operating_status          # DEGRADED
 for i in $(seq 10); do curl -s http://$FIP/; done | sort | uniq -c                  # 10 : tout va au serveur 2
 openstack server unpause tp15-vm-web1-demo
-until [ "$(openstack loadbalancer member show tp15-pool-web-demo tp15-member-web1-demo \
-  -f value -c operating_status)" = ONLINE ]; do sleep 2; done
+until openstack loadbalancer member show tp15-pool-web-demo tp15-member-web1-demo \
+  -f value -c operating_status | grep -qx ONLINE; do sleep 2; done
 for i in $(seq 10); do curl -s http://$FIP/; done | sort | uniq -c                  # de nouveau 5 et 5
 ```
 
@@ -279,8 +291,7 @@ openstack loadbalancer l7rule create --type PATH --compare-type STARTS_WITH --va
 curl -s -o /dev/null -w '%{http_code} -> %{redirect_url}\n' http://$FIP/page    # 302 -> https://…/page
 ```
 
-`l7rule create --wait` affiche `<identifiant> not found (HTTP 404)` : le client ne retrouve pas la
-règle pendant son attente. La règle est pourtant créée, et appliquée : la redirection répond `302`.
+`l7rule create --wait` affiche la règle, `ACTIVE` : la redirection répond `302`.
 
 ## Étape 7 (partie C). Au plus juste
 
@@ -430,7 +441,7 @@ sudo apt-get purge -y isc-dhcp-client isc-dhcp-common
 ```bash
 # [instance]
 ./openstack-lab-trainee/verify.sh | tail -1                  # 42 réussis, 0 échoués
-./openstack-lab-trainee/tps/tp15/verifier-entree.sh          # "Lab prêt pour le TP 15." : Octavia absent
+./openstack-lab-trainee/tps/tp15/verify-entry.sh          # "Lab prêt pour le TP 15." : Octavia absent
 free -m | awk '/^Mem:/{print $7}'                            # la mémoire est revenue
 ```
 
@@ -463,17 +474,17 @@ free -m | awk '/^Mem:/{print $7}'                            # la mémoire est r
   certificat renouvelé sans interruption, ancien secret supprimé.
 - [ ] Redirection HTTP vers HTTPS (302) ; clients limités par `--allowed-cidr` (refus puis accès).
 - [ ] Vue d'un membre : amphores refusées (403).
-- [ ] Nettoyage fait ; Octavia retiré ; `verify.sh` sans échec ; `verifier-entree.sh` : lab prêt.
+- [ ] Nettoyage fait ; Octavia retiré ; `verify.sh` sans échec ; `verify-entry.sh` : lab prêt.
 
 ## Sources
 
 - Kolla-Ansible, Octavia (réseau de gestion, certificats, image) :
-  <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/octavia.html>
+  <https://docs.openstack.org/kolla-ansible/2026.1/reference/networking/octavia.html>
 - Octavia, guide de l'utilisateur et recettes (HTTPS, L7) :
-  <https://docs.openstack.org/octavia/2025.1/user/guides/basic-cookbook.html>
-- Octavia, politiques et rôles : <https://docs.openstack.org/octavia/2025.1/configuration/policy.html>
+  <https://docs.openstack.org/octavia/2026.1/user/guides/basic-cookbook.html>
+- Octavia, politiques et rôles : <https://docs.openstack.org/octavia/2026.1/configuration/policy.html>
 - Client `openstack loadbalancer` : <https://docs.openstack.org/python-octaviaclient/latest/cli/index.html>
 - Images de test des amphores : <https://tarballs.opendev.org/openstack/octavia/test-images/>
 - Kolla-Ansible, exploitation (`deploy`, `stop`, `reconfigure`, `--tags`) :
-  <https://docs.openstack.org/kolla-ansible/2025.1/user/operating-kolla.html>
+  <https://docs.openstack.org/kolla-ansible/2026.1/user/operating-kolla.html>
 - Toutes les sources du parcours : [sources.md](../sources.md)

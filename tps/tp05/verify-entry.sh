@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  verifier-entree.sh : le lab est-il prêt pour le TP 05 ? [instance]
+#  verify-entry.sh : le lab est-il prêt pour le TP 05 ? [instance]
 #  Lecture seule : ne crée, ne modifie et ne supprime rien.
 #
-#  Usage : ./openstack-lab-trainee/tps/tp05/verifier-entree.sh
+#  Usage : ./openstack-lab-trainee/tps/tp05/verify-entry.sh
 #  Code retour : 0 si toutes les conditions d'entrée sont remplies, 1 sinon.
 #  Chaque écart est suivi de ce qu'il faut faire. Une commande en échec (API injoignable,
 #  sudo refusé) est un écart, jamais un « rien à signaler ».
@@ -28,6 +28,16 @@ echo "== Plateforme"
 openstack token issue >/dev/null 2>&1 && ok "OpenStack répond" \
   || ecart "OpenStack ne répond pas" "lancer ./openstack-lab-trainee/verify.sh et lire la FAQ du lab"
 
+echo; echo "== Mode de virtualisation de Nova (TP 02, étape 7)"
+VT=$(sudo -n grep '^virt_type' /etc/kolla/nova-compute/nova.conf 2>/dev/null)
+if [ -z "$VT" ]; then
+  ecart "virt_type illisible dans /etc/kolla/nova-compute/nova.conf (sudo refusé ou ligne absente)" "vérifier sudo, puis relancer deploy.sh avec le scénario en place (TP 01)"
+elif [ "$VT" = "virt_type = qemu" ] || { [ "$VT" = "virt_type = kvm" ] && [ -e /dev/kvm ]; }; then
+  ok "$VT (/dev/kvm $([ -e /dev/kvm ] && echo présent || echo absent))"
+else
+  ecart "$VT alors que /dev/kvm est $([ -e /dev/kvm ] && echo présent || echo absent) : aucune VM ne démarrera" "revenir à QEMU comme au TP 02, étape 7, partie C"
+fi
+
 echo; echo "== Ressources communes du déploiement (à ne jamais supprimer)"
 for c in "keypair:mykey" "network:demo-net" "network:public1" "router:demo-router" "image:cirros" "flavor:m1.tiny"; do
   t=${c%%:*}; n=${c#*:}
@@ -46,6 +56,12 @@ sudo docker ps --format '{{.Names}}' 2>/dev/null | grep -qx horizon && ok "conte
 echo; echo "== Restes d'un essai précédent du TP 05"
 R="faire le nettoyage du TP 05 (dernière étape de l'énoncé)"
 zero "VM tp05-*" "$(nb '^tp05-' openstack server list --all-projects -f value -c Name)" "$R"
+
+echo; echo "== Disque"
+BESOIN=5   # Go libres demandés pour le TP 05
+LIBRE=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
+if [ "$LIBRE" -ge "$BESOIN" ]; then ok "place libre sur / : $LIBRE Go ($BESOIN Go demandés)"
+else ecart "place libre sur / : $LIBRE Go, $BESOIN Go demandés" "libérer de la place (sudo docker image prune -f supprime les images sans étiquette ; sudo docker system df montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00)"; fi
 
 echo
 if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 05."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi

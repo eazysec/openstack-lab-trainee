@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  verifier-entree.sh : le lab est-il prêt pour le TP 12 bis ? [instance]
+#  verify-entry.sh : le lab est-il prêt pour le TP 12 bis ? [instance]
 #  Lecture seule : ne crée, ne modifie et ne supprime rien.
 #
-#  Usage : ./openstack-lab-trainee/tps/tp12-bis/verifier-entree.sh
+#  Usage : ./openstack-lab-trainee/tps/tp12-bis/verify-entry.sh
 #  Code retour : 0 si toutes les conditions d'entrée sont remplies, 1 sinon.
 #  Chaque écart est suivi de ce qu'il faut faire. Une commande en échec (API injoignable,
 #  sudo refusé) est un écart, jamais un « rien à signaler ».
@@ -28,6 +28,16 @@ echo "== Plateforme"
 openstack token issue >/dev/null 2>&1 && ok "OpenStack répond" \
   || ecart "OpenStack ne répond pas" "lancer ./openstack-lab-trainee/verify.sh et lire la FAQ du lab"
 
+echo; echo "== Mode de virtualisation de Nova (TP 02, étape 7)"
+VT=$(sudo -n grep '^virt_type' /etc/kolla/nova-compute/nova.conf 2>/dev/null)
+if [ -z "$VT" ]; then
+  ecart "virt_type illisible dans /etc/kolla/nova-compute/nova.conf (sudo refusé ou ligne absente)" "vérifier sudo, puis relancer deploy.sh avec le scénario en place (TP 01)"
+elif [ "$VT" = "virt_type = qemu" ] || { [ "$VT" = "virt_type = kvm" ] && [ -e /dev/kvm ]; }; then
+  ok "$VT (/dev/kvm $([ -e /dev/kvm ] && echo présent || echo absent))"
+else
+  ecart "$VT alors que /dev/kvm est $([ -e /dev/kvm ] && echo présent || echo absent) : aucune VM ne démarrera" "revenir à QEMU comme au TP 02, étape 7, partie C"
+fi
+
 echo; echo "== Ressources communes du déploiement (à ne jamais supprimer)"
 for c in "keypair:mykey" "network:demo-net" "network:public1" "router:demo-router" "image:cirros" "flavor:m1.tiny"; do
   t=${c%%:*}; n=${c#*:}
@@ -44,7 +54,7 @@ G=$(openstack flavor show m1.1g -f value -c ram 2>/dev/null) || G=""
 [ -n "$G" ] && ok "gabarit m1.1g : $G Mo" || ecart "gabarit m1.1g absent" "faire l'étape 0 du TP 12 (création du gabarit m1.1g)"
 
 echo; echo "== Cinder (étape 5)"
-openstack service show volumev3 >/dev/null 2>&1 && ok "service volumev3 (Cinder) présent" \
+openstack volume service list >/dev/null 2>&1 && ok "Cinder présent" \
   || ecart "Cinder absent : l'étape 5 crée un volume" "déployer le scénario 02 ou 04 (TP 04, étape 0)"
 
 echo; echo "== Restes d'un essai précédent du TP 12 bis"
@@ -52,6 +62,12 @@ R="faire le nettoyage du TP 12 bis (étape 6) : les VM d'abord, puis les FIP, le
 zero "VM tp12b-*" "$(nb '^tp12b-' openstack server list -f value -c Name)" "$R"
 zero "volumes tp12b-*" "$(nb '^tp12b-' openstack volume list --all-projects -f value -c Name)" "$R"
 zero "security groups tp12b-*" "$(nb '^tp12b-' openstack security group list -f value -c Name)" "$R"
+
+echo; echo "== Disque"
+BESOIN=5   # Go libres demandés pour le TP 12 bis
+LIBRE=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
+if [ "$LIBRE" -ge "$BESOIN" ]; then ok "place libre sur / : $LIBRE Go ($BESOIN Go demandés)"
+else ecart "place libre sur / : $LIBRE Go, $BESOIN Go demandés" "libérer de la place (sudo docker image prune -f supprime les images sans étiquette ; sudo docker system df montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00)"; fi
 
 echo
 if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 12 bis."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi

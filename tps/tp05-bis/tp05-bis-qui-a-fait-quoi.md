@@ -19,10 +19,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp05-bis/verifier-entree.sh    # dernière ligne : "Lab prêt pour le TP 05 bis."
+./openstack-lab-trainee/tps/tp05-bis/verify-entry.sh    # dernière ligne : "Lab prêt pour le TP 05 bis."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du
 déploiement sont là et qu'il ne reste rien d'un essai précédent (`tp05b-`). Chaque écart est affiché
 avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est pas
 `Lab prêt pour le TP 05 bis.`
@@ -67,33 +68,45 @@ c'est Keystone qui donne le nom.
 
 ## Étape 3. Suivre la requête de service en service
 
-Pour créer la VM, Nova a demandé l'image à Glance et le port à Neutron. Il leur a transmis le même
-identifiant :
+Pour créer la VM, Nova a fait appel à Placement, à Glance et à Neutron. Il leur a transmis le même
+identifiant. Cherchez-le dans tous les journaux :
 
 ```bash
 # [instance]
-for f in nova/nova-api.log nova/nova-compute.log neutron/neutron-server.log glance/glance-api.log; do
-  echo "$f : $(sudo grep -c "$R" /var/log/kolla/$f) ligne(s)"
-done
-sudo grep "$R" /var/log/kolla/neutron/neutron-server.log | head -n 2
+sudo grep -rc "$R" /var/log/kolla/ | grep -v ':0$'
+sudo grep "$R" /var/log/kolla/neutron/neutron-openvswitch-agent.log | head -n 1
 ```
 
-Chaque service le note : dans Neutron, il apparaît en premier entre les crochets (identifiant
-global), suivi de l'identifiant propre à Neutron. Un seul identifiant suffit pour reconstituer tout ce
-que la plateforme a fait pour une demande.
+Là où il est noté, il apparaît en premier entre les crochets (identifiant global), suivi de
+l'identifiant propre au service. Un seul identifiant suffit pour relier ce que la plateforme a fait
+pour une demande.
+
+Mais tous les services ne le notent pas. Les API de Neutron et de Glance tournent sous uWSGI (depuis
+OpenStack 2026.1) : chaque appel est noté dans `neutron-server-uwsgi.log` et `glance-api-uwsgi.log`,
+sans identifiant de requête ni utilisateur ; `neutron-server.log` et `glance-api.log` ne notent que
+certains événements.
+
+```bash
+# [instance]
+sudo tail -n 2 /var/log/kolla/neutron/neutron-server-uwsgi.log
+```
 
 ## Étape 4. Un échec d'authentification
 
 ```bash
 # [instance]
 OS_USERNAME=tp05b-user OS_PROJECT_NAME=tp05b-proj OS_PASSWORD=faux openstack token issue   # refusé : 401
-sudo grep 'POST /v3/auth/tokens' /var/log/kolla/keystone/keystone-apache-public-access.log | grep ' 401 ' | tail -n 1
+sudo grep 'POST /v3/auth/tokens' /var/log/kolla/keystone/keystone-uwsgi.log | grep 'HTTP/1.1 401' | tail -n 1
 moi openstack token issue -c expires       # le bon mot de passe
-sudo grep 'POST /v3/auth/tokens' /var/log/kolla/keystone/keystone-apache-public-access.log | grep ' 201 ' | tail -n 1
+sudo grep 'POST /v3/auth/tokens' /var/log/kolla/keystone/keystone-uwsgi.log | grep 'HTTP/1.1 201' | tail -n 1
+sudo grep 'Authorization failed' /var/log/kolla/keystone/keystone.log | tail -n 1
 ```
 
-L'échec est bien tracé (`401`), à côté des réussites (`201`). Mais regardez ce que la ligne ne dit
-pas : ni le nom de l'utilisateur, ni l'adresse d'où vient la tentative (`- - -` en tête de ligne).
+L'échec est bien tracé (`401`), à côté des réussites (`201`), avec l'adresse qui s'est connectée à
+Keystone : ici l'hôte lui-même, d'où part la commande. `keystone.log` y ajoute une ligne
+`Authorization failed`, qui porte l'identifiant de requête (`Request-ID`) affiché par la commande
+refusée. Mais regardez ce que ces lignes ne disent pas : ni le nom de l'utilisateur, ni son
+identifiant.
 
 ## Étape 5. Un appel refusé par une règle d'accès
 
@@ -110,28 +123,14 @@ appli() {  # appli <id> <secret> <commande…> : la commande, avec l'identifiant
     OS_APPLICATION_CREDENTIAL_SECRET=$secret "$@"
 }
 appli $ID $SECRET openstack network list   # refusé : 401
-sudo grep 'status: 401' /var/log/kolla/neutron/neutron-server.log | tail -n 1
+openstack network list > /dev/null         # l'admin : accepté
+sudo grep 'GET /v2.0/networks' /var/log/kolla/neutron/neutron-server-uwsgi.log | tail -n 3
 ```
 
-Neutron a tracé le refus : l'heure, `GET /v2.0/networks`, `status: 401`. Mais qui l'a provoqué ?
-Recommencez quatre fois, en laissant l'admin faire un appel normal avant chaque refus, puis comptez
-les identifiants d'utilisateur notés sur les lignes de refus :
-
-```bash
-# [instance]
-for k in 1 2 3 4; do
-  openstack network list > /dev/null                              # l'admin : accepté
-  appli $ID $SECRET openstack network list > /dev/null 2>&1       # l'automate : refusé
-done
-sudo grep 'status: 401' /var/log/kolla/neutron/neutron-server.log | tail -n 8 \
-  | grep -oE '[0-9a-f]{32} [0-9a-f]{32}' | cut -d' ' -f1 | sort | uniq -c
-echo "tp05b-user : $U ; admin : $(openstack user show admin -f value -c id)"
-```
-
-L'identifiant de l'admin apparaît sur des lignes de refus, alors que l'admin n'a rien vu refuser.
-Neutron a rejeté le jeton : il ne sait pas qui appelle, et la ligne reprend le contexte d'une requête
-précédente traitée par le même processus. Une ligne de refus dit qu'il y a eu un refus, quand et sur
-quoi ; pas qui l'a provoqué.
+Neutron a tracé le refus : l'heure, `GET /v2.0/networks`, `HTTP/1.1 401`, puis l'appel accepté de
+l'admin (`200`). Mais qui a provoqué le refus ? Rien sur la ligne ne le dit : aucune ligne de ce
+journal ne porte d'utilisateur, appel accepté ou refusé. Une ligne de refus dit qu'il y a eu un
+refus, quand et sur quoi ; pas qui l'a provoqué.
 
 ## Étape 6. Combien de temps, et à quelle heure ?
 
@@ -158,7 +157,7 @@ moi openstack network delete tp05b-net
 openstack user delete tp05b-user           # son identifiant d'application avec lui
 openstack project delete tp05b-proj
 unset -f moi appli; unset MDP R U ID SECRET
-./openstack-lab-trainee/tps/tp05-bis/verifier-entree.sh | tail -1    # "Lab prêt pour le TP 05 bis."
+./openstack-lab-trainee/tps/tp05-bis/verify-entry.sh | tail -1    # "Lab prêt pour le TP 05 bis."
 ```
 
 ## Questions
@@ -166,7 +165,7 @@ unset -f moi appli; unset MDP R U ID SECRET
 1. À partir d'une VM, comment retrouvez-vous qui l'a créée, quand, et ce que chaque service a fait
    pour elle ?
 2. Un échec d'authentification : que savez-vous, et que ne savez-vous pas ? Que faudrait-il pour
-   savoir qui a essayé, et d'où ?
+   savoir qui a essayé ?
 3. Ces journaux sont des fichiers sur l'hôte. Contre qui ne protègent-ils pas ? Que faire en
    production ?
 4. Pourquoi l'heure des machines est-elle indispensable à une enquête ?
@@ -174,16 +173,16 @@ unset -f moi appli; unset MDP R U ID SECRET
 ## Validation
 
 - [ ] Créateur de la VM retrouvé (identifiant de requête, utilisateur, nom).
-- [ ] Même identifiant relevé dans Nova, Neutron et Glance.
+- [ ] Même identifiant relevé dans plusieurs services ; journaux qui ne le notent pas identifiés.
 - [ ] Échec d'authentification `401` relevé, et ce qui manque à la ligne noté.
-- [ ] Refus d'une règle d'accès retrouvé dans le journal de Neutron ; identifiants notés sur les lignes
-  de refus comptés et comparés à ceux de `tp05b-user` et de l'admin.
+- [ ] Refus d'une règle d'accès retrouvé dans le journal de Neutron ; absence d'utilisateur sur la ligne
+  notée.
 - [ ] Questions 2 et 3 argumentées.
 - [ ] Nettoyage fait.
 
 ## Sources
 
-- Journaux des services dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/reference/logging-and-monitoring/central-logging-guide.html>
+- Journaux des services dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2026.1/reference/logging-and-monitoring/central-logging-guide.html>
 - Nova : actions et événements d'une instance : <https://docs.openstack.org/api-ref/compute/#servers-actions-servers-os-instance-actions>
 - Identifiant de requête global, transmis d'un service à l'autre : <https://specs.openstack.org/openstack/oslo-specs/specs/pike/global-req-id.html>
 - Toutes les sources du parcours : [sources.md](../sources.md)

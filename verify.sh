@@ -57,7 +57,7 @@ volume_purge() {
 # Supprime les ressources de test "verify-*" (de cette exécution, ou d'une précédente interrompue)
 purge_test_resources() {
   local id fip
-  if openstack service show volumev3 >/dev/null 2>&1; then     # seulement si Cinder est déployé
+  if openstack volume service list >/dev/null 2>&1; then     # seulement si Cinder est déployé
     for id in $(openstack volume list -f value -c ID -c Name | awk '$2 ~ /^verify-/{print $1}'); do volume_purge "$id"; done
   fi
   for id in $(openstack server list -f value -c ID -c Name | awk '$2 ~ /^verify-/{print $1}'); do
@@ -68,7 +68,7 @@ purge_test_resources() {
   done
   # Une VM peut rester listée "DELETED" quelques secondes après "delete --wait"
   retry 30 2 bash -c "! openstack server list -f value -c Name | grep -q '^verify-'"
-  if openstack service show volumev3 >/dev/null 2>&1; then
+  if openstack volume service list >/dev/null 2>&1; then
     for id in $(openstack volume type list -f value -c ID -c Name 2>/dev/null | awk '$2 ~ /^verify-/{print $1}'); do
       openstack volume type delete "$id" 2>/dev/null
     done
@@ -101,6 +101,10 @@ if [[ "$KEEP" != "--keep" ]]; then
   purge_test_resources
 fi
 
+# Version déployée : une information, pas un test (aucun PASS ni FAIL)
+REL=$(awk -F'"' '/^openstack_release:/{print $2}' /etc/kolla/globals.yml 2>/dev/null)
+KA=$(pip show kolla-ansible 2>/dev/null | awk '/^Version:/{print $2}')
+echo "== Version : OpenStack ${REL:-inconnue}, Kolla-Ansible ${KA:-inconnu} (maintenance : https://releases.openstack.org/)"
 echo "== Hôte"
 check "service openstack-lab-net actif"           systemctl is-active openstack-lab-net
 check "passerelle $EXT_GW sur $VETH_HOST"         bash -c "ip -4 addr show $VETH_HOST | grep -q $EXT_GW"
@@ -127,7 +131,7 @@ check "SSH hôte -> VM"                            retry 20 5 vm_ssh true
 check "VM -> Internet (ping 8.8.8.8)"             vm_ssh ping -c2 8.8.8.8
 check "VM -> DNS (opendev.org)"                   vm_ssh nslookup opendev.org
 
-if openstack service show cinderv3 >/dev/null 2>&1; then
+if openstack volume service list >/dev/null 2>&1; then   # type de catalogue : volumev3 jusqu'à 2025.1, block-storage ensuite
   echo "== Cinder"
   check "Cinder : services up"                    bash -c '! openstack volume service list -f value -c State | grep -qv up'
   VOL=$(openstack volume create --size 1 "$NAME-vol" -f value -c id 2>/dev/null)

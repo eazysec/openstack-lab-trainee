@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  verifier-entree.sh : le lab est-il prêt pour le TP 14 ? [instance]
+#  verify-entry.sh : le lab est-il prêt pour le TP 13 ? [instance]
 #  Lecture seule : ne crée, ne modifie et ne supprime rien.
 #
-#  Usage : ./openstack-lab-trainee/tps/tp14/verifier-entree.sh
+#  Usage : ./openstack-lab-trainee/tps/tp13/verify-entry.sh
 #  Code retour : 0 si toutes les conditions d'entrée sont remplies, 1 sinon.
 #  Chaque écart est suivi de ce qu'il faut faire. Une commande en échec (API injoignable,
 #  sudo refusé) est un écart, jamais un « rien à signaler ».
 # =============================================================================
 set -uo pipefail
-DEPOT=$(cd "$(dirname "$0")/../.." && pwd)
 source ~/kolla/venv/bin/activate && source /etc/kolla/admin-openrc.sh \
   || { echo "Environnement OpenStack introuvable (~/kolla/venv, /etc/kolla/admin-openrc.sh)." >&2; exit 2; }
 ECARTS=0
@@ -28,12 +27,29 @@ zero() {  # $1 libellé, $2 nombre, $3 remède
 echo "== Plateforme"
 openstack token issue >/dev/null 2>&1 && ok "OpenStack répond" \
   || ecart "OpenStack ne répond pas" "lancer ./openstack-lab-trainee/verify.sh et lire la FAQ du lab"
+openstack volume service list >/dev/null 2>&1 && ok "Cinder présent" \
+  || ecart "Cinder absent : le TP 13 demande le scénario 04 (volumes chiffrés, secrets)" "déployer le scénario 04 (TP 08, étape 0)"
+openstack service show key-manager >/dev/null 2>&1 && ok "service key-manager présent" \
+  || ecart "service key-manager absent : le TP 13 demande le scénario 04 (volumes chiffrés, secrets)" "déployer le scénario 04 (TP 08, étape 0)"
 [ "$(openstack image show debian13 -f value -c status 2>/dev/null)" = active ] && ok "image debian13 : active" \
   || ecart "image debian13 absente ou inutilisable" "refaire l'étape 0 du TP 12"
 [ "$(openstack flavor show m1.1g -f value -c ram 2>/dev/null)" = 1024 ] && ok "gabarit m1.1g : 1024 Mo" \
   || ecart "gabarit m1.1g absent ou différent" "refaire l'étape 0 du TP 12"
+for c in jq nc; do
+  command -v $c >/dev/null && ok "commande $c présente sur l'hôte" || ecart "commande $c absente de l'hôte" "sudo apt-get install -y $( [ $c = nc ] && echo netcat-openbsd || echo $c )"
+done
 
-echo; echo "== Restes du TP 13 (le TP 14 recrée la même architecture)"
+echo; echo "== Mode de virtualisation de Nova (TP 02, étape 7)"
+VT=$(sudo -n grep '^virt_type' /etc/kolla/nova-compute/nova.conf 2>/dev/null)
+if [ -z "$VT" ]; then
+  ecart "virt_type illisible dans /etc/kolla/nova-compute/nova.conf (sudo refusé ou ligne absente)" "vérifier sudo, puis relancer deploy.sh avec le scénario en place (TP 01)"
+elif [ "$VT" = "virt_type = qemu" ] || { [ "$VT" = "virt_type = kvm" ] && [ -e /dev/kvm ]; }; then
+  ok "$VT (/dev/kvm $([ -e /dev/kvm ] && echo présent || echo absent))"
+else
+  ecart "$VT alors que /dev/kvm est $([ -e /dev/kvm ] && echo présent || echo absent) : aucune VM ne démarrera" "revenir à QEMU comme au TP 02, étape 7, partie C"
+fi
+
+echo; echo "== Restes d'un essai précédent du TP 13 (ou du TP 14)"
 R13="faire l'étape 16 du TP 13 (nettoyage)"
 for t in network router port "security group" "floating ip"; do
   zero "$t avec le tag tp13" "$(nb . openstack $t list --tags tp13 -f value)" "$R13"
@@ -41,34 +57,25 @@ done
 zero "VM tp13-*" "$(nb '^tp13-' openstack server list --all-projects -f value -c Name)" "$R13"
 zero "volumes tp13-*" "$(nb '^tp13-' openstack volume list --all-projects -f value -c Name)" "$R13"
 zero "types de volume tp13-*" "$(nb '^tp13-' openstack volume type list -f value -c Name)" "$R13"
+zero "paires de clés tp13-*" "$(nb '^tp13-' openstack keypair list -f value -c Name)" "$R13"
 zero "secrets tp13-*" "$(nb '"Name": "tp13-' openstack secret list -f json)" "$R13"
+zero "réseaux ht-tp13-* (architecture créée par Heat au TP 14)" "$(nb '^ht-tp13-' openstack network list -f value -c Name)" "faire l'étape 10 du TP 14 (nettoyage)"
 zero "FIP 10.0.2.150 allouée" "$(nb '^10\.0\.2\.150$' openstack floating ip list -f value -c 'Floating IP Address')" "$R13"
 
-echo; echo "== Hôte : restes des étapes 3 et 4 du TP 13"
+echo; echo "== Hôte : restes des étapes 3 et 4 d'un essai précédent"
 zero "route 192.168.121.0/24" "$(nb . ip route show 192.168.121.0/24)" "$R13"
 zero "règle FORWARD tp13" "$(nb tp13 sudo iptables -S FORWARD)" "$R13"
 [ -e /etc/chrony/conf.d/tp13.conf ] && ecart "/etc/chrony/conf.d/tp13.conf présent" "$R13" || ok "configuration chrony du TP 13 : absente"
 dpkg -l squid 2>/dev/null | grep -q '^ii' && ecart "Squid installé" "$R13" || ok "Squid : non installé"
 
-echo; echo "== Restes d'un essai précédent du TP 14"
-zero "VM tp14-*" "$(nb '^tp14-' openstack server list --all-projects -f value -c Name)" "faire l'étape de nettoyage du TP 14"
-zero "réseaux tp14-*" "$(nb '^tp14-' openstack network list -f value -c Name)" "faire l'étape de nettoyage du TP 14"
+info "mémoire disponible : $(awk '/^MemAvailable/{printf "%d Mo", $2/1024}' /proc/meminfo) (le TP 13 démarre deux VM de 1 Go)"
 
-echo; echo "== Heat"
-fichier=$(grep -E '^ENABLE_HEAT=' "$DEPOT/scenarios/04-aio-complet.env" | cut -d= -f2)
-if ! TYPES=$(openstack service list -f value -c Type 2>/dev/null); then
-  ecart "liste des services : commande en échec" "vérifier que la plateforme répond (./openstack-lab-trainee/verify.sh)"
-elif grep -qx orchestration <<< "$TYPES"; then
-  info "Heat est déjà déployé (TP rejoué) : à l'étape 1, passez directement à la vérification"
-  zero "piles tp14-*" "$(nb '^tp14-' openstack stack list -f value -c 'Stack Name')" "faire l'étape de nettoyage du TP 14"
-  [ "$fichier" = yes ] || info "le scénario 04 indique ENABLE_HEAT=$fichier alors que Heat est déployé"
-else
-  ok "Heat : absent (l'étape 1 l'ajoute)"
-  [ "$fichier" = no ] && ok "scénario 04 : ENABLE_HEAT=no" \
-    || ecart "scénario 04 : ENABLE_HEAT=$fichier alors que Heat est absent" "reprendre l'étape 1 (déploiement interrompu ?)"
-fi
-info "mémoire disponible : $(awk '/^MemAvailable/{printf "%d Mo", $2/1024}' /proc/meminfo)"
+echo; echo "== Disque"
+BESOIN=5   # Go libres demandés pour le TP 13
+LIBRE=$(df --output=avail -BG / | tail -1 | tr -dc 0-9)
+if [ "$LIBRE" -ge "$BESOIN" ]; then ok "place libre sur / : $LIBRE Go ($BESOIN Go demandés)"
+else ecart "place libre sur / : $LIBRE Go, $BESOIN Go demandés" "libérer de la place (sudo docker image prune -f supprime les images sans étiquette ; sudo docker system df montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00)"; fi
 
 echo
-if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 14."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi
+if [ "$ECARTS" -eq 0 ]; then echo "Lab prêt pour le TP 13."; else echo "$ECARTS écart(s) à corriger avant de commencer."; fi
 [ "$ECARTS" -eq 0 ]

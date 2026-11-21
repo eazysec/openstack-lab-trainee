@@ -17,10 +17,10 @@ source "$SCENARIO_FILE"
 
 # ----------------------------------------------------------------- CONFIG ----
 # Valeurs par défaut ; un fichier de scénario ou l'environnement peut les surcharger.
-OPENSTACK_RELEASE="${OPENSTACK_RELEASE:-2025.1}"   # série OpenStack : images et contraintes de versions
+OPENSTACK_RELEASE="${OPENSTACK_RELEASE:-2026.1}"   # série OpenStack : images et contraintes de versions
 # Branche Kolla-Ansible : stable/<série> tant que la série est maintenue, puis unmaintained/<série>
 # (la branche stable/ est supprimée quand la série passe en « Unmaintained »)
-KOLLA_ANSIBLE_REF="${KOLLA_ANSIBLE_REF:-unmaintained/2025.1}"
+KOLLA_ANSIBLE_REF="${KOLLA_ANSIBLE_REF:-stable/2026.1}"
 WORKDIR="${WORKDIR:-$HOME/kolla}"                   # venv + inventaire + logs
 VENV="$WORKDIR/venv"
 INVENTORY="$WORKDIR/all-in-one"
@@ -55,7 +55,7 @@ CINDER_LOOP_SIZE_GB="${CINDER_LOOP_SIZE_GB:-20}"
 
 LAB_CONF_DIR=/etc/openstack-lab                     # config hôte persistante (lue au boot)
 
-# Virtualisation : kvm si /dev/kvm existe (instance *.metal), sinon émulation qemu
+# Virtualisation : kvm si /dev/kvm existe (instance *.metal, virtualisation imbriquée, serveur dédié), sinon émulation qemu
 if [[ -e /dev/kvm ]]; then VIRT_TYPE="kvm"; else VIRT_TYPE="qemu"; fi
 
 # ---------------------------------------------------------------- HELPERS ----
@@ -295,10 +295,13 @@ cat > /etc/kolla/config/galera.cnf <<EOF
 innodb_buffer_pool_size = 1G
 EOF
 
-# Nova-compute : relance des VM après reboot de l'hôte ; en QEMU, CPU compatible émulation
+# Nova-compute : relance des VM après reboot de l'hôte ; en QEMU, CPU compatible émulation.
+# reimage_timeout_per_gb : délai d'attente de la réécriture d'un volume racine par Cinder (rebuild
+# --reimage-boot-volume, TP 04 bis), 20 s par Go par défaut ; mesuré 22 s pour 1 Go sur ce lab.
 cat > /etc/kolla/config/nova/nova-compute.conf <<EOF
 [DEFAULT]
 resume_guests_state_on_host_boot = true
+reimage_timeout_per_gb = 60
 EOF
 if [[ "$VIRT_TYPE" == "qemu" ]]; then
   cat >> /etc/kolla/config/nova/nova-compute.conf <<EOF
@@ -308,14 +311,9 @@ cpu_mode = none
 EOF
 fi
 
-# Cinder : type de service vu par le middleware d'authentification. Kolla écrit « volume », absent du
-# catalogue ; avec lui, Cinder refuse tout identifiant d'application muni de règles d'accès.
-if [[ "$ENABLE_CINDER" == "yes" ]]; then
-  cat > /etc/kolla/config/cinder.conf <<EOF
-[keystone_authtoken]
-service_type = volumev3
-EOF
-fi
+# Cinder : aucune surcharge. Depuis 2026.1, Kolla écrit [keystone_authtoken] service_type = block-storage,
+# le seul type de Cinder au catalogue ; les règles d'accès des identifiants d'application s'y appliquent
+# (TP 04 bis). L'ancienne surcharge « volumev3 » les ferait toutes refuser.
 
 # ---------------------------------------------------------------- DÉPLOIEMENT
 log "bootstrap-servers (Docker, utilisateurs, paquets)"
@@ -329,7 +327,10 @@ if [[ "$ENABLE_OCTAVIA" == "yes" && ! -f /etc/kolla/config/octavia/server_ca.cer
 fi
 
 log "prechecks"
-kolla-ansible prechecks -i "$INVENTORY"
+# Depuis 2026.1, Kolla réserve aux tests les images publiques de quay.io/openstack.kolla et refuse
+# de les utiliser sans --use-test-images. Acceptable pour un lab ; en production, construire ses
+# images (kolla-build) ou les servir depuis son propre registre.
+kolla-ansible prechecks --use-test-images -i "$INVENTORY"
 
 log "pull des images"
 kolla-ansible pull -i "$INVENTORY"

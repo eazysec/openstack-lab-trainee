@@ -19,10 +19,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp09/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 09."
+./openstack-lab-trainee/tps/tp09/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 09."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du déploiement sont là (`mykey`,
 `demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`), que Cinder et Barbican sont déployés (scénario 04) et
 qu'il ne reste rien d'un essai précédent (`tp09-`, type de volume compris).
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
@@ -114,7 +115,7 @@ source ~/tp09-openrc.sh
 openstack volume create --size 1 --type tp09-voltype-luks tp09-vol-user
 ```
 
-Réponse : `Key manager error (HTTP 400)`. Ajoutez le rôle `creator` et recommencez :
+Réponse : `BadRequestException: 400: … Key manager error`. Ajoutez le rôle `creator` et recommencez :
 
 ```bash
 # [instance]
@@ -221,9 +222,9 @@ rm ~/tp09-openrc.sh
 
 ## Sources
 
-- Cinder : chiffrement des volumes : <https://docs.openstack.org/cinder/2025.1/configuration/block-storage/volume-encryption.html>
-- Barbican : <https://docs.openstack.org/barbican/2025.1/>
+- Cinder : chiffrement des volumes : <https://docs.openstack.org/cinder/2026.1/configuration/block-storage/volume-encryption.html>
+- Barbican : <https://docs.openstack.org/barbican/2026.1/>
 - Barbican : déclarer l'utilisateur d'un secret (*consumers*) : <https://docs.openstack.org/api-guide/key-manager/consumers.html>
-- Cinder dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/reference/storage/cinder-guide.html>
+- Cinder dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2026.1/reference/storage/cinder-guide.html>
 - Guide de sécurité OpenStack : <https://docs.openstack.org/security-guide/>
 - Toutes les sources du parcours : [sources.md](../sources.md)

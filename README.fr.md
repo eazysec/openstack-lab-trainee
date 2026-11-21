@@ -2,7 +2,7 @@
 
 # Pratiquez la sécurité dès la conception, sur un cloud sur mesure
 
-Par [Merlin Tchoffo](https://www.linkedin.com/in/merlin-t-08316915), expert en cybersécurité et cloud.
+[Merlin Tchoffo](https://www.linkedin.com/in/merlin-t-08316915), expert en cybersécurité et cloud.
 
 ⭐ Si ce travail vous est utile, pensez à mettre une étoile au dépôt ! Une erreur, une explication à
 améliorer, un exercice à proposer ? Ouvrez une *issue* ou proposez une *pull request* : les
@@ -31,7 +31,7 @@ vérification régulière des mesures de sécurité.
 Ce dépôt est construit comme une feuille de route d'apprentissage progressive : il part des bases
 d'OpenStack, sur un cloud que vous déployez vous-même, et avance vers des cas pratiques de sécurité
 dans tout l'écosystème OpenStack, ses services et les applications qu'il héberge. Chaque TP part de
-l'état laissé par le précédent, le vérifie d'abord (`verifier-entree.sh`), et se termine par des
+l'état laissé par le précédent, le vérifie d'abord (`verify-entry.sh`), et se termine par des
 questions et une grille de validation, à faire relire par un tuteur.
 
 ## Les phases de travail
@@ -83,8 +83,6 @@ C'est ce constat qui m'a donné envie de créer ces travaux pratiques et de les 
 
 La sécurité se conçoit dès le départ, se vérifie à la construction et se cultive collectivement.
 
-Merlin Tchoffo, expert en cybersécurité et cloud
-
 ---
 
 ## Le lab : OpenStack All-in-One sur une instance cloud (Kolla-Ansible)
@@ -124,7 +122,7 @@ openstack-lab-trainee/
 ├── tests/
 │   └── test-public-fip.sh     test du scénario 03 côté hôte, sans ressource AWS (TP 07)
 ├── tps/                       parcours de TP : énoncés, conventions, grille de suivi, sources ;
-│                              un dossier tpNN/ par TP : énoncé, verifier-entree.sh, fichiers fournis
+│                              un dossier tpNN/ par TP : énoncé, verify-entry.sh, fichiers fournis
 ├── VERSION                    version du dépôt
 ├── LICENSE                    licence des scripts (MIT)
 ├── LICENSE-CONTENU.md         licence des contenus pédagogiques (CC BY-SA 4.0)
@@ -159,11 +157,16 @@ Prérequis : instance Ubuntu 24.04 neuve, ≥ 8 Go RAM (16 recommandés), ≥ 2 
 ≥ 40 Go de disque (60 recommandés : ~30 Go occupés en scénario 04), utilisateur avec `sudo` sans mot
 de passe (`ubuntu` sur EC2), accès Internet.
 
-> **Version d'OpenStack.** Le lab déploie OpenStack 2025.1 (Epoxy). Cette série n'est plus maintenue
-> par le projet OpenStack depuis l'automne 2026 : plus de correctifs officiels, ni de sécurité, et ses
-> images de conteneurs ne sont plus reconstruites. Le déploiement fonctionne (vérifié le 18/11/2026),
-> mais la série sera retirée à sa fin de vie, à une date non annoncée. Le passage à 2026.1 (Gazpacho)
-> est en préparation.
+> **Version d'OpenStack.** Le lab déploie OpenStack 2026.1 (Gazpacho), une série maintenue par le
+> projet OpenStack (fin de maintenance estimée à l'automne 2027, d'après releases.openstack.org). La
+> version précédente du lab, sur OpenStack 2025.1 (Epoxy, série qui n'est plus maintenue), reste
+> disponible sur la branche `stable/2025.1` de ce dépôt, sans évolution.
+>
+> **Images de conteneurs.** `deploy.sh` utilise les images publiques de Kolla
+> (`quay.io/openstack.kolla`). Depuis 2026.1, Kolla-Ansible les présente comme des images de test et
+> refuse de les utiliser sans l'option `--use-test-images`, que `deploy.sh` lui passe. Cela convient à un
+> lab. En production, construisez vos propres images (`kolla-build`) et tirez-les d'un registre que vous
+> maîtrisez.
 
 ```bash
 # Depuis votre poste : vérifier qu'aucun frais de crédits CPU n'est possible (voir aws/finops.md)
@@ -193,8 +196,8 @@ Les paramètres se règlent dans le fichier de scénario, ou en variable d'envir
 
 | Variable | Défaut | Rôle |
 |---|---|---|
-| `OPENSTACK_RELEASE` | `2025.1` | Série OpenStack : version des images et des contraintes de versions |
-| `KOLLA_ANSIBLE_REF` | `unmaintained/2025.1` | Branche Kolla-Ansible : `stable/<série>` tant que la série est maintenue, `unmaintained/<série>` ensuite (la branche `stable/` est alors supprimée) |
+| `OPENSTACK_RELEASE` | `2026.1` | Série OpenStack : version des images et des contraintes de versions |
+| `KOLLA_ANSIBLE_REF` | `stable/2026.1` | Branche Kolla-Ansible : `stable/<série>` tant que la série est maintenue, `unmaintained/<série>` ensuite (la branche `stable/` est alors supprimée) |
 | `WORKDIR` | `~/kolla` | venv, inventaire, logs |
 | `MGMT_IF` / `MGMT_IP` | détectés via la route par défaut | Interface/IP des API |
 | `EXT_CIDR` / `EXT_GW` | `10.0.2.0/24` / `10.0.2.1` | Réseau externe Neutron |
@@ -222,6 +225,9 @@ Pour tout supprimer :
 ./openstack-lab-trainee/destroy.sh            # conteneurs et données OpenStack
 ./openstack-lab-trainee/destroy.sh --purge    # + config, venv, réseau hôte, stockage Cinder ; puis sudo reboot
 ```
+
+Les images Docker restent sur le disque, même après `--purge` (mesuré : disque à 50 % dès le
+scénario 01 redéployé).
 
 ---
 
@@ -333,7 +339,7 @@ Non déployés :
 - Octavia (répartition de charge) : désactivé, pour la même raison ; le TP 15 l'ajoute
   (`ENABLE_OCTAVIA=yes` dans le scénario 04), puis le retire ;
 - Barbican et Designate : seulement dans le scénario 04 ;
-- **Swift (stockage objet) : n'existe plus dans Kolla-Ansible 2025.1** (aucun rôle ni variable `enable_swift`).
+- **Swift (stockage objet) : n'existe plus dans Kolla-Ansible (vérifié en 2025.1 et en 2026.1)** (aucun rôle ni variable `enable_swift`).
   L'alternative Kolla, `ceph-rgw` (API compatible Swift), exige un cluster Ceph externe. Pour le TP 10,
   le lab fournit à la place un serveur S3 léger (Garage), hors Kolla ;
 - Cinder backup : nécessiterait Swift, Ceph ou NFS ;
@@ -346,8 +352,7 @@ Non déployés :
 | `/etc/kolla/globals.yml` | Configuration principale (généré par `deploy.sh`) |
 | `/etc/kolla/passwords.yml` | Tous les secrets (ne jamais committer) |
 | `/etc/kolla/config/galera.cnf` | `innodb_buffer_pool_size = 1G` |
-| `/etc/kolla/config/nova/nova-compute.conf` | `resume_guests_state_on_host_boot`, et en QEMU `virt_type`, `cpu_mode` |
-| `/etc/kolla/config/cinder.conf` (si Cinder) | `[keystone_authtoken] service_type = volumev3` : sans lui, Cinder refuse les identifiants d'application munis de règles d'accès (TP 04 bis) |
+| `/etc/kolla/config/nova/nova-compute.conf` | `resume_guests_state_on_host_boot`, `reimage_timeout_per_gb`, et en QEMU `virt_type`, `cpu_mode` |
 | `/etc/kolla/<service>/` | Config rendue de chaque service (écrasée à chaque déploiement : ne pas éditer) |
 | `/etc/kolla/admin-openrc.sh`, `/etc/kolla/clouds.yaml` | Identifiants CLI admin |
 | `/etc/openstack-lab/network.env` | Paramètres du réseau hôte (lus au boot) |
@@ -407,7 +412,7 @@ scénario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
 
 | Choix | Pourquoi |
 |---|---|
-| Kolla-Ansible `unmaintained/2025.1` + upper-constraints | Versions figées par les contraintes : déploiement reproductible. La série 2025.1 n'est plus maintenue : sa branche `stable/2025.1` a été supprimée, d'où `unmaintained/2025.1` |
+| Kolla-Ansible `stable/2026.1` + upper-constraints | Versions figées par les contraintes : déploiement reproductible. Quand une série n'est plus maintenue, sa branche `stable/` est supprimée : il faut alors passer à `unmaintained/<série>` (c'est arrivé à 2025.1) |
 | `set -Eeuo pipefail` + trap affichant la ligne en erreur | Arrêt à la première erreur, avec le log |
 | Un script + des fichiers de scénario | Une seule logique à maintenir ; les variantes ne diffèrent que par leurs paramètres |
 | `enable_loadbalancer: "no"` (+ haproxy/keepalived/proxysql à `no`) | Depuis 2024.2 c'est cette variable qui désactive le load balancer. Sinon ProxySQL prend le port 3306 et MariaDB ne démarre pas |
@@ -417,6 +422,7 @@ scénario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
 | Détection de `/dev/kvm`, sinon `qemu` + `cpu_mode=none` | Instances sans virtualisation matérielle |
 | InnoDB limité à 1 Go | Par défaut MariaDB réserve ~40 % de la RAM |
 | `resume_guests_state_on_host_boot = true` | Les VM redémarrent après un reboot de l'hôte |
+| `reimage_timeout_per_gb = 60` | Nova attend 60 s par Go (20 par défaut) qu'un volume racine soit réécrit (`rebuild --reimage-boot-volume`, TP 04 bis) : 1 Go demande 22 s sur ce lab |
 | Cinder sur fichier loop par défaut | Aucun disque supplémentaire à acheter |
 | Refus d'utiliser un `CINDER_DEVICE` contenant des données | Évite d'effacer un disque par erreur |
 | `destroy.sh` supprime les volumes Docker oubliés par `kolla-ansible destroy` | Un redéploiement repart réellement de zéro |

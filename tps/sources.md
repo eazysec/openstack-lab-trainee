@@ -1,7 +1,7 @@
 # Sources et références
 
-> Tous les liens ont été vérifiés le 17/10/2026 (ils répondaient). Les versions citées (`2025.1`)
-> correspondent au déploiement du lab ; pour une autre version, remplacer `2025.1` dans l'adresse.
+> Tous les liens ont été vérifiés le 19/11/2026 (ils répondaient). Les versions citées (`2026.1`)
+> correspondent au déploiement du lab ; pour une autre version, remplacer `2026.1` dans l'adresse.
 
 ## Ce qui a réellement servi à construire le lab
 
@@ -9,7 +9,7 @@ Pour être transparent sur l'origine des informations :
 
 | Source | Ce qu'on y a trouvé |
 |---|---|
-| Le code de Kolla-Ansible 2025.1 installé sur l'instance (`~/kolla/venv/share/kolla-ansible/ansible/`) : `group_vars/all.yml`, `roles/*/defaults/main.yml`, `roles/*/templates/` | Les variables réelles de la release : `enable_loadbalancer`, `enable_barbican`, `enable_designate`, `designate_backend`, `neutron_dns_integration`, l'absence de rôle Swift… Plus fiable que toute documentation, car c'est ce qui s'exécute |
+| Le code de Kolla-Ansible 2026.1 installé sur l'instance (`~/kolla/venv/share/kolla-ansible/ansible/`) : `group_vars/all/*.yml`, `roles/*/defaults/main.yml`, `roles/*/templates/` | Les variables réelles de la release : `enable_loadbalancer`, `enable_barbican`, `enable_designate`, `designate_backend`, `neutron_dns_integration`, l'absence de rôle Swift… Plus fiable que toute documentation, car c'est ce qui s'exécute |
 | Les observations faites sur le lab | MTU des réseaux, comportement de `losetup` au boot, réponses du VPC, messages d'erreur exacts cités dans les TP |
 | Les journaux de l'instance (`/var/log/kolla/`, `journalctl`, console AWS) | Le diagnostic de chaque incident (voir [../aws/aws-setup.md §6](../aws/aws-setup.md)) |
 
@@ -22,40 +22,40 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 
 | Sujet | Référence |
 |---|---|
-| Kolla-Ansible 2025.1 (documentation) | <https://docs.openstack.org/kolla-ansible/2025.1/> |
-| Installation rapide (*quickstart*) | <https://docs.openstack.org/kolla-ansible/2025.1/user/quickstart.html> |
-| Configuration avancée (surcharges dans `/etc/kolla/config/`) | <https://docs.openstack.org/kolla-ansible/2025.1/admin/advanced-configuration.html> |
-| Dépannage Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2025.1/user/troubleshooting.html> |
-| Neutron dans Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/neutron.html> |
-| Cinder dans Kolla-Ansible (LVM) | <https://docs.openstack.org/kolla-ansible/2025.1/reference/storage/cinder-guide.html> |
-| Keystone dans Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2025.1/reference/shared-services/keystone-guide.html> |
-| Designate dans Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/designate-guide.html> |
-| Octavia dans Kolla-Ansible : réseau de gestion, certificats, image (TP 15) | <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/octavia.html> |
-| Octavia : recettes (HTTPS, L7) et politiques (TP 15) | <https://docs.openstack.org/octavia/2025.1/user/guides/basic-cookbook.html> |
+| Kolla-Ansible 2026.1 (documentation) | <https://docs.openstack.org/kolla-ansible/2026.1/> |
+| Installation rapide (*quickstart*) | <https://docs.openstack.org/kolla-ansible/2026.1/user/quickstart.html> |
+| Configuration avancée (surcharges dans `/etc/kolla/config/`) | <https://docs.openstack.org/kolla-ansible/2026.1/admin/advanced-configuration.html> |
+| Dépannage Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2026.1/user/troubleshooting.html> |
+| Neutron dans Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2026.1/reference/networking/neutron.html> |
+| Cinder dans Kolla-Ansible (LVM) | <https://docs.openstack.org/kolla-ansible/2026.1/reference/storage/cinder-guide.html> |
+| Keystone dans Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2026.1/reference/shared-services/keystone-guide.html> |
+| Designate dans Kolla-Ansible | <https://docs.openstack.org/kolla-ansible/2026.1/reference/networking/designate-guide.html> |
+| Octavia dans Kolla-Ansible : réseau de gestion, certificats, image (TP 15) | <https://docs.openstack.org/kolla-ansible/2026.1/reference/networking/octavia.html> |
+| Octavia : recettes (HTTPS, L7) et politiques (TP 15) | <https://docs.openstack.org/octavia/2026.1/user/guides/basic-cookbook.html> |
 | Images de test des amphores (TP 15) | <https://tarballs.opendev.org/openstack/octavia/test-images/> |
 | Calendrier des versions OpenStack | <https://releases.openstack.org/> |
-| Versions figées des dépendances (*upper-constraints*) | <https://releases.openstack.org/constraints/upper/2025.1> |
+| Versions figées des dépendances (*upper-constraints*) | <https://releases.openstack.org/constraints/upper/2026.1> |
 | Client `openstack` | <https://docs.openstack.org/python-openstackclient/latest/> |
 | Liste des commandes du client | <https://docs.openstack.org/python-openstackclient/latest/cli/command-list.html> |
-| Keystone (identité, projets, rôles) | <https://docs.openstack.org/keystone/2025.1/> |
-| Keystone : identifiants d'application et règles d'accès (TP 06 bis) | <https://docs.openstack.org/keystone/2025.1/user/application_credentials.html> |
-| Keystone : jetons Fernet (TP 06 bis) | <https://docs.openstack.org/keystone/2025.1/admin/fernet-token-faq.html> |
+| Keystone (identité, projets, rôles) | <https://docs.openstack.org/keystone/2026.1/> |
+| Keystone : identifiants d'application et règles d'accès (TP 06 bis) | <https://docs.openstack.org/keystone/2026.1/user/application_credentials.html> |
+| Keystone : jetons Fernet (TP 06 bis) | <https://docs.openstack.org/keystone/2026.1/admin/fernet-token-faq.html> |
 | keystonemiddleware : validation et cache des jetons dans les services (TP 06 bis) | <https://docs.openstack.org/keystonemiddleware/latest/middlewarearchitecture.html> |
 | Identifiant de requête global, transmis d'un service à l'autre (TP 05 bis) | <https://specs.openstack.org/openstack/oslo-specs/specs/pike/global-req-id.html> |
 | Nova : actions et événements d'une instance (TP 05 bis) | <https://docs.openstack.org/api-ref/compute/#servers-actions-servers-os-instance-actions> |
-| Cinder : volumes et snapshots en ligne de commande ; revert et re-image (TP 04 bis) | <https://docs.openstack.org/cinder/2025.1/cli/cli-manage-volumes.html>, <https://docs.openstack.org/api-ref/block-storage/v3/#revert-volume-to-snapshot> |
-| Nova (calcul) | <https://docs.openstack.org/nova/2025.1/> |
-| Nova : planificateur (*scheduler*) | <https://docs.openstack.org/nova/2025.1/admin/configuration/schedulers.html> |
-| Neutron (réseau) | <https://docs.openstack.org/neutron/2025.1/> |
-| Neutron : réseaux *self-service* avec Open vSwitch | <https://docs.openstack.org/neutron/2025.1/admin/deploy-ovs-selfservice.html> |
-| Neutron : MTU | <https://docs.openstack.org/neutron/2025.1/admin/config-mtu.html> |
-| Neutron : intégration DNS avec Designate | <https://docs.openstack.org/neutron/2025.1/admin/config-dns-int-ext-serv.html> |
-| Cinder (stockage bloc) | <https://docs.openstack.org/cinder/2025.1/> |
-| Cinder : chiffrement des volumes | <https://docs.openstack.org/cinder/2025.1/configuration/block-storage/volume-encryption.html> |
-| Glance (images) | <https://docs.openstack.org/glance/2025.1/> |
-| Horizon (interface web) | <https://docs.openstack.org/horizon/2025.1/> |
-| Designate (DNS) | <https://docs.openstack.org/designate/2025.1/> |
-| Barbican (secrets) | <https://docs.openstack.org/barbican/2025.1/> |
+| Cinder : volumes et snapshots en ligne de commande ; revert et re-image (TP 04 bis) | <https://docs.openstack.org/cinder/2026.1/cli/cli-manage-volumes.html>, <https://docs.openstack.org/api-ref/block-storage/v3/#revert-volume-to-snapshot> |
+| Nova (calcul) | <https://docs.openstack.org/nova/2026.1/> |
+| Nova : planificateur (*scheduler*) | <https://docs.openstack.org/nova/2026.1/admin/scheduling.html> |
+| Neutron (réseau) | <https://docs.openstack.org/neutron/2026.1/> |
+| Neutron : réseaux *self-service* avec Open vSwitch | <https://docs.openstack.org/neutron/2026.1/admin/deploy-ovs-selfservice.html> |
+| Neutron : MTU | <https://docs.openstack.org/neutron/2026.1/admin/config-mtu.html> |
+| Neutron : intégration DNS avec Designate | <https://docs.openstack.org/neutron/2026.1/admin/config-dns-int-ext-serv.html> |
+| Cinder (stockage bloc) | <https://docs.openstack.org/cinder/2026.1/> |
+| Cinder : chiffrement des volumes | <https://docs.openstack.org/cinder/2026.1/configuration/block-storage/volume-encryption.html> |
+| Glance (images) | <https://docs.openstack.org/glance/2026.1/> |
+| Horizon (interface web) | <https://docs.openstack.org/horizon/2026.1/> |
+| Designate (DNS) | <https://docs.openstack.org/designate/2026.1/> |
+| Barbican (secrets) | <https://docs.openstack.org/barbican/2026.1/> |
 | Barbican : guide de l'API (secrets, conteneurs, ACL, *consumers*) | <https://docs.openstack.org/api-guide/key-manager/> |
 | CirrOS (image de test) | <https://github.com/cirros-dev/cirros> |
 | Open vSwitch | <https://docs.openvswitch.org/en/latest/> |
@@ -131,7 +131,7 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 | cloud-init : phases du démarrage | <https://cloudinit.readthedocs.io/en/latest/explanation/boot.html> |
 | cloud-init : données d'instance et gabarits Jinja | <https://cloudinit.readthedocs.io/en/latest/explanation/instancedata.html> |
 | cloud-init : commandes (`status`, `query`, `schema`) | <https://cloudinit.readthedocs.io/en/latest/reference/cli.html> |
-| Nova : service de métadonnées | <https://docs.openstack.org/nova/2025.1/user/metadata.html> |
+| Nova : service de métadonnées | <https://docs.openstack.org/nova/2026.1/user/metadata.html> |
 | Images cloud de Debian | <https://cloud.debian.org/images/cloud/> |
 | GTFOBins : `systemctl` et les échappements par `sudo` | <https://gtfobins.github.io/gtfobins/systemctl/> |
 | NFS : `exports(5)` | <https://man7.org/linux/man-pages/man5/exports.5.html> |
@@ -142,7 +142,7 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 
 | Sujet | Référence |
 |---|---|
-| Nova : mode rescue | <https://docs.openstack.org/nova/2025.1/user/rescue.html> |
+| Nova : mode rescue | <https://docs.openstack.org/nova/2026.1/user/rescue.html> |
 | sudoers : format des règles et traitement des erreurs | <https://www.sudo.ws/docs/man/sudoers.man/> |
 | GRUB : configuration et édition au démarrage | <https://www.gnu.org/software/grub/manual/grub/grub.html> |
 | cloud-init : commandes `status`, `single`, `clean` | <https://cloudinit.readthedocs.io/en/latest/reference/cli.html> |
@@ -153,7 +153,7 @@ pour comprendre, approfondir, ou vérifier une évolution de version.
 
 | Sujet | Référence |
 |---|---|
-| Neutron : routeurs, SNAT, security groups | <https://docs.openstack.org/neutron/2025.1/admin/intro-os-networking.html> |
+| Neutron : routeurs, SNAT, security groups | <https://docs.openstack.org/neutron/2026.1/admin/intro-os-networking.html> |
 | Client `openstack` : règles de security group | <https://docs.openstack.org/python-openstackclient/latest/cli/command-objects/security-group-rule.html> |
 | Barbican : client en ligne de commande | <https://docs.openstack.org/python-barbicanclient/latest/cli/usage.html> |
 | Netplan : routes et routage par source (`routing-policy`) | <https://netplan.readthedocs.io/en/stable/netplan-yaml/> |

@@ -68,8 +68,9 @@ pour les distinguer au premier coup d'œil de celles créées à la main.
 ## 2. Conventions
 
 **Conditions d'entrée.** Un TP part de l'état laissé par le précédent. Chaque TP fournit le script
-`tps/tpNN/verifier-entree.sh`, que son étape 0 lance : il vérifie, sans
-rien modifier, que le lab est prêt, et indique pour chaque écart ce qu'il faut faire. Ne commencez
+`tps/tpNN/verify-entry.sh`, que son étape 0 lance : il vérifie, sans
+rien modifier, que le lab est prêt, et indique pour chaque écart ce qu'il faut faire. Il contrôle
+aussi la place libre sur le disque : 20 Go au TP 01, 12 Go aux TP 14 et 15, 5 Go pour les autres. Ne commencez
 pas tant que sa dernière ligne n'est pas `Lab prêt pour le TP NN.`
 
 Chaque bloc de commandes indique où l'exécuter :

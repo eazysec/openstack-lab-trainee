@@ -33,7 +33,7 @@ Ordre de grandeur pour une session de TP de 8 h sur la `t2.xlarge` : ~1,6 USD, p
 ## 2. Crédits CPU des instances *burstable* (t2, t3, t4g)
 
 Les instances `t*` accumulent des « crédits CPU » quand elles sont peu sollicitées et les dépensent
-quand elles travaillent. L'émulation QEMU (pas de KVM sur une instance non *metal*) fait travailler
+quand elles travaillent. L'émulation QEMU (pas de KVM sur la `t2` du lab) fait travailler
 le CPU en continu dès qu'une VM OpenStack tourne : elle épuise les crédits.
 
 | Mode | Défaut pour | Crédits épuisés → | Risque financier |

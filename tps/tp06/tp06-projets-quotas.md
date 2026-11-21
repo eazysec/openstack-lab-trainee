@@ -18,10 +18,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp06/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 06."
+./openstack-lab-trainee/tps/tp06/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 06."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du déploiement sont là (`mykey`,
 `demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`) et qu'il ne reste rien d'un essai précédent
 (ressources `tp06-`, fichier `~/tp06-openrc.sh`).
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
@@ -200,9 +201,9 @@ rm ~/tp06-openrc.sh
 
 ## Sources
 
-- Keystone : projets, utilisateurs, rôles : <https://docs.openstack.org/keystone/2025.1/>
+- Keystone : projets, utilisateurs, rôles : <https://docs.openstack.org/keystone/2026.1/>
 - Nova, API : `hostId` et champs `OS-EXT-SRV-ATTR` de `server show` :
   <https://docs.openstack.org/api-ref/compute/#show-server-details>
-- Keystone dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/reference/shared-services/keystone-guide.html>
+- Keystone dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2026.1/reference/shared-services/keystone-guide.html>
 - Guide de sécurité OpenStack : <https://docs.openstack.org/security-guide/>
 - Toutes les sources du parcours : [sources.md](../sources.md)

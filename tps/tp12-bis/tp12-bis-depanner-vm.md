@@ -21,10 +21,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp12-bis/verifier-entree.sh    # dernière ligne : "Lab prêt pour le TP 12 bis."
+./openstack-lab-trainee/tps/tp12-bis/verify-entry.sh    # dernière ligne : "Lab prêt pour le TP 12 bis."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du
 déploiement sont là, que l'image `debian13` et le gabarit `m1.1g` du TP 12 existent, et qu'il ne
 reste rien d'un essai précédent (`tp12b-`) ; il vérifie aussi que Cinder répond, pour l'étape 5. Chaque écart est affiché avec ce qu'il faut faire.
 
@@ -333,7 +334,7 @@ rm -r ~/tp12b
 
 ## Sources
 
-- Nova, mode rescue : <https://docs.openstack.org/nova/2025.1/user/rescue.html>
+- Nova, mode rescue : <https://docs.openstack.org/nova/2026.1/user/rescue.html>
 - sudoers, format des règles et traitement des erreurs : <https://www.sudo.ws/docs/man/sudoers.man/>
 - GRUB, configuration et édition au démarrage : <https://www.gnu.org/software/grub/manual/grub/grub.html>
 - cloud-init, commandes `status`, `single`, `clean` : <https://cloudinit.readthedocs.io/en/latest/reference/cli.html>

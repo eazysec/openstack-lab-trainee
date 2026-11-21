@@ -20,10 +20,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp04-bis/verifier-entree.sh    # dernière ligne : "Lab prêt pour le TP 04 bis."
+./openstack-lab-trainee/tps/tp04-bis/verify-entry.sh    # dernière ligne : "Lab prêt pour le TP 04 bis."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que Cinder est déployé, que les
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que Cinder est déployé, que les
 ressources communes du déploiement sont là et qu'il ne reste rien d'un essai précédent (`tp04b-` :
 VM, volumes, snapshots, images). Ne commencez pas tant que la dernière ligne n'est pas
 `Lab prêt pour le TP 04 bis.`
@@ -161,7 +162,7 @@ Deux limites, à constater :
 
 ```bash
 # [instance]
-openstack volume snapshot create --volume tp04b-vol-racine --force tp04b-snap-racine
+openstack --os-volume-api-version 3.66 volume snapshot create --volume tp04b-vol-racine tp04b-snap-racine   # volume attaché : TP 04
 until [ "$(openstack volume snapshot show tp04b-snap-racine -f value -c status)" = available ]; do sleep 2; done
 openstack volume revert tp04b-snap-racine       # refusé : le volume racine est attaché à la VM
 openstack server remove volume tp04b-vm-volume tp04b-vol-donnees; attendre tp04b-vol-donnees available
@@ -178,24 +179,26 @@ d'application et règles d'accès). Pour qu'une règle s'applique à Cinder, tro
 openstack service list -c Name -c Type | grep -iE 'name|cinder'       # 1. le catalogue de Keystone
 sudo docker exec cinder_api awk '/^\[keystone_authtoken\]/{s=1} s&&/^service_type/{print;exit}' /etc/cinder/cinder.conf
                                                                        # 2. le type que Cinder se donne
+openstack endpoint list --service block-storage -c Interface -c URL    # l'adresse de Cinder
 ```
 
 | | Où | Valeur |
 |---|---|---|
-| 1 | Catalogue de Keystone : types sous lesquels Cinder est enregistré | `block-storage`, `volumev3` |
-| 2 | Configuration de Cinder (`[keystone_authtoken] service_type`), écrite par le déploiement | `volumev3` |
+| 1 | Catalogue de Keystone : type sous lequel Cinder est enregistré | `block-storage` |
+| 2 | Configuration de Cinder (`[keystone_authtoken] service_type`), écrite par le déploiement | `block-storage` |
 | 3 | Le champ `"service"` de chaque règle d'accès | celui que vous écrivez |
 
 Cinder vérifie que la valeur 2 figure dans le catalogue, puis que la valeur 3 lui est **exactement
-égale**. Les appels nécessaires ont été relevés avec `--debug` (TP 06 bis, étape 5) : la recherche du
-volume, la création du snapshot et la liste.
+égale**. Les chemins sont ceux que le client appelle, relevés avec `--debug` (TP 06 bis, étape 5) :
+la recherche du volume, la création du snapshot et la liste. L'adresse de Cinder se termine par
+`/v3`, sans identifiant de projet : les chemins non plus.
 
 ```bash
 # [instance]
-R='[{"service": "volumev3", "method": "GET", "path": "/v3/*/volumes/*"},
-    {"service": "volumev3", "method": "GET", "path": "/v3/*/volumes/detail"},
-    {"service": "volumev3", "method": "POST", "path": "/v3/*/snapshots"},
-    {"service": "volumev3", "method": "GET", "path": "/v3/*/snapshots/detail"}]'
+R='[{"service": "block-storage", "method": "GET", "path": "/v3/volumes/*"},
+    {"service": "block-storage", "method": "GET", "path": "/v3/volumes/detail"},
+    {"service": "block-storage", "method": "POST", "path": "/v3/snapshots"},
+    {"service": "block-storage", "method": "GET", "path": "/v3/snapshots/detail"}]'
 { read -r ID; read -r SECRET; } < <(openstack application credential create tp04b-appcred-snapshots \
   --role member --access-rules "$R" -f value -c id -c secret)
 appli() {  # appli <id> <secret> <commande…> : la commande, avec l'identifiant d'application seul
@@ -210,13 +213,13 @@ appli $ID $SECRET openstack volume snapshot delete tp04b-snap-auto              
 appli $ID $SECRET openstack volume delete tp04b-vol-copie                                       # refusé
 ```
 
-Contre-épreuve : les mêmes règles, écrites avec `block-storage`, un type pourtant présent dans le
-catalogue :
+Contre-épreuve : les mêmes règles, écrites avec `volumev3`, le type sous lequel Cinder était aussi
+enregistré jusqu'à OpenStack 2025.1 :
 
 ```bash
 # [instance]
 { read -r ID2; read -r SECRET2; } < <(openstack application credential create tp04b-appcred-mauvais-type \
-  --role member --access-rules "${R//volumev3/block-storage}" -f value -c id -c secret)
+  --role member --access-rules "${R//block-storage/volumev3}" -f value -c id -c secret)
 appli $ID2 $SECRET2 openstack volume snapshot list -c Name                                     # refusé : 401
 openstack application credential delete tp04b-appcred-snapshots
 openstack application credential delete tp04b-appcred-mauvais-type
@@ -239,7 +242,7 @@ until [ -z "$(openstack volume snapshot list -f value -c Name | grep '^tp04b-')"
 openstack volume delete tp04b-vol-donnees tp04b-vol-copie tp04b-vol-racine
 until [ -z "$(openstack volume list -f value -c Name | grep '^tp04b-')" ]; do sleep 3; done
 unset -f attendre ecrire lire appli; unset FIP FIP2 SA IMG R ID SECRET ID2 SECRET2
-./openstack-lab-trainee/tps/tp04-bis/verifier-entree.sh | tail -1    # "Lab prêt pour le TP 04 bis."
+./openstack-lab-trainee/tps/tp04-bis/verify-entry.sh | tail -1    # "Lab prêt pour le TP 04 bis."
 ```
 
 ## Questions
@@ -254,9 +257,8 @@ unset -f attendre ecrire lire appli; unset FIP FIP2 SA IMG R ID SECRET ID2 SECRE
 5. Un re-image avec une image plus grande que le volume : que se passe-t-il, à votre avis ?
 6. `openstack server image create` sur une VM qui démarre sur un volume produit une image de 0 octet.
    Que contient-elle vraiment ?
-7. À l'étape 5, pourquoi la règle écrite avec `block-storage` est-elle refusée, alors que ce type est
-   dans le catalogue ? Qu'arriverait-il si la configuration de Cinder portait un type absent du
-   catalogue ?
+7. À l'étape 5, pourquoi la règle écrite avec `volumev3` est-elle refusée ? Qu'arriverait-il si la
+   configuration de Cinder portait un type absent du catalogue ?
 
 ## Validation
 
@@ -264,13 +266,13 @@ unset -f attendre ecrire lire appli; unset FIP FIP2 SA IMG R ID SECRET ID2 SECRE
 - [ ] Refus du re-image avec un snapshot ; chaîne snapshot → volume → image → re-image faite.
 - [ ] VM sur volume reconstruite : système remis à neuf, volume de données intact.
 - [ ] Limites de l'étape 4 relevées ; questions 2 et 3 argumentées.
-- [ ] Automate de snapshots : création et liste acceptées, suppressions refusées ; règle `block-storage` refusée ; les trois valeurs relevées.
+- [ ] Automate de snapshots : création et liste acceptées, suppressions refusées ; règle `volumev3` refusée ; les trois valeurs relevées.
 - [ ] Nettoyage fait.
 
 ## Sources
 
-- Cinder : gérer les volumes et leurs snapshots en ligne de commande : <https://docs.openstack.org/cinder/2025.1/cli/cli-manage-volumes.html>
+- Cinder : gérer les volumes et leurs snapshots en ligne de commande : <https://docs.openstack.org/cinder/2026.1/cli/cli-manage-volumes.html>
 - API Block Storage v3 : revert au snapshot : <https://docs.openstack.org/api-ref/block-storage/v3/#revert-volume-to-snapshot> ; re-image : <https://docs.openstack.org/api-ref/block-storage/v3/>
-- Images adossées à des volumes (question 6) : <https://docs.openstack.org/cinder/2025.1/admin/blockstorage-volume-backed-image.html>
+- Images adossées à des volumes (question 6) : <https://docs.openstack.org/cinder/2026.1/admin/volume-backed-image.html>
 - Nova : reconstruire une instance qui démarre sur un volume : <https://docs.openstack.org/api-ref/compute/#rebuild-server-rebuild-action>
 - Toutes les sources du parcours : [sources.md](../sources.md)

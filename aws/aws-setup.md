@@ -24,16 +24,19 @@ simulation par défaut et affichent le coût avant toute action.
 
 ## 2. Les contraintes AWS et leurs conséquences
 
-### 2.1 Pas de virtualisation matérielle (instance non *metal*)
+### 2.1 Pas de virtualisation matérielle (instance `t2` du lab)
 
-Une instance EC2 classique est elle-même une VM. Le processeur n'expose pas les extensions
-Intel VT-x / AMD-V à l'intérieur : il n'y a pas de `/dev/kvm`.
+Une instance EC2 virtuelle est elle-même une VM. Sur la `t2.xlarge` du lab, le processeur n'expose pas
+les extensions Intel VT-x / AMD-V à l'intérieur : il n'y a pas de `/dev/kvm`. Seules les instances
+*metal* et, depuis février 2026, les familles C8i, M8i et R8i avec l'option de virtualisation imbriquée
+les exposent (voir le tableau du §4 ; non testé sur le lab).
 
 - **Conséquence** : Nova ne peut pas utiliser KVM. Les VM OpenStack tournent en émulation QEMU (TCG),
-  10 à 50 fois plus lente. Une CirrOS démarre en ~1 min ; une Debian 13
+  nettement plus lente qu'avec KVM (rapport non mesuré sur le lab). Une CirrOS démarre en ~1 min ; une Debian 13
   cloud (TP 12) termine cloud-init en ~2 min, une Ubuntu 24.04 minimale en ~3 min 40 (mesures sur
   `t2.xlarge`, 1 Go de mémoire).
-- **Ce que fait `deploy.sh`** : il détecte l'absence de `/dev/kvm` et configure `virt_type = qemu`.
+- **Ce que fait `deploy.sh`** : il détecte l'absence de `/dev/kvm` et configure `virt_type = qemu` (variable
+  `nova_compute_virt_type` de `globals.yml` et surcharge `/etc/kolla/config/nova/nova-compute.conf`).
 
 ### 2.2 Instance *burstable* (familles t2, t3, t4g)
 
@@ -89,7 +92,7 @@ Les coûts indiqués sont des ordres de grandeur ; le détail est dans [finops.m
 |---|---|---|
 | Rester en QEMU (actuel) | Suffisant pour CirrOS et la découverte d'OpenStack | Prix de l'instance actuelle |
 | **Instance `*.metal` (ex. `c5.metal`, `m5.metal`) | Serveur physique entier : `/dev/kvm` disponible. `deploy.sh` passe automatiquement en `kvm`, sans modification. | ~4 à 5 USD/heure. À arrêter dès la fin du TP.** |
-| Virtualisation imbriquée | Certaines familles d'instances récentes peuvent proposer la virtualisation imbriquée selon les régions : vérifier la documentation AWS du moment. | Variable |
+| Virtualisation imbriquée | Depuis février 2026, option CPU des familles C8i, M8i et R8i, à activer au lancement : KVM fonctionne dans l'instance (`/dev/kvm` présent, `deploy.sh` passe en `kvm`). AWS conseille *metal* pour les charges sensibles aux performances. [Documentation AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-ec2-nested-virtualization.html). Non testé sur le lab. | Prix de l'instance choisie |
 | Instance non *burstable* (`m5.xlarge`, `m6i.xlarge`…) | Pas de KVM, mais pas de bridage CPU non plus | Comparable à la `t2.xlarge` |
 
 ### 3.2 Rendre les floating IP joignables depuis Internet

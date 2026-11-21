@@ -23,7 +23,7 @@ site. Les trois niveaux du TP s'en rapprochent pas à pas :
 | 2 | Bucket S3 (Garage) sur l'hôte | Oui | Non |
 | 3 | Copie sur votre poste | Oui | Oui |
 
-> Sur ce lab, Garage tourne à côté d'OpenStack (Swift n'existe plus dans Kolla-Ansible 2025.1). Il
+> Sur ce lab, Garage tourne à côté d'OpenStack (Swift n'existe plus dans Kolla-Ansible : vérifié en 2025.1 et en 2026.1). Il
 > s'utilise comme n'importe quel service S3 : AWS S3, OVHcloud Object Storage, Ceph RGW…
 
 ---
@@ -32,10 +32,11 @@ site. Les trois niveaux du TP s'en rapprochent pas à pas :
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp10/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 10."
+./openstack-lab-trainee/tps/tp10/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 10."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du déploiement sont là (`mykey`,
 `demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`), que Cinder, Barbican, le stockage objet du lab et
 `restic` sont là, et qu'il ne reste rien d'un essai précédent (`tp10-`, bucket et clé compris).
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est

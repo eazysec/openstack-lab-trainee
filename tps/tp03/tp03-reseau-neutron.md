@@ -17,10 +17,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp03/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 03."
+./openstack-lab-trainee/tps/tp03/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 03."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le
+lab, voir TP 02, étape 7), que les ressources communes du déploiement sont là (`mykey`,
 `demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`) et qu'il ne reste rien d'un essai précédent
 (`tp03-`).
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
@@ -180,9 +181,9 @@ openstack security group delete tp03-sg
 
 ## Sources
 
-- Neutron : réseaux *self-service* avec Open vSwitch : <https://docs.openstack.org/neutron/2025.1/admin/deploy-ovs-selfservice.html>
-- Neutron dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/neutron.html>
-- Neutron : MTU : <https://docs.openstack.org/neutron/2025.1/admin/config-mtu.html>
+- Neutron : réseaux *self-service* avec Open vSwitch : <https://docs.openstack.org/neutron/2026.1/admin/deploy-ovs-selfservice.html>
+- Neutron dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2026.1/reference/networking/neutron.html>
+- Neutron : MTU : <https://docs.openstack.org/neutron/2026.1/admin/config-mtu.html>
 - `ip netns` : <https://man7.org/linux/man-pages/man8/ip-netns.8.html>
 - Open vSwitch : <https://docs.openvswitch.org/en/latest/>
 - `tcpdump` : <https://www.tcpdump.org/manpages/tcpdump.1.html>

@@ -18,10 +18,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp08/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 08."
+./openstack-lab-trainee/tps/tp08/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 08."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du déploiement sont là (`mykey`,
 `demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`) et qu'il ne reste rien d'un essai précédent
 (`tp08-`, fichier `~/tp08-openrc.sh`). Si Barbican manque, il le signale : déployez-le ci-dessous, puis relancez le script.
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
@@ -218,7 +219,7 @@ openstack secret list
 
 ## Sources
 
-- Barbican : <https://docs.openstack.org/barbican/2025.1/>
-- Keystone : projets, utilisateurs, rôles : <https://docs.openstack.org/keystone/2025.1/>
+- Barbican : <https://docs.openstack.org/barbican/2026.1/>
+- Keystone : projets, utilisateurs, rôles : <https://docs.openstack.org/keystone/2026.1/>
 - Guide de sécurité OpenStack : <https://docs.openstack.org/security-guide/>
 - Toutes les sources du parcours : [sources.md](../sources.md)

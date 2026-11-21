@@ -22,10 +22,11 @@ Internet : on interroge directement ce serveur.
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp11/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 11."
+./openstack-lab-trainee/tps/tp11/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 11."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du déploiement sont là (`mykey`,
 `demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`), qu'aucune zone DNS d'un essai précédent n'est restée et
 qu'il ne reste rien d'un essai précédent (`tp11-`). Si Designate manque, il le signale.
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
@@ -244,7 +245,7 @@ rm ~/tp11-openrc.sh
 
 ## Sources
 
-- Designate : <https://docs.openstack.org/designate/2025.1/>
-- Designate dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2025.1/reference/networking/designate-guide.html>
-- Neutron : intégration DNS avec Designate : <https://docs.openstack.org/neutron/2025.1/admin/config-dns-int-ext-serv.html>
+- Designate : <https://docs.openstack.org/designate/2026.1/>
+- Designate dans Kolla-Ansible : <https://docs.openstack.org/kolla-ansible/2026.1/reference/networking/designate-guide.html>
+- Neutron : intégration DNS avec Designate : <https://docs.openstack.org/neutron/2026.1/admin/config-dns-int-ext-serv.html>
 - Toutes les sources du parcours : [sources.md](../sources.md)

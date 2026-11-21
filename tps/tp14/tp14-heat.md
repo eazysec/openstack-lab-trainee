@@ -38,18 +38,20 @@ d'un lab sans aucun reste du TP 13, ni dans OpenStack ni sur l'hôte.
 ```bash
 # [instance]
 ./openstack-lab-trainee/verify.sh | tail -1                  # "Résultat : 42 réussis, 0 échoués"
-./openstack-lab-trainee/tps/tp14/verifier-entree.sh          # dernière ligne : "Lab prêt pour le TP 14."
+./openstack-lab-trainee/tps/tp14/verify-entry.sh          # dernière ligne : "Lab prêt pour le TP 14."
 ```
 
-`verifier-entree.sh` ne modifie rien. Il contrôle :
+`verify-entry.sh` ne modifie rien. Il contrôle :
 
 | Condition | Pourquoi | Si elle n'est pas remplie |
 |---|---|---|
 | OpenStack répond ; image `debian13` et gabarit `m1.1g` présents | les VM du TP 14 les utilisent | `verify.sh`, puis étape 0 du TP 12 |
+| `virt_type = qemu` dans `nova.conf` (ou `kvm` si `/dev/kvm` existe) | sinon aucune VM ne démarre | TP 02, étape 7, partie C |
 | Aucune ressource `tp13`, FIP `10.0.2.150` libre | la pile recrée les mêmes adresses et la même FIP | étape 16 du TP 13 |
 | Hôte sans route `192.168.121.0/24`, règle FORWARD `tp13`, configuration chrony du TP 13 ni Squid | le TP 14 les remet en place lui-même | étape 16 du TP 13 |
 | Aucun reste `tp14-` | essai précédent du TP 14 | étape 10 du TP 14 |
 | Heat absent et `ENABLE_HEAT=no` dans le scénario 04 | l'étape 1 l'ajoute | si Heat est déjà là (TP rejoué), passer à la fin de l'étape 1 |
+| 12 Go libres au moins sur `/` | place prise par le TP, avec une marge | libérer de la place (`sudo docker image prune -f` supprime les images sans étiquette ; `sudo docker system df` montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00) |
 
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
 pas `Lab prêt pour le TP 14.`
@@ -80,8 +82,17 @@ grep '^ENABLE_HEAT' openstack-lab-trainee/scenarios/04-aio-complet.env     # ENA
 ```
 
 `deploy.sh` réécrit `/etc/kolla/globals.yml` à partir du scénario (`enable_heat: "yes"`), installe
-le client `python-heatclient`, puis repasse sur tous les services : ceux qui n'ont pas changé ne sont
-que vérifiés.
+le client `python-heatclient`, télécharge de nouveau les images de tous les services
+(`kolla-ansible pull`), puis repasse sur tous les services. Si le projet Kolla a publié des images plus
+récentes depuis votre déploiement, les services concernés redémarrent sur ces nouvelles images :
+ajouter Heat met donc aussi à jour le reste du cloud. Les anciennes images restent sur le disque
+(7 Go de place perdue, mesurés en novembre 2026) :
+
+```bash
+# [instance] : les anciennes images, sans étiquette, restent sur le disque
+sudo docker image prune -f                                   # Total reclaimed space : la place rendue
+df -h /                                                      # place libre
+```
 
 Vérifiez :
 
@@ -105,7 +116,7 @@ liste des services de ce moment-là.
 > # [instance]
 > source ~/kolla/venv/bin/activate
 > sed -i 's/^enable_heat: "no"/enable_heat: "yes"/' /etc/kolla/globals.yml   # à faire soi-même
-> pip install python-heatclient -c https://releases.openstack.org/constraints/upper/2025.1
+> pip install python-heatclient -c https://releases.openstack.org/constraints/upper/2026.1
 > kolla-ansible deploy -i ~/kolla/all-in-one --tags heat,horizon            # deux minutes environ
 > ```
 >
@@ -618,7 +629,7 @@ qu'à l'étape 0 doit répondre de la même façon.
 ```bash
 # [instance]
 ./openstack-lab-trainee/verify.sh | tail -1                  # 42 réussis, 0 échoués : plus de section "Heat"
-./openstack-lab-trainee/tps/tp14/verifier-entree.sh          # "Lab prêt pour le TP 14." : Heat absent, ENABLE_HEAT=no
+./openstack-lab-trainee/tps/tp14/verify-entry.sh          # "Lab prêt pour le TP 14." : Heat absent, ENABLE_HEAT=no
 free -m | awk '/^Mem:/{print $7}'                            # la mémoire est revenue
 ```
 
@@ -657,13 +668,13 @@ Dans Horizon, après une nouvelle connexion, le menu Orchestration a disparu.
 - [ ] Tests de l'étape 12 du TP 13 rejoués : mêmes résultats ; trois écarts constatés et expliqués.
 - [ ] Modification hors du modèle constatée, puis retirée (étape 9).
 - [ ] Relevés de l'étape 3 et de l'étape 10 comparés ; volume restant expliqué et supprimé.
-- [ ] Nettoyage complet ; Heat retiré ; `verify.sh` sans échec ; `verifier-entree.sh` : lab prêt.
+- [ ] Nettoyage complet ; Heat retiré ; `verify.sh` sans échec ; `verify-entry.sh` : lab prêt.
 
 ## Sources
 
-- Heat, guide des modèles : <https://docs.openstack.org/heat/2025.1/template_guide/>
-- Heat, spécification HOT (fonctions `get_param`, `get_resource`, `get_attr`, `list_join`) : <https://docs.openstack.org/heat/2025.1/template_guide/hot_spec.html>
-- Heat, types de ressources OpenStack : <https://docs.openstack.org/heat/2025.1/template_guide/openstack.html>
+- Heat, guide des modèles : <https://docs.openstack.org/heat/2026.1/template_guide/>
+- Heat, spécification HOT (fonctions `get_param`, `get_resource`, `get_attr`, `list_join`) : <https://docs.openstack.org/heat/2026.1/template_guide/hot_spec.html>
+- Heat, types de ressources OpenStack : <https://docs.openstack.org/heat/2026.1/template_guide/openstack.html>
 - Client `openstack stack` : <https://docs.openstack.org/python-heatclient/latest/cli/stack.html>
-- Kolla-Ansible, exploitation (`deploy`, `stop`, `reconfigure`, `--tags`) : <https://docs.openstack.org/kolla-ansible/2025.1/user/operating-kolla.html>
+- Kolla-Ansible, exploitation (`deploy`, `stop`, `reconfigure`, `--tags`) : <https://docs.openstack.org/kolla-ansible/2026.1/user/operating-kolla.html>
 - Toutes les sources du parcours : [sources.md](../sources.md)

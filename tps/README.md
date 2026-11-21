@@ -70,7 +70,7 @@ to tell them apart at a glance from those created by hand.
 ## 2. Conventions
 
 **Entry conditions.** A lab starts from the state left by the previous one. Each lab provides the
-script `tps/tpNN/verifier-entree.sh`, which its step 0 runs: it checks, without changing anything,
+script `tps/tpNN/verify-entry.sh`, which its step 0 runs: it checks, without changing anything,
 that the platform is ready, and says what to do for each gap. Do not start until its last line is
 `Lab prêt pour le TP NN.` (platform ready for TP NN).
 

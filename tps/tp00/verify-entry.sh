@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  verifier-entree.sh : tout est-il prêt pour le TP 00 ? [poste]
+#  verify-entry.sh : tout est-il prêt pour le TP 00 ? [poste]
 #  Lecture seule : ne crée, ne modifie et ne supprime rien.
 #
-#  Usage : ./openstack-lab-trainee/tps/tp00/verifier-entree.sh [<IP_PUBLIQUE>]
+#  Usage : ./openstack-lab-trainee/tps/tp00/verify-entry.sh [<IP_PUBLIQUE>]
 #          (sur le poste, dans le dossier qui contient openstack-lab-trainee/ et ec2_key)
 #  Code retour : 0 si toutes les conditions d'entrée sont remplies, 1 sinon.
 #  Chaque écart est suivi de ce qu'il faut faire.

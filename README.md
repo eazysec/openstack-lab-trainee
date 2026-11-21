@@ -33,7 +33,7 @@ security measures.
 This repository is structured as a progressive learning roadmap: it starts with OpenStack fundamentals
 on a cloud that you deploy yourself, and advances toward practical security use cases across the
 OpenStack ecosystem, its services and the applications it hosts. Each lab starts from the state left
-by the previous one, checks it first (`verifier-entree.sh`), and ends with questions and a validation
+by the previous one, checks it first (`verify-entry.sh`), and ends with questions and a validation
 grid, to be reviewed by a tutor.
 
 ## Work phases
@@ -82,8 +82,6 @@ That observation is what made me want to create these labs and share them.
 
 Security is designed from the start, verified during the build and grown collectively.
 
-Merlin Tchoffo, cybersecurity and cloud expert
-
 ---
 
 ## The platform: OpenStack All-in-One on a cloud instance (Kolla-Ansible)
@@ -124,7 +122,7 @@ openstack-lab-trainee/
 ├── tests/
 │   └── test-public-fip.sh     host-side test of scenario 03, without AWS resources (TP 07)
 ├── tps/                       the labs: instructions, conventions, progress grid, sources;
-│                              one tpNN/ folder per lab: instructions, verifier-entree.sh, provided files
+│                              one tpNN/ folder per lab: instructions, verify-entry.sh, provided files
 ├── VERSION                    repository version
 ├── LICENSE                    licence of the scripts (MIT)
 ├── LICENSE-CONTENU.md         licence of the educational content (CC BY-SA 4.0)
@@ -159,11 +157,15 @@ Prerequisites: fresh Ubuntu 24.04 instance, ≥ 8 GB RAM (16 recommended), ≥ 2
 ≥ 40 GB of disk (60 recommended: ~30 GB used with scenario 04), a user with passwordless `sudo`
 (`ubuntu` on EC2), Internet access.
 
-> **OpenStack version.** The platform deploys OpenStack 2025.1 (Epoxy). This series has no longer been
-> maintained by the OpenStack project since autumn 2026: no more official fixes, including security
-> fixes, and its container images are no longer rebuilt. The deployment works (checked on 18/11/2026),
-> but the series will be removed at its end of life, on a date not yet announced. The move to 2026.1
-> (Gazpacho) is being prepared.
+> **OpenStack version.** The platform deploys OpenStack 2026.1 (Gazpacho), a series maintained by the
+> OpenStack project (end of maintenance estimated in autumn 2027, according to releases.openstack.org).
+> The previous version of the platform, on OpenStack 2025.1 (Epoxy, a series no longer maintained),
+> remains available on the `stable/2025.1` branch of this repository, without further changes.
+>
+> **Container images.** `deploy.sh` uses the public Kolla images (`quay.io/openstack.kolla`). Since
+> 2026.1, Kolla-Ansible presents them as test images and refuses to use them without the
+> `--use-test-images` option, which `deploy.sh` passes. This is fine for a lab. In production, build
+> your own images (`kolla-build`) and pull them from a registry you control.
 
 ```bash
 # From your workstation: check that no CPU credit charge is possible (see aws/finops.md)
@@ -196,8 +198,8 @@ Parameters are set in the scenario file, or as environment variables:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `OPENSTACK_RELEASE` | `2025.1` | OpenStack series: image and version constraints |
-| `KOLLA_ANSIBLE_REF` | `unmaintained/2025.1` | Kolla-Ansible branch: `stable/<series>` while the series is maintained, `unmaintained/<series>` afterwards (the `stable/` branch is then deleted) |
+| `OPENSTACK_RELEASE` | `2026.1` | OpenStack series: image and version constraints |
+| `KOLLA_ANSIBLE_REF` | `stable/2026.1` | Kolla-Ansible branch: `stable/<series>` while the series is maintained, `unmaintained/<series>` afterwards (the `stable/` branch is then deleted) |
 | `WORKDIR` | `~/kolla` | venv, inventory, logs |
 | `MGMT_IF` / `MGMT_IP` | detected from the default route | Interface/IP of the APIs |
 | `EXT_CIDR` / `EXT_GW` | `10.0.2.0/24` / `10.0.2.1` | Neutron external network |
@@ -225,6 +227,9 @@ To remove everything:
 ./openstack-lab-trainee/destroy.sh            # OpenStack containers and data
 ./openstack-lab-trainee/destroy.sh --purge    # + config, venv, host network, Cinder storage; then sudo reboot
 ```
+
+Docker images stay on disk, even after `--purge` (measured: disk 50 % full as soon as scenario 01
+is redeployed).
 
 ---
 
@@ -339,7 +344,7 @@ Not deployed:
 - Octavia (load balancing): disabled for the same reason; TP 15 adds it (`ENABLE_OCTAVIA=yes` in
   scenario 04), then removes it;
 - Barbican and Designate: only in scenario 04;
-- **Swift (object storage): no longer exists in Kolla-Ansible 2025.1** (no role, no `enable_swift`
+- **Swift (object storage): no longer exists in Kolla-Ansible (checked in 2025.1 and 2026.1)** (no role, no `enable_swift`
   variable). The Kolla alternative, `ceph-rgw` (Swift-compatible API), requires an external Ceph
   cluster. For TP 10, the platform provides a lightweight S3 server (Garage) instead, outside Kolla;
 - Cinder backup: would require Swift, Ceph or NFS;
@@ -352,8 +357,7 @@ Not deployed:
 | `/etc/kolla/globals.yml` | Main configuration (generated by `deploy.sh`) |
 | `/etc/kolla/passwords.yml` | All the secrets (never commit it) |
 | `/etc/kolla/config/galera.cnf` | `innodb_buffer_pool_size = 1G` |
-| `/etc/kolla/config/nova/nova-compute.conf` | `resume_guests_state_on_host_boot`, and with QEMU `virt_type`, `cpu_mode` |
-| `/etc/kolla/config/cinder.conf` (with Cinder) | `[keystone_authtoken] service_type = volumev3`: without it, Cinder rejects application credentials with access rules (TP 04 bis) |
+| `/etc/kolla/config/nova/nova-compute.conf` | `resume_guests_state_on_host_boot`, `reimage_timeout_per_gb`, and with QEMU `virt_type`, `cpu_mode` |
 | `/etc/kolla/<service>/` | Rendered configuration of each service (overwritten on every deployment: do not edit) |
 | `/etc/kolla/admin-openrc.sh`, `/etc/kolla/clouds.yaml` | Admin CLI credentials |
 | `/etc/openstack-lab/network.env` | Host network parameters (read at boot) |
@@ -414,7 +418,7 @@ Internet goes through scenario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
 
 | Choice | Why |
 |---|---|
-| Kolla-Ansible `unmaintained/2025.1` + upper-constraints | Versions pinned by the constraints: reproducible deployment. The 2025.1 series is no longer maintained: its `stable/2025.1` branch was deleted, hence `unmaintained/2025.1` |
+| Kolla-Ansible `stable/2026.1` + upper-constraints | Versions pinned by the constraints: reproducible deployment. When a series is no longer maintained, its `stable/` branch is deleted: you must then switch to `unmaintained/<series>` (this happened to 2025.1) |
 | `set -Eeuo pipefail` + trap showing the failing line | Stops at the first error, with the log |
 | One script + scenario files | A single logic to maintain; variants differ only by their parameters |
 | `enable_loadbalancer: "no"` (+ haproxy/keepalived/proxysql set to `no`) | Since 2024.2 this variable disables the load balancer. Otherwise ProxySQL takes port 3306 and MariaDB does not start |
@@ -424,6 +428,7 @@ Internet goes through scenario 03 ([aws/aws-setup.md §4](aws/aws-setup.md)).
 | `/dev/kvm` detection, otherwise `qemu` + `cpu_mode=none` | Instances without hardware virtualisation |
 | InnoDB limited to 1 GB | By default MariaDB reserves ~40 % of the RAM |
 | `resume_guests_state_on_host_boot = true` | VMs restart after a host reboot |
+| `reimage_timeout_per_gb = 60` | Nova waits 60 s per GB (20 by default) for a root volume to be rewritten (`rebuild --reimage-boot-volume`, TP 04 bis): 1 GB takes 22 s on this lab |
 | Cinder on a loop file by default | No extra disk to buy |
 | Refuses a `CINDER_DEVICE` that contains data | Avoids erasing a disk by mistake |
 | `destroy.sh` removes the Docker volumes left by `kolla-ansible destroy` | A redeployment really starts from scratch |

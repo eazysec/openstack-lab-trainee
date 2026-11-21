@@ -18,10 +18,11 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp04/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 04."
+./openstack-lab-trainee/tps/tp04/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 04."
 ```
 
-Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
+Ce script ne modifie rien. Il vérifie que la plateforme répond, que Nova peut démarrer des VM (`virt_type = qemu` sur le lab, voir
+TP 02, étape 7), que les ressources communes du déploiement sont là (`mykey`,
 `demo-net`, `public1`, `demo-router`, `cirros`, `m1.tiny`) et qu'il ne reste rien d'un essai précédent
 (`tp04-`). Si Cinder manque, il le signale : ajoutez-le ci-dessous, puis relancez le script.
 Chaque écart est affiché avec ce qu'il faut faire. Ne commencez pas tant que la dernière ligne n'est
@@ -108,17 +109,24 @@ exit
 openstack volume snapshot create --volume tp04-vol tp04-snap
 ```
 
-Cette commande échoue : on ne fait pas de snapshot d'un volume en cours d'utilisation sans le dire
-explicitement, car les données en cours d'écriture pourraient être incohérentes. Deux options :
-détacher le volume, ou forcer. Ici, le système de fichiers est démonté, on peut forcer :
+Cette commande échoue (`status must be available, but current status is: in-use`) : on ne fait pas
+de snapshot d'un volume en cours d'utilisation sans le dire explicitement, car les données en cours
+d'écriture pourraient être incohérentes. Deux options : détacher le volume, ou demander le snapshot
+d'un volume attaché. Ici, le système de fichiers est démonté, on peut le demander :
 
 ```bash
 # [instance]
-openstack volume snapshot create --volume tp04-vol --force tp04-snap
+openstack --os-volume-api-version 3.66 volume snapshot create --volume tp04-vol tp04-snap
 openstack volume snapshot list            # attendre "available"
 openstack volume create --snapshot tp04-snap --size 1 tp04-vol-copie
 openstack volume list
 ```
+
+La demande passe par la version de l'API de Cinder : jusqu'à la 3.65, il fallait l'option `--force` ;
+à partir de la 3.66, Cinder accepte le snapshot d'un volume attaché sans option, et c'est à vous de
+vous assurer que le système de fichiers est au repos. Le client `openstack` du lab (9.0) n'envoie
+plus `--force` mais garde la 3.65 pour cette commande : avec `--force`, elle échoue comme la
+première. D'où `--os-volume-api-version 3.66`.
 
 `tp04-vol-copie` est un nouveau volume contenant les données du snapshot. Pour vérifier, attachez-le
 à `tp04-vm-2` à la place de `tp04-vol` et lisez `preuve.txt`. Les autres façons de revenir en arrière
@@ -165,8 +173,8 @@ du snapshot se termine, puis relancez.
 
 ## Sources
 
-- Cinder (stockage bloc) : <https://docs.openstack.org/cinder/2025.1/>
-- Cinder dans Kolla-Ansible (LVM) : <https://docs.openstack.org/kolla-ansible/2025.1/reference/storage/cinder-guide.html>
+- Cinder (stockage bloc) : <https://docs.openstack.org/cinder/2026.1/>
+- Cinder dans Kolla-Ansible (LVM) : <https://docs.openstack.org/kolla-ansible/2026.1/reference/storage/cinder-guide.html>
 - `lvcreate` (LVM) : <https://man7.org/linux/man-pages/man8/lvcreate.8.html>
 - `losetup` : <https://man7.org/linux/man-pages/man8/losetup.8.html>
 - Toutes les sources du parcours : [sources.md](../sources.md)

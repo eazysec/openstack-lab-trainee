@@ -11,6 +11,7 @@
 - Lancer une VM, suivre son démarrage, lui attribuer une floating IP.
 - Se connecter en SSH à la VM, et comprendre pourquoi cela se fait depuis l'hôte.
 - Faire la même chose dans Horizon.
+- Constater que KVM est indisponible sur l'instance, et lire où Nova signale l'échec.
 
 ---
 
@@ -18,7 +19,7 @@
 
 ```bash
 # [instance]
-./openstack-lab-trainee/tps/tp02/verifier-entree.sh        # dernière ligne : "Lab prêt pour le TP 02."
+./openstack-lab-trainee/tps/tp02/verify-entry.sh        # dernière ligne : "Lab prêt pour le TP 02."
 ```
 
 Ce script ne modifie rien. Il vérifie que la plateforme répond, que les ressources communes du déploiement sont là (`mykey`,
@@ -372,7 +373,76 @@ préfère `ProxyJump`.
 
 Scénario 03 : voir le TP 07 et [../../aws/aws-setup.md §4](../../aws/aws-setup.md).
 
-## Étape 7. Nettoyage
+## Étape 7. Forcer KVM : lire un échec, puis revenir à QEMU
+
+Au TP 00, `/dev/kvm` manquait ; au TP 01, `deploy.sh` a donc réglé Nova en émulation
+(`virt_type = qemu`). On demande ici à Nova d'utiliser KVM malgré tout, pour voir comment l'échec se
+manifeste et où en lire la cause. On revient ensuite à QEMU.
+
+**A. Passer en KVM.**
+
+```bash
+# [instance]
+grep -c -E 'vmx|svm' /proc/cpuinfo                    # extensions de virtualisation visibles : 0
+sudo grep -n '^virt_type' /etc/kolla/nova-compute/nova.conf
+sudo sed -i 's/^virt_type = qemu$/virt_type = kvm/' /etc/kolla/nova-compute/nova.conf
+sudo grep -n '^virt_type' /etc/kolla/nova-compute/nova.conf
+sudo docker restart nova_compute
+until sudo docker ps --filter name=nova_compute --format '{{.Status}}' | grep -q '(healthy)'; do sleep 5; done
+openstack compute service list --service nova-compute -c Host -c Status -c State
+```
+
+Le service redémarre et se déclare `up` : Nova ne vérifie pas au démarrage que KVM est utilisable.
+
+**B. Lancer une VM et chercher la cause de l'échec.**
+
+```bash
+# [instance]
+openstack server create --image cirros --flavor m1.tiny --network demo-net --wait tp02-vm-kvm
+openstack server show tp02-vm-kvm -c status -c fault
+ID=$(openstack server show tp02-vm-kvm -f value -c id)
+sudo grep "$ID" /var/log/kolla/nova/nova-compute.log | grep -m1 'does not support'
+```
+
+La création se termine en `ERROR`. Le champ `fault` ne dit que `Exceeded maximum number of retries` ;
+la cause est dans le journal de `nova-compute` : `Emulator '/usr/bin/qemu-system-x86_64' does not
+support virt type 'kvm'`.
+
+**Et pour avoir KVM ?** Il faut une machine qui expose la virtualisation matérielle :
+
+- une **instance EC2 *metal*** : un serveur physique dédié, sans hyperviseur AWS entre le système et
+  le processeur ; le réseau (VPC) et les disques (EBS) passent toujours par les cartes Nitro d'AWS ;
+- une **instance EC2 avec virtualisation imbriquée** (familles C8i, M8i, R8i, option à activer au
+  lancement) ; AWS conseille *metal* pour les charges sensibles aux performances ;
+- un **serveur dédié**, comme le serveur OVH prévu pour le lab.
+
+Sur ces machines, `/dev/kvm` existe et `deploy.sh` choisit `kvm` de lui-même. Aucune n'est testée sur
+le lab. Les deux premières sont payantes : voir les [prix EC2](https://aws.amazon.com/ec2/pricing/on-demand/),
+le [calculateur AWS](https://calculator.aws/) et [aws/finops.md](../../aws/finops.md).
+
+Dans la suite des TP, Nova reste en émulation. `deploy.sh` a écrit `nova_compute_virt_type: "qemu"`
+dans `/etc/kolla/globals.yml` et `virt_type = qemu` dans la surcharge
+`/etc/kolla/config/nova/nova-compute.conf` ; Kolla-Ansible en a tiré le `nova.conf` modifié ici. Cette
+modification à la main ne survivrait donc pas à un `kolla-ansible reconfigure`.
+
+**C. Revenir à QEMU et vérifier.**
+
+```bash
+# [instance]
+openstack server delete --wait tp02-vm-kvm
+sudo sed -i 's/^virt_type = kvm$/virt_type = qemu/' /etc/kolla/nova-compute/nova.conf
+sudo grep -n '^virt_type' /etc/kolla/nova-compute/nova.conf
+sudo docker restart nova_compute
+until sudo docker ps --filter name=nova_compute --format '{{.Status}}' | grep -q '(healthy)'; do sleep 5; done
+openstack server create --image cirros --flavor m1.tiny --network demo-net --wait tp02-vm-qemu
+openstack server show tp02-vm-qemu -c status
+openstack server delete --wait tp02-vm-qemu
+```
+
+La dernière vérification doit afficher `virt_type = qemu`, et `tp02-vm-qemu` doit être `ACTIVE`. Ne
+passez pas à la suite sans cela : toutes les VM des TP suivants en dépendent.
+
+## Étape 8. Nettoyage
 
 ```bash
 # [instance]
@@ -395,6 +465,8 @@ openstack server list
    protège pas ?
 7. La console des VM passe par une deuxième redirection du tunnel (port 6080). Pourquoi ne pas
    simplement ouvrir le port 6080 dans le Security Group ?
+8. À l'étape 7, `nova_compute` redémarre sans erreur avec `virt_type = kvm`. À quel moment l'échec
+   apparaît-il, où en lit-on la cause, et quelle est cette cause sur l'instance ?
 
 ## Validation
 
@@ -406,14 +478,16 @@ openstack server list
 - [ ] Connexion à `tp02-vm-poste` depuis votre poste par au moins trois méthodes parmi B à F.
 - [ ] Le risque du transfert d'agent (E) démontré : root joint la VM avec votre agent, puis plus
   après la fermeture de la session.
+- [ ] Échec de `tp02-vm-kvm` constaté et sa cause lue dans `nova-compute.log` ; retour à
+  `virt_type = qemu` vérifié par une VM `ACTIVE`.
 - [ ] Nettoyage fait (`openstack server list` ne montre plus de `tp02-…`).
 
 ## Sources
 
 - Commandes du client `openstack` : <https://docs.openstack.org/python-openstackclient/latest/cli/command-list.html>
-- Nova (calcul) : <https://docs.openstack.org/nova/2025.1/>
-- Glance (images) : <https://docs.openstack.org/glance/2025.1/>
-- Horizon : <https://docs.openstack.org/horizon/2025.1/>
+- Nova (calcul) : <https://docs.openstack.org/nova/2026.1/>
+- Glance (images) : <https://docs.openstack.org/glance/2026.1/>
+- Horizon : <https://docs.openstack.org/horizon/2026.1/>
 - CirrOS : <https://github.com/cirros-dev/cirros>
 - SSH : `ProxyCommand`, `ProxyJump` : <https://man.openbsd.org/ssh_config>
 - SSH (options `-A`, `-J`, `-L`, `-W`) : <https://man.openbsd.org/ssh>

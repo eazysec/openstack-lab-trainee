@@ -59,17 +59,19 @@ l'étape 9, un montage échouerait parce qu'il a lieu avant l'installation des p
 ```bash
 # [instance]
 cd ~/openstack-lab-trainee && ./verify.sh | tail -1        # "… 0 échoués"
-./tps/tp12/verifier-entree.sh                              # dernière ligne : "Lab prêt pour le TP 12."
+./tps/tp12/verify-entry.sh                              # dernière ligne : "Lab prêt pour le TP 12."
 ```
 
-`verifier-entree.sh` ne modifie rien. Il contrôle :
+`verify-entry.sh` ne modifie rien. Il contrôle :
 
 | Condition | Pourquoi | Si elle n'est pas remplie |
 |---|---|---|
 | OpenStack répond ; Cinder présent | l'étape 8 crée un volume | déployer le scénario 02 ou 04 (TP 04, étape 0) |
+| `virt_type = qemu` dans `nova.conf` (ou `kvm` si `/dev/kvm` existe) | sinon aucune VM ne démarre | TP 02, étape 7, partie C |
 | L'instance joint `cloud.debian.org` | l'image y est téléchargée | vérifier l'accès Internet de l'instance |
 | Pas de fichier `~/.ssh/tp12-key` | sinon `ssh-keygen` demande s'il faut l'écraser, et le bloc ci-dessous s'arrête sur cette question | supprimer la clé d'un essai précédent |
 | Une seule image `debian13` au plus ; aucune ressource `tp12-` | noms en double | nettoyage d'un essai précédent (étape 12) |
+| 5 Go libres au moins sur `/` | place prise par le TP, avec une marge | libérer de la place (`sudo docker image prune -f` supprime les images sans étiquette ; `sudo docker system df` montre ce qui est récupérable) ou agrandir le disque de l'instance (TP 00) |
 
 Il indique aussi si l'image et le gabarit existent déjà (lab préparé par le tuteur, ou TP rejoué) :
 dans ce cas, ne créez que la clé.
@@ -478,7 +480,7 @@ for ip in $FIP $FIPS $FIPC; do ssh-keygen -R $ip; done
 - Modules de cloud-init (users, mounts, fs_setup, runcmd, bootcmd) : <https://cloudinit.readthedocs.io/en/latest/reference/modules.html>
 - Phases du démarrage de cloud-init : <https://cloudinit.readthedocs.io/en/latest/explanation/boot.html>
 - Gabarits Jinja dans un user-data : <https://cloudinit.readthedocs.io/en/latest/explanation/instancedata.html>
-- Service de métadonnées de Nova : <https://docs.openstack.org/nova/2025.1/user/metadata.html>
+- Service de métadonnées de Nova : <https://docs.openstack.org/nova/2026.1/user/metadata.html>
 - Images cloud de Debian : <https://cloud.debian.org/images/cloud/>
 - GTFOBins, `systemctl` : <https://gtfobins.github.io/gtfobins/systemctl/>
 - NFS et automontage : <https://man7.org/linux/man-pages/man5/exports.5.html>,
