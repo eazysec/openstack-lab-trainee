@@ -127,7 +127,7 @@ Terminal 1, à laisser ouvert :
 ssh -i ec2_key -N -L 8080:<IP_PRIVEE_INSTANCE>:80 -L 6080:<IP_PRIVEE_INSTANCE>:6080 ubuntu@<IP_PUBLIQUE>
 ```
 
-`<IP_PRIVEE_INSTANCE>` est l'adresse de `enX0` notée au TP 00. Avec `-N`, SSH n'ouvre pas de shell :
+`<IP_PRIVEE_INSTANCE>` est l'adresse de l'interface de l'instance (`enX0` sur une `t2`, `ens5` sur une `t3`) notée au TP 00. Avec `-N`, SSH n'ouvre pas de shell :
 le terminal semble figé, c'est normal. Chaque `-L` relie un port de votre poste à un port de
 l'instance :
 
@@ -167,7 +167,8 @@ l'instance (2 minutes) : le trafic SSH qui arrive par Internet, et le trafic HTT
 
 ```bash
 # [instance]
-sudo timeout 120 tcpdump -i enX0 -w /tmp/tunnel.pcap 'tcp port 22' &
+IFACE=$(ip -o -4 route show default | awk '{print $5; exit}')   # interface de l'instance : enX0 (t2), ens5 (t3)
+sudo timeout 120 tcpdump -i "$IFACE" -w /tmp/tunnel.pcap 'tcp port 22' &
 sudo timeout 120 tcpdump -i lo -w /tmp/horizon.pcap 'tcp port 80' &
 ```
 
@@ -182,7 +183,7 @@ sudo rm -f /tmp/tunnel.pcap /tmp/horizon.pcap
 ```
 
 La requête de connexion, identifiant et mot de passe compris, est lisible à la sortie du tunnel (`lo`),
-mais invisible dans le trafic SSH (`enX0`). La solution durable est de chiffrer Horizon lui-même
+mais invisible dans le trafic SSH (`$IFACE`). La solution durable est de chiffrer Horizon lui-même
 (HTTPS, `kolla_enable_tls_external`, voir le README du lab).
 
 ## Étape 6. Se connecter depuis votre poste : les différentes façons
@@ -345,7 +346,7 @@ valider avec le tuteur), puis le refermer après l'exercice. Ne touchez pas au p
 
 ```bash
 # [instance] : <FIP2> est la floating IP de tp02-vm-poste
-IF=$(ip -o -4 route show default | awk '{print $5; exit}')      # l'interface de l'instance (enX0 sur EC2)
+IF=$(ip -o -4 route show default | awk '{print $5; exit}')      # l'interface de l'instance : enX0 (t2), ens5 (t3)
 sudo iptables -t nat -A PREROUTING -i $IF -p tcp --dport 2201 -j DNAT --to-destination <FIP2>:22 \
   -m comment --comment tp02-h
 ```

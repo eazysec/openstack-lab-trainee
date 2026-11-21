@@ -300,8 +300,9 @@ allow 192.168.121.0/24
 bindaddress 10.0.2.1
 EOF
 sudo systemctl restart chrony
-sudo iptables -C FORWARD -s 192.168.120.0/22 -o enX0 -m comment --comment tp13 -j DROP 2>/dev/null \
-  || sudo iptables -A FORWARD -s 192.168.120.0/22 -o enX0 -m comment --comment tp13 -j DROP
+IFACE=$(ip -o -4 route show default | awk '{print $5; exit}')   # interface de l'instance : enX0 (t2), ens5 (t3)
+sudo iptables -C FORWARD -s 192.168.120.0/22 -o "$IFACE" -m comment --comment tp13 -j DROP 2>/dev/null \
+  || sudo iptables -A FORWARD -s 192.168.120.0/22 -o "$IFACE" -m comment --comment tp13 -j DROP
 sudo iptables -S FORWARD | grep tp13
 ```
 
@@ -556,7 +557,8 @@ L'hôte, lui, n'est pas dans la pile. Défaites-le comme à l'étape 16 du TP 13
 
 ```bash
 # [instance] l'hôte
-sudo iptables -D FORWARD -s 192.168.120.0/22 -o enX0 -m comment --comment tp13 -j DROP
+IFACE=$(ip -o -4 route show default | awk '{print $5; exit}')   # interface de l'instance : enX0 (t2), ens5 (t3)
+sudo iptables -D FORWARD -s 192.168.120.0/22 -o "$IFACE" -m comment --comment tp13 -j DROP
 sudo ip route del 192.168.121.0/24 dev veth-ext
 sudo rm -f /etc/chrony/conf.d/tp13.conf && sudo systemctl restart chrony
 sudo rm -f /etc/squid/conf.d/tp13.conf

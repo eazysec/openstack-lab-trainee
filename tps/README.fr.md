@@ -124,7 +124,8 @@ désigne toujours la machine AWS, et *VM* les machines créées par OpenStack.
 
 1. **Aucune ressource AWS payante sans l'accord du tuteur** (Elastic IP, volume EBS, instance
    supplémentaire…). Voir [../aws/finops.md](../aws/finops.md).
-2. **Ne jamais modifier le réseau de l'interface `enX0`** de l'instance (adresses, netplan, networkd) :
+2. **Ne jamais modifier le réseau de l'interface de l'instance** (`enX0` sur une `t2`, `ens5` sur une `t3` ;
+   adresses, netplan, networkd) :
    c'est par elle qu'on administre l'instance, et une erreur la rend injoignable
    (voir [../aws/aws-setup.md §6](../aws/aws-setup.md)).
 3. **Arrêter l'instance en fin de journée** (console AWS, *Arrêter*, jamais *Résilier*). OpenStack redémarre

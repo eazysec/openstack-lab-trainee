@@ -15,6 +15,7 @@ et affichent le coût avant d'agir.
 | Ressource | Scénarios | Coût indicatif | Facturé quand ? |
 |---|---|---|---|
 | Instance `t2.xlarge` | tous | ~0,19 USD/h (~135 USD/mois en continu) | Instance démarrée |
+| Instance `t3.xlarge` Spot (option) | tous | ~0,03 à 0,06 USD/h selon la zone (relevé le 21/11/2026, variable) ; AWS peut la reprendre avec 2 min de préavis | Instance démarrée |
 | IPv4 publique auto-attribuée | tous | ~0,005 USD/h (~3,6 USD/mois) | Instance démarrée |
 | Volume EBS racine 58 Go | tous | ~5 à 6 USD/mois | Toujours, même instance arrêtée |
 | Cinder sur fichier loop | 02, 04 | 0 (pris sur le disque racine) | jamais |
@@ -38,7 +39,7 @@ le CPU en continu dès qu'une VM OpenStack tourne : elle épuise les crédits.
 
 | Mode | Défaut pour | Crédits épuisés → | Risque financier |
 |---|---|---|---|
-| **standard** | `t2` (notre cas) | CPU bridé (~40 % par vCPU sur une `t2.xlarge`) : tout devient lent | Aucun |
+| **standard** | `t2` | CPU bridé au niveau de base (22,5 % par vCPU sur une `t2.xlarge`, 40 % sur une `t3.xlarge`) : tout devient lent | Aucun |
 | **unlimited** | `t3`, `t3a`, `t4g` | Pas de bridage, mais surcoût à l'heure de vCPU au-delà du quota | Facture qui grimpe sans alerte visible : **interdit dans le lab** |
 
 **Règle du lab : aucun frais de crédits CPU supplémentaire ne doit jamais être facturé.** Toute instance

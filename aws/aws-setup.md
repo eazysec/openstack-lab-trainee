@@ -14,7 +14,7 @@ simulation par défaut et affichent le coût avant toute action.
 
 | Élément | Valeur | Remarque |
 |---|---|---|
-| Type d'instance | `t2.xlarge` (4 vCPU, 16 Go) | Virtualisation Xen (interface `enX0`) ; instance *burstable* |
+| Type d'instance | `t2.xlarge` (4 vCPU, 16 Go) ou `t3.xlarge` (4 vCPU, 16 Go) | `t2` : Xen, interface `enX0` ; `t3` : Nitro, interface `ens5` ; instances *burstable* |
 | Région | `us-east-1` | |
 | OS | Ubuntu 24.04 LTS | |
 | Réseau | 1 ENI, IP privée 172.31.x.x/20, IP publique auto-attribuée, MTU 9001 | VPC par défaut |
@@ -41,7 +41,7 @@ les exposent (voir le tableau du §4 ; non testé sur le lab).
 ### 2.2 Instance *burstable* (familles t2, t3, t4g)
 
 L'émulation QEMU sollicite le CPU en continu et épuise les crédits CPU des instances `t*` :
-en mode standard (`t2`), le CPU est ensuite bridé (VM très lentes) ; en mode unlimited (`t3`/`t4g`),
+en mode standard, le CPU est ensuite bridé (VM très lentes) ; en mode unlimited (défaut des `t3`/`t4g`),
 le dépassement est facturé. Détails et surveillance : [finops.md §2](finops.md).
 
 ### 2.3 Le VPC n'est pas un réseau Ethernet
@@ -109,7 +109,7 @@ Les coûts indiqués sont des ordres de grandeur ; le détail est dans [finops.m
 | *Prefix delegation* (/28 sur l'ENI) | Attribue 16 IP privées d'un coup à l'ENI | Chaque IP publique reste payante | Non implémenté |
 | IPv6 | Le VPC peut fournir des IPv6 publiques sans surcoût ; Neutron route nativement l'IPv6 | Aucun (hors configuration du VPC) | Non implémenté ; nécessite un VPC et un sous-réseau avec IPv6 |
 
-Le nombre d'IP par ENI est limité selon le type d'instance (15 pour une `t2.xlarge`, IP primaire comprise).
+Le nombre d'IP par ENI est limité selon le type d'instance (15 pour une `t2.xlarge` ou une `t3.xlarge`, IP primaire comprise).
 
 ### 3.3 Stockage pour Cinder
 

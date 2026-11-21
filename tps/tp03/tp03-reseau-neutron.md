@@ -149,7 +149,16 @@ ssh cirros@<FIP> ping -c3 8.8.8.8
 ```
 
 Dans la session 1, relevez l'adresse source des paquets. Arrêtez tcpdump (Ctrl+C), puis recommencez
-en écoutant sur `enX0` : `sudo tcpdump -ni enX0 icmp and host 8.8.8.8`. Comparez les adresses source.
+en écoutant sur l'interface de l'instance (`enX0` sur une `t2`, `ens5` sur une `t3`), dont le nom est lu
+dans la route par défaut :
+
+```bash
+# [instance] : session 1
+IFACE=$(ip -o -4 route show default | awk '{print $5; exit}'); echo "$IFACE"
+sudo tcpdump -ni "$IFACE" icmp and host 8.8.8.8
+```
+
+Relancez le `ping` de la session 2, puis comparez les adresses source.
 
 ## Étape 6. Nettoyage
 
@@ -168,7 +177,7 @@ openstack security group delete tp03-sg
 
 1. Dessinez le chemin d'un paquet de `tp03-vm-1` vers 8.8.8.8 : chaque interface traversée et l'adresse
    source à chaque étape. Indiquez pour chaque étape si elle relève d'OpenStack, de l'hôte Linux ou d'AWS.
-2. Quelle adresse source voyez-vous sur `veth-ext` ? Et sur `enX0` ? Qui a fait chaque traduction ?
+2. Quelle adresse source voyez-vous sur `veth-ext` ? Et sur l'interface de l'instance (`$IFACE`) ? Qui a fait chaque traduction ?
 3. Quelle différence entre un security group OpenStack et un Security Group AWS ?
 4. Pourquoi supprimer le sous-réseau du routeur avant de supprimer le routeur ?
 

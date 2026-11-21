@@ -13,7 +13,7 @@
 >
 > ```
 > Votre poste ── ssh -i ec2_key ──► instance AWS = hôte OpenStack = bastion
->                                     ├─ enX0     adresse privée AWS (SSH, Internet)
+>                                     ├─ enX0/ens5 adresse privée AWS (SSH, Internet)
 >                                     └─ veth-ext 10.0.2.1 (côté OpenStack, réseau public1)
 >                                                 │
 >                          tp13-router-pub-demo ──┴── tp13-router-adm-demo
@@ -193,8 +193,9 @@ règle sur l'hôte le refuse :
 
 ```bash
 # [instance]
-sudo iptables -C FORWARD -s 192.168.120.0/22 -o enX0 -m comment --comment tp13 -j DROP 2>/dev/null \
-  || sudo iptables -A FORWARD -s 192.168.120.0/22 -o enX0 -m comment --comment tp13 -j DROP
+IFACE=$(ip -o -4 route show default | awk '{print $5; exit}')   # interface de l'instance : enX0 (t2), ens5 (t3)
+sudo iptables -C FORWARD -s 192.168.120.0/22 -o "$IFACE" -m comment --comment tp13 -j DROP 2>/dev/null \
+  || sudo iptables -A FORWARD -s 192.168.120.0/22 -o "$IFACE" -m comment --comment tp13 -j DROP
 sudo iptables -S FORWARD | grep tp13
 ```
 
@@ -854,7 +855,8 @@ rm -f ~/tp13-keypair-adm-demo.pub /tmp/squid-parse.txt
 
 ```bash
 # [instance] l'hôte
-sudo iptables -D FORWARD -s 192.168.120.0/22 -o enX0 -m comment --comment tp13 -j DROP
+IFACE=$(ip -o -4 route show default | awk '{print $5; exit}')   # interface de l'instance : enX0 (t2), ens5 (t3)
+sudo iptables -D FORWARD -s 192.168.120.0/22 -o "$IFACE" -m comment --comment tp13 -j DROP
 sudo ip route del 192.168.121.0/24 dev veth-ext
 sudo rm -f /etc/chrony/conf.d/tp13.conf && sudo systemctl restart chrony
 sudo rm -f /etc/squid/conf.d/tp13.conf /etc/squid/conf.d/tp13-ssh.conf

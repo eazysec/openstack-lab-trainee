@@ -13,7 +13,7 @@
 - Comprendre le montage du scénario 03 : IP secondaire de l'ENI → NAT 1:1 par l'hôte → floating IP.
 - Le tester sans rien créer dans AWS, avec un client « Internet » simulé.
 
-> Règle du lab n°2 : on ne modifie jamais le réseau de `enX0` à la main. Ce TP passe uniquement par
+> Règle du lab n°2 : on ne modifie jamais à la main le réseau de l'interface de l'instance (`enX0` sur une `t2`, `ens5` sur une `t3`). Ce TP passe uniquement par
 > les outils du dépôt, qui ont un retour arrière automatique.
 
 ---
@@ -42,7 +42,7 @@ openstack server create --image cirros --flavor m1.tiny --key-name mykey \
 FIP=$(openstack floating ip create public1 -f value -c floating_ip_address)
 openstack server add floating ip tp07-vm $FIP
 echo $FIP
-ip addr show enX0           # la floating IP n'apparaît pas sur l'interface de l'instance
+ip addr show "$(ip -o -4 route show default | awk '{print $5; exit}')"   # la floating IP n'apparaît pas sur l'interface de l'instance
 ```
 
 Depuis votre poste, `ping <FIP>` ne peut pas fonctionner : 10.0.2.x est une adresse privée, interne à

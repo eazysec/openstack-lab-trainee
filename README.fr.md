@@ -277,9 +277,9 @@ On crée donc un réseau externe interne à l'hôte, et l'hôte fait le pont par
                      Internet
                         │
               ┌─────────┴──────────┐  pare-feu du cloud (Security Group AWS)
-              │  enX0 172.31.x.x   │  IP publique traduite par le cloud
+              │ <IFACE> 172.31.x.x │  IP publique traduite par le cloud
               │                    │
-   API OpenStack, Horizon :80      │  iptables MASQUERADE 10.0.2.0/24 -> enX0
+   API OpenStack, Horizon :80      │  iptables MASQUERADE 10.0.2.0/24 -> <IFACE>
               │                    │
               │  veth-ext 10.0.2.1/24   passerelle du réseau externe
               │      ║ paire veth (câble virtuel)
@@ -288,6 +288,9 @@ On crée donc un réseau externe interne à l'hôte, et l'hôte fait le pont par
    public1  : 10.0.2.0/24 (flat), floating IP de 10.0.2.100 à 10.0.2.200
    demo-net : 10.0.0.0/24 (VXLAN), routeur demo-router
 ```
+
+`<IFACE>` : l'interface de l'instance, détectée par `deploy.sh` dans la route par défaut (`enX0` sur une
+`t2`, `ens5` sur une `t3`).
 
 | Réseau | Plage | Usage des adresses |
 |---|---|---|
@@ -300,8 +303,8 @@ Le chemin d'un paquet sortant d'une VM :
 |---|---|---|
 | VM → `br-int` → routeur Neutron | OpenStack | Le routeur traduit 10.0.0.x en floating IP 10.0.2.x |
 | Routeur → `br-ex` → `veth-neutron` | OpenStack | Fonctionnement standard ; `veth-neutron` joue le rôle de la « 2ᵉ carte réseau » |
-| `veth-ext` → `enX0` | Hôte Linux | `veth-ext` (10.0.2.1) est la passerelle ; iptables remplace la source par l'IP de l'interface |
-| `enX0` → Internet | Cloud (AWS) | Le paquet porte l'IP et la MAC de l'interface : le cloud l'accepte et le traduit vers l'IP publique |
+| `veth-ext` → `<IFACE>` | Hôte Linux | `veth-ext` (10.0.2.1) est la passerelle ; iptables remplace la source par l'IP de l'interface |
+| `<IFACE>` → Internet | Cloud (AWS) | Le paquet porte l'IP et la MAC de l'interface : le cloud l'accepte et le traduit vers l'IP publique |
 
 Conséquences :
 - **côté OpenStack, rien n'est modifié** : Neutron, `br-ex` et les floating IP fonctionnent comme d'habitude ;

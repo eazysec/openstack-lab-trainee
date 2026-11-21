@@ -125,8 +125,8 @@ means the AWS machine, and *VM* the machines created by OpenStack.
 
 1. **No charged AWS resource without the tutor's approval** (Elastic IP, EBS volume, extra
    instance…). See [../aws/finops.md](../aws/finops.md) (in French).
-2. **Never change the network of the `enX0` interface** of the instance (addresses, netplan,
-   networkd): it is how the instance is administered, and a mistake makes it unreachable
+2. **Never change the network of the instance's interface** (`enX0` on a `t2`, `ens5` on a `t3`;
+   addresses, netplan, networkd): it is how the instance is administered, and a mistake makes it unreachable
    (see [../aws/aws-setup.md §6](../aws/aws-setup.md)).
 3. **Stop the instance at the end of the day** (AWS console, *Stop*, never *Terminate*). OpenStack
    restarts on its own; the public IP changes.

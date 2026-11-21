@@ -282,9 +282,9 @@ So an external network internal to the host is created, and the host bridges it 
                      Internet
                         │
               ┌─────────┴──────────┐  cloud firewall (AWS Security Group)
-              │  enX0 172.31.x.x   │  public IP translated by the cloud
+              │ <IFACE> 172.31.x.x │  public IP translated by the cloud
               │                    │
-   OpenStack APIs, Horizon :80     │  iptables MASQUERADE 10.0.2.0/24 -> enX0
+   OpenStack APIs, Horizon :80     │  iptables MASQUERADE 10.0.2.0/24 -> <IFACE>
               │                    │
               │  veth-ext 10.0.2.1/24   gateway of the external network
               │      ║ veth pair (virtual cable)
@@ -293,6 +293,9 @@ So an external network internal to the host is created, and the host bridges it 
    public1  : 10.0.2.0/24 (flat), floating IPs from 10.0.2.100 to 10.0.2.200
    demo-net : 10.0.0.0/24 (VXLAN), router demo-router
 ```
+
+`<IFACE>`: the instance's interface, detected by `deploy.sh` from the default route (`enX0` on a `t2`,
+`ens5` on a `t3`).
 
 | Network | Range | Use of addresses |
 |---|---|---|
@@ -305,8 +308,8 @@ The path of a packet leaving a VM:
 |---|---|---|
 | VM → `br-int` → Neutron router | OpenStack | The router translates 10.0.0.x into floating IP 10.0.2.x |
 | Router → `br-ex` → `veth-neutron` | OpenStack | Standard behaviour; `veth-neutron` plays the role of the "second network card" |
-| `veth-ext` → `enX0` | Linux host | `veth-ext` (10.0.2.1) is the gateway; iptables replaces the source with the interface's IP |
-| `enX0` → Internet | Cloud (AWS) | The packet carries the interface's IP and MAC: the cloud accepts it and translates it to the public IP |
+| `veth-ext` → `<IFACE>` | Linux host | `veth-ext` (10.0.2.1) is the gateway; iptables replaces the source with the interface's IP |
+| `<IFACE>` → Internet | Cloud (AWS) | The packet carries the interface's IP and MAC: the cloud accepts it and translates it to the public IP |
 
 Consequences:
 - **nothing is changed on the OpenStack side**: Neutron, `br-ex` and floating IPs work as usual;
