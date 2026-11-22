@@ -354,6 +354,21 @@ avec son réseau : chaque répartiteur lance une amphore d'1 Go sur l'hôte. Qui
 Comment réserveriez-vous la création de répartiteurs aux seuls utilisateurs qui ont le rôle
 `load-balancer_member` (`openstack role list | grep load-balancer`) ?
 
+**La clé de l'autorité des amphores.** Kolla-Ansible a créé à l'étape 1 une autorité de certification :
+sa clé privée (`server_ca.key.pem`) signe les certificats que les amphores acceptent. Qui la détient
+peut se faire passer pour Octavia auprès d'elles.
+
+À vous, côté exploitant :
+1. **Constatez** : combien de copies de `server_ca.key.pem` sur l'hôte, et dans quels conteneurs
+   (`/etc/octavia/certs/`) ? Est-elle chiffrée (première ligne du fichier) ? Où se trouve la phrase qui
+   la déchiffre, et qui peut la lire ? La clé du certificat client des services
+   (`client.cert-and-key.pem`) est-elle chiffrée ? Quand chaque certificat expire-t-il
+   (`kolla-ansible octavia-certificates -i ~/kolla/all-in-one --check-expiry <jours>`) ?
+2. **Réduisez** ce qui peut l'être sans arrêter le service : le dossier `/etc/kolla/octavia-certificates`
+   ne sert qu'à fabriquer et renouveler les certificats. Sortez-en une copie de l'instance (sur votre
+   poste), supprimez-le de l'hôte, puis prouvez qu'Octavia crée toujours un répartiteur.
+3. Ranger cette clé dans Barbican, sur ce lab, la protégerait-il ? Justifiez.
+
 ## Étape 8. Nettoyage
 
 Un répartiteur en cours de création ne se supprime pas : attendez qu'il soit `ACTIVE`.
