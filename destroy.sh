@@ -25,7 +25,11 @@ if [[ -x "$WORKDIR/venv/bin/kolla-ansible" ]]; then
     echo "ERREUR : des processus qemu tournent encore (pgrep -a qemu-system-x86_64)." >&2
     exit 1
   fi
-  kolla-ansible destroy -i "$WORKDIR/all-in-one" --yes-i-really-really-mean-it
+  # Kolla-Ansible 22.x : avec enable_octavia, le nettoyage de l'hôte teste octavia_auto_configure, qui
+  # dépend de octavia_provider_drivers, définie seulement dans le rôle octavia (absent de destroy) :
+  # « 'octavia_provider_drivers' is undefined » (mesuré le 22/11/2026). On lui donne sa valeur par défaut.
+  kolla-ansible destroy -i "$WORKDIR/all-in-one" --yes-i-really-really-mean-it \
+    -e "octavia_provider_drivers='amphora:Amphora provider'"
 fi
 # kolla-ansible destroy oublie les volumes des conteneurs d'initialisation :
 # on supprime ceux qui portent un nom Kolla et qu'aucun conteneur n'utilise.
