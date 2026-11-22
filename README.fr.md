@@ -172,8 +172,8 @@ de passe (`ubuntu` sur EC2), accès Internet.
 # Depuis votre poste : vérifier qu'aucun frais de crédits CPU n'est possible (voir aws/finops.md)
 ./openstack-lab-trainee/aws/check-cpu-credits.sh <INSTANCE_ID>
 
-# Copier le dépôt sur l'instance
-scp -r -i ec2_key openstack-lab-trainee ubuntu@<IP_PUBLIQUE>:
+# Copier le dépôt sur l'instance (sans l'historique .git, inutile sur l'instance)
+tar --exclude=.git -czf - openstack-lab-trainee | ssh -i ec2_key ubuntu@<IP_PUBLIQUE> tar -xzf -
 ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
 
 # Sur l'instance (tmux conseillé : le déploiement est long)
@@ -208,6 +208,7 @@ Les paramètres se règlent dans le fichier de scénario, ou en variable d'envir
 | `ENABLE_HEAT` | `no` | Orchestration Heat (environ 1 Go de mémoire en plus, mesuré) ; le TP 14 l'active |
 | `ENABLE_OCTAVIA` | `no` | Répartition de charge Octavia (0,7 à 1,2 Go de mémoire en plus, mesuré ; plus une VM d'1 Go, l'amphore, par répartiteur) ; le TP 15 l'active |
 | `OCTAVIA_AMP_IMAGE_URL` | image de test du projet Octavia (Ubuntu 24.04) | Image des amphores, téléchargée et enregistrée une fois |
+| `OCTAVIA_REQUIRE_LB_ROLE` | `no` | `yes` : créer ou modifier un répartiteur exige le rôle `load-balancer_member` (par défaut, `member` suffit) ; TP 15, étape 7 |
 | `ENABLE_BARBICAN` | `no` | Gestion des secrets ; nécessaire pour chiffrer les volumes Cinder |
 | `ENABLE_DESIGNATE` | `no` | DNS (backend bind9 sur l'hôte, port 53) |
 | `ENABLE_LAB_BACKUP` | `no` | Stockage objet S3 (Garage, hors Kolla), restic et s3cmd, pour le TP 10 |

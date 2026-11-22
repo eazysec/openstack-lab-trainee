@@ -171,8 +171,8 @@ Prerequisites: fresh Ubuntu 24.04 instance, ≥ 8 GB RAM (16 recommended), ≥ 2
 # From your workstation: check that no CPU credit charge is possible (see aws/finops.md)
 ./openstack-lab-trainee/aws/check-cpu-credits.sh <INSTANCE_ID>
 
-# Copy the repository to the instance
-scp -r -i ec2_key openstack-lab-trainee ubuntu@<IP_PUBLIQUE>:
+# Copy the repository to the instance (without the .git history, not needed there)
+tar --exclude=.git -czf - openstack-lab-trainee | ssh -i ec2_key ubuntu@<IP_PUBLIQUE> tar -xzf -
 ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
 
 # On the instance (tmux recommended: the deployment takes a long time)
@@ -210,6 +210,7 @@ Parameters are set in the scenario file, or as environment variables:
 | `ENABLE_HEAT` | `no` | Heat orchestration (about 1 GB of extra memory, measured); TP 14 enables it |
 | `ENABLE_OCTAVIA` | `no` | Octavia load balancing (0.7 to 1.2 GB of extra memory, measured; plus a 1 GB VM, the amphora, per load balancer); TP 15 enables it |
 | `OCTAVIA_AMP_IMAGE_URL` | test image of the Octavia project (Ubuntu 24.04) | Amphora image, downloaded and registered once |
+| `OCTAVIA_REQUIRE_LB_ROLE` | `no` | `yes`: creating or changing a load balancer requires the `load-balancer_member` role (by default, `member` is enough); lab 15, step 7 |
 | `ENABLE_BARBICAN` | `no` | Secret management; required to encrypt Cinder volumes |
 | `ENABLE_DESIGNATE` | `no` | DNS (bind9 backend on the host, port 53) |
 | `ENABLE_LAB_BACKUP` | `no` | S3 object storage (Garage, outside Kolla), restic and s3cmd, for TP 10 |

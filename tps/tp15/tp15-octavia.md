@@ -271,10 +271,22 @@ openstack loadbalancer listener set --default-tls-container-ref $H2 --wait tp15-
 openssl s_client -connect $FIP:443 </dev/null 2>/dev/null | openssl x509 -noout -fingerprint -sha256
 openssl x509 -in ~/tp15/cert2.pem -noout -fingerprint -sha256      # identique : le nouveau est servi
 openstack acl get $H -c Users                         # l'ancien secret : Octavia peut toujours le lire
-openstack secret delete $H                            # on le retire, avec ses accès
 ```
 
-L'accès d'Octavia à l'ancien secret ne disparaît pas tout seul : on le supprime avec le secret.
+L'accès d'Octavia à l'ancien secret ne disparaît pas tout seul : le compte de service garde la
+lecture d'une clé privée qui ne sert plus.
+
+À vous : retirez à Octavia l'accès à l'ancien secret, **sans supprimer ce secret** (on le garde
+souvent quelques jours, pour pouvoir revenir en arrière). Vérifiez ensuite que la liste d'accès de
+l'ancien secret est vide, que le secret existe toujours, et que le site sert encore le nouveau
+certificat. Aide : `openstack acl --help`.
+
+Une fois le retour arrière exclu, supprimez l'ancien secret :
+
+```bash
+# [instance]
+openstack secret delete $H
+```
 
 ## Étape 6. Rediriger HTTP vers HTTPS
 
@@ -307,17 +319,15 @@ openstack security group rule list $SGVIP -c "IP Protocol" -c "IP Range" -c "Por
 ```
 
 Les ports 80 et 443 sont ouverts à `0.0.0.0/0`. Ce groupe n'appartient pas à votre projet : on ne le
-modifie pas, on demande à Octavia de limiter les clients de chaque écouteur (`--allowed-cidr`).
-L'hôte joint le site depuis `10.0.2.1` :
+modifie pas, on demande à Octavia de limiter les clients de chaque écouteur (option `--allowed-cidr`
+de `openstack loadbalancer listener set`). L'hôte joint le site depuis `10.0.2.1`.
 
-```bash
-# [instance]
-openstack loadbalancer listener set --allowed-cidr 192.0.2.0/24 --wait tp15-listener-https-demo
-curl -sk -m 5 https://$FIP/ ; echo "code $?"           # 28 : l'hôte n'est pas dans la liste
-openstack security group rule list $SGVIP -c "IP Range" -c "Port Range" | grep 443
-openstack loadbalancer listener set --allowed-cidr 10.0.2.0/24 --wait tp15-listener-https-demo
-curl -sk -m 5 https://$FIP/                             # accepté
-```
+À vous : n'autorisez que le réseau de l'hôte, `10.0.2.0/24`, sur **les deux écouteurs** (HTTP et
+HTTPS). Prouvez d'abord que la limite refuse bien un client : réglez provisoirement un écouteur sur
+un réseau qui n'est pas le vôtre (`192.0.2.0/24`, réservé à la documentation), constatez le refus
+(`curl -m 5` : code 28, délai dépassé), puis ouvrez-le à `10.0.2.0/24` et constatez l'accès. Relevez
+les règles que cela produit dans le groupe du VIP. La règle met quelques secondes à s'appliquer :
+relancez le test plutôt que de conclure sur le premier essai.
 
 **Ce qu'un membre du projet voit de l'amphore.** Un projet `tp15-proj-equipe`, un utilisateur
 `member` :
@@ -334,9 +344,15 @@ moi openstack loadbalancer amphora list            # refusé (403) : les amphore
 moi openstack loadbalancer provider list           # accepté
 ```
 
-Un membre peut créer ses propres répartiteurs (rôle `member`, mesuré sur le lab) ; il ne voit
-jamais les amphores, ni leur réseau, ni leur image. Il ne peut ni s'y connecter, ni les mettre à
-jour : c'est l'exploitant qui en a la charge.
+Il ne voit jamais les amphores, ni leur réseau, ni leur image. Il ne peut ni s'y connecter, ni les
+mettre à jour : c'est l'exploitant qui en a la charge.
+
+À vous : vérifiez si `tp15-user-equipe` peut créer son propre répartiteur. Il lui faut d'abord un
+réseau et un sous-réseau dans son projet (`moi openstack network create …`, puis un sous-réseau en
+`192.168.159.0/24`). Attendez que le répartiteur soit `ACTIVE`, puis supprimez-le (`--cascade`)
+avec son réseau : chaque répartiteur lance une amphore d'1 Go sur l'hôte. Qui paie cette mémoire ?
+Comment réserveriez-vous la création de répartiteurs aux seuls utilisateurs qui ont le rôle
+`load-balancer_member` (`openstack role list | grep load-balancer`) ?
 
 ## Étape 8. Nettoyage
 

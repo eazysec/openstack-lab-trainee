@@ -65,6 +65,18 @@ chmod 600 ec2_key                        # SSH refuse une clé privée lisible p
 ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
 ```
 
+À la première connexion, SSH affiche l'empreinte de la clé de l'instance et demande
+`Are you sure you want to continue connecting?`. Ne répondez `yes` qu'après l'avoir comparée à
+l'empreinte que l'instance a publiée à son démarrage, dans sa console :
+
+```bash
+# [poste] : dans un autre terminal
+aws ec2 get-console-output --instance-id <INSTANCE_ID> --latest --output text \
+  | grep -A4 'BEGIN SSH HOST KEY FINGERPRINTS'     # la ligne ED25519 doit être identique
+```
+
+Si elles diffèrent, répondez `no` : vous ne parlez pas à votre instance.
+
 ## Étape 3. Explorer la machine
 
 ```bash

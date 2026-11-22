@@ -17,7 +17,7 @@
 
 ```bash
 # [poste] : dans le dossier qui contient openstack-lab-trainee/ et ec2_key
-scp -r -i ec2_key openstack-lab-trainee ubuntu@<IP_PUBLIQUE>:
+tar --exclude=.git -czf - openstack-lab-trainee | ssh -i ec2_key ubuntu@<IP_PUBLIQUE> tar -xzf -   # sans .git
 ssh -i ec2_key ubuntu@<IP_PUBLIQUE>
 ```
 
@@ -34,7 +34,8 @@ ligne n'est pas `Lab prêt pour le TP 01.`
 ## Étape 1. Lancer le déploiement
 
 Le déploiement dure environ 20 minutes. On le lance dans tmux : si la connexion SSH coupe, il
-continue, et on le retrouve avec `tmux attach -t deploy`.
+continue, et on le retrouve avec `tmux attach -t deploy`. Pour quitter tmux sans arrêter le
+déploiement : Ctrl+b, puis d. Ne tapez pas Ctrl+C : il interrompt le déploiement.
 
 ```bash
 # [instance]

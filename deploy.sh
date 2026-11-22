@@ -47,6 +47,9 @@ ENABLE_LAB_BACKUP="${ENABLE_LAB_BACKUP:-no}"      # stockage objet S3 (Garage) +
 ENABLE_OCTAVIA="${ENABLE_OCTAVIA:-no}"            # répartition de charge (pilote amphora : une VM par répartiteur)
 # Image des amphores : image de test du projet Octavia (reconstruite chaque nuit, sans empreinte publiée)
 OCTAVIA_AMP_IMAGE_URL="${OCTAVIA_AMP_IMAGE_URL:-https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-noble.qcow2}"
+# yes : créer, modifier ou supprimer un répartiteur exige le rôle load-balancer_member (par défaut, le
+# rôle member suffit : chaque membre d'un projet peut lancer des amphores, à la charge de l'exploitant)
+OCTAVIA_REQUIRE_LB_ROLE="${OCTAVIA_REQUIRE_LB_ROLE:-no}"
 NEUTRON_DNS_DOMAIN="${NEUTRON_DNS_DOMAIN:-lab.example.}"   # domaine DNS des ports Neutron (avec point final)
 DESIGNATE_NS_RECORD="${DESIGNATE_NS_RECORD:-ns1.lab.example}"   # serveur de noms des zones, SANS point final (Kolla l'ajoute)
 CINDER_DEVICE="${CINDER_DEVICE:-}"                  # ex. /dev/nvme1n1 (vide = fichier loop)
@@ -324,6 +327,19 @@ sudo usermod -aG docker "$USER"
 if [[ "$ENABLE_OCTAVIA" == "yes" && ! -f /etc/kolla/config/octavia/server_ca.cert.pem ]]; then
   log "Certificats d'Octavia"
   kolla-ansible octavia-certificates -i "$INVENTORY"
+fi
+
+# Octavia : politique d'accès (OCTAVIA_REQUIRE_LB_ROLE), écrite ou retirée à chaque déploiement
+if [[ "$ENABLE_OCTAVIA" == "yes" ]]; then
+  if [[ "$OCTAVIA_REQUIRE_LB_ROLE" == "yes" ]]; then
+    sudo mkdir -p /etc/kolla/config/octavia
+    sudo tee /etc/kolla/config/octavia/policy.yaml > /dev/null <<'EOF'
+# Écrit par deploy.sh (OCTAVIA_REQUIRE_LB_ROLE=yes) : les écritures exigent load-balancer_member
+"load-balancer:member_and_owner": "role:load-balancer_member and rule:load-balancer:owner"
+EOF
+  else
+    sudo rm -f /etc/kolla/config/octavia/policy.yaml
+  fi
 fi
 
 log "prechecks"
