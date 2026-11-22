@@ -37,7 +37,7 @@ openstack volume service list       # si la commande échoue ou ne liste rien : 
 Si besoin, ajoutez Cinder au déploiement existant (les VM existantes sont conservées) :
 
 ```bash
-# [instance] : dans tmux, ~15 min
+# [instance] : dans tmux, ~25 min
 ./openstack-lab-trainee/deploy.sh openstack-lab-trainee/scenarios/02-aio-cinder.env
 ./openstack-lab-trainee/verify.sh        # attendu : « 0 échoués » sur la dernière ligne
 ```

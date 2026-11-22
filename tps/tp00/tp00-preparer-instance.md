@@ -40,7 +40,7 @@ Si vous créez vous-même l'instance, utilisez ces paramètres (déjà validés)
 | Paramètre | Valeur |
 |---|---|
 | Image (AMI) | Ubuntu Server 24.04 LTS, pas une version plus récente : le lab n'est validé que sur 24.04 |
-| Type | `t2.xlarge` ou `t3.xlarge` (4 vCPU, 16 Go), ou équivalent ≥ 4 vCPU / 16 Go ; une `t3` doit être passée en mode de crédits standard (étape suivante) |
+| Type | `t2.xlarge` ou `t3.xlarge` (4 vCPU, 16 Go), les deux testés ; ou équivalent ≥ 4 vCPU / 16 Go. Une `t3` doit être en mode de crédits standard (étape suivante) |
 | Disque | 60 Go |
 | Paire de clés | `ec2_key` |
 | Security Group (entrant) | SSH (22) depuis votre IP uniquement. Port 80 (Horizon) **fermé** : on y accède par un tunnel SSH (TP 02). L'ouvrir, même limité à votre IP, ferait circuler le mot de passe admin en clair |

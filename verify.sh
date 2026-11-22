@@ -108,7 +108,11 @@ echo "== Version : OpenStack ${REL:-inconnue}, Kolla-Ansible ${KA:-inconnu} (mai
 echo "== Hôte"
 check "service openstack-lab-net actif"           systemctl is-active openstack-lab-net
 check "passerelle $EXT_GW sur $VETH_HOST"         bash -c "ip -4 addr show $VETH_HOST | grep -q $EXT_GW"
-check "aucun conteneur unhealthy"                 bash -c '[ -z "$(sudo docker ps -q --filter health=unhealthy)" ]'
+# Juste après un déploiement, un conteneur relancé peut être « unhealthy » le temps de son contrôle de
+# santé (mesuré : 1 échec juste après l'ajout d'Octavia, 0 deux minutes plus tard) : on attend 3 min au plus.
+for _ in $(seq 36); do [ -z "$(sudo docker ps -q --filter health=unhealthy)" ] && break; sleep 5; done
+UNHEALTHY=$(sudo docker ps --filter health=unhealthy --format '{{.Names}}' | tr '\n' ' ')
+check "aucun conteneur unhealthy${UNHEALTHY:+ (${UNHEALTHY% })}" test -z "$UNHEALTHY"
 check "aucun conteneur en redémarrage"            bash -c '[ -z "$(sudo docker ps -q --filter status=restarting)" ]'
 
 echo "== API OpenStack"

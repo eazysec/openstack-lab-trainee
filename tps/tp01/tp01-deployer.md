@@ -33,7 +33,7 @@ ligne n'est pas `Lab prêt pour le TP 01.`
 
 ## Étape 1. Lancer le déploiement
 
-Le déploiement dure environ 15 minutes. On le lance dans tmux : si la connexion SSH coupe, il
+Le déploiement dure environ 20 minutes. On le lance dans tmux : si la connexion SSH coupe, il
 continue, et on le retrouve avec `tmux attach -t deploy`.
 
 ```bash
